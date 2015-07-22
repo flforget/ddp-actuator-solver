@@ -3,6 +3,8 @@
 
 #include <Eigen/Core>
 
+using namespace Eigen;
+
 class DynamicModel
 {
 // constructors //
@@ -12,8 +14,9 @@ public:
 // attributes //
 public:
 private:
-    unsigned int stateNb;
-    unsigned int commandNb;
+    static unsigned int stateNb;
+    static unsigned int commandNb;
+
 protected:
 
 // methods //

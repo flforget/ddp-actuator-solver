@@ -5,6 +5,19 @@
 #include "costfunction.h"
 #include <Eigen/Core>
 
+using namespace Eigen;
+
+#ifdef stateSize
+typedef Matrix<double,stateSize,1> stateVec;
+#else
+typedef Matrix<double,Dynamic,1> stateVec;
+#endif
+#ifdef commandSize
+typedef Matrix<double,commandSize,1> commandVec;
+#else
+typedef Matrix<double,Dynamic,1> commandVec;
+#endif
+
 class ILQRSolver
 {
 public:
@@ -18,8 +31,8 @@ private:
     CostFunction costFunction;
     unsigned int stateNb;
     unsigned int commandNb;
-    Eigen::VectorXf xInit;
-    Eigen::VectorXf xDes;
+    stateVec xInit;
+    stateVec xDes;
     unsigned int T;
     double dt;
     unsigned int iter;
@@ -27,16 +40,16 @@ private:
     double stopCrit;
     double changeAmount;
 
-    Eigen::VectorXf* xList;
-    Eigen::VectorXf* uList;
-    Eigen::VectorXf* updatedxList;
-    Eigen::VectorXf* updateduList;
+    stateVec* xList;
+    stateVec* uList;
+    stateVec* updatedxList;
+    stateVec* updateduList;
 
 
 protected:
     // methods //
 public:
-    void initSolver(Eigen::VectorXf myxInit, Eigen::VectorXf myxDes, unsigned int myT,
+    void initSolver(stateVec myxInit, stateVec myxDes, unsigned int myT,
                     double mydt, unsigned int myiterMax,double mystopCrit);
     void solveTrajectory();
     void initTrajectory();

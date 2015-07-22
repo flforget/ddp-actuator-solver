@@ -1,5 +1,7 @@
 #include "ilqrsolver.h"
 
+using namespace Eigen;
+
 ILQRSolver::ILQRSolver(DynamicModel myDynamicModel, CostFunction myCostFunction)
 {
     this->dynamicModel = myDynamicModel;
@@ -8,7 +10,7 @@ ILQRSolver::ILQRSolver(DynamicModel myDynamicModel, CostFunction myCostFunction)
     this->commandNb = myDynamicModel.getCommandNb();
 }
 
-void ILQRSolver::initSolver(Eigen::VectorXf myxInit, Eigen::VectorXf myxDes, unsigned int myT,
+void ILQRSolver::initSolver(Eigen::VectorXd myxInit, Eigen::VectorXd myxDes, unsigned int myT,
                        double mydt, unsigned int myiterMax,double mystopCrit)
 {
     this->xInit = myxInit;
@@ -18,10 +20,10 @@ void ILQRSolver::initSolver(Eigen::VectorXf myxInit, Eigen::VectorXf myxDes, uns
     this->iterMax = myiterMax;
     this->stopCrit = mystopCrit;
 
-    this->xList = new Eigen::VectorXf[myT+1];
-    this->uList = new Eigen::VectorXf[myT];
-    this->updatedxList = new Eigen::VectorXf[myT+1];
-    this->updateduList = new Eigen::VectorXf[myT];
+    this->xList = new Eigen::VectorXd[myT+1];
+    this->uList = new Eigen::VectorXd[myT];
+    this->updatedxList = new Eigen::VectorXd[myT+1];
+    this->updateduList = new Eigen::VectorXd[myT];
 
 }
 
@@ -42,11 +44,6 @@ void ILQRSolver::solveTrajectory()
 void ILQRSolver::initTrajectory()
 {
     this->xList[0] = this->xInit;
-    Eigen::Vector<double,this->commandNb> zerosCommand;
-    for(int i=0;i<this->T;i++)
-    {
-        uList[i] = zerosCommand;
-    }
 }
 
 void ILQRSolver::backwardLoop()
