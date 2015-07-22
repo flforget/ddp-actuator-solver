@@ -1,0 +1,66 @@
+\documentclass[10pt,a4paper]{report}
+%\usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{multicol}
+\usepackage{verbatim}
+
+% parametres de la page
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\setlength{\extrarowheight}{0.3cm}
+
+
+\begin{document}
+
+
+
+iLQRSolver.py is a library used to compute a sequence of control to reach a specified point with a specified system and cost function.
+\\
+In order to use the solver, you have to implement a class which describe the dynamic model of the system and another which describe the cost function you will use to solve your problem.
+The attributes and methods need to have the same names and return the same things.
+\subsection*{dynamic model}
+This class is the one which describe the system you want to command. It needs to have particular attributes and methods.
+\subsubsection*{attributes}
+Two attributes are mandatory for the solver to work.
+\begin{verbatim}
+self.stateNumber
+self.commandNumber
+\end{verbatim}
+stateNumber attribute allow the solver to know how many variable your state contains.\\ 
+commandNumber specified the number of commands your system have.\\
+These 2 attributes are supposed to be unsigned integer.\\
+Both these attributes make the Solver as generic as possible.
+\subsubsection*{methods}
+Two methods are mandatory for the solver to work.
+\begin{verbatim}
+def computeNextState(self,dt,X,U):
+	''' code here '''
+	return nextX
+def def computeAllModelDeriv(self,dt,X,U):
+	''' code here '''
+	return lx,lxx,lu,luu,lux,lxu
+
+\end{verbatim}
+ 
+\begin{eqnarray}
+lx &=& \partial  
+\end{eqnarray}
+
+
+
+
+
+
+
+
+The solver class need to be instantiated with the dynamic model of the system and the cost function you want to apply.
+\begin{verbatim}
+solver = ILQRSolver(model,costFunction)
+\end{verbatim}
+\end{document}
