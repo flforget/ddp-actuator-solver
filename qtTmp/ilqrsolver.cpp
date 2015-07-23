@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 
-ILQRSolver::ILQRSolver(DynamicModel myDynamicModel, CostFunction myCostFunction)
+ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction)
 {
     this->dynamicModel = myDynamicModel;
     this->costFunction = myCostFunction;
@@ -24,7 +24,6 @@ void ILQRSolver::initSolver(Eigen::VectorXd myxInit, Eigen::VectorXd myxDes, uns
     this->uList = new Eigen::VectorXd[myT];
     this->updatedxList = new Eigen::VectorXd[myT+1];
     this->updateduList = new Eigen::VectorXd[myT];
-
 }
 
 void ILQRSolver::solveTrajectory()
@@ -44,6 +43,10 @@ void ILQRSolver::solveTrajectory()
 void ILQRSolver::initTrajectory()
 {
     this->xList[0] = this->xInit;
+    for(unsigned int i=1;i<this->T;i++)
+    {
+
+    }
 }
 
 void ILQRSolver::backwardLoop()

@@ -21,7 +21,7 @@ typedef Matrix<double,Dynamic,1> commandVec;
 class ILQRSolver
 {
 public:
-    ILQRSolver(DynamicModel myDynamicModel, CostFunction myCostFunction);
+    ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction);
 private:
 protected:
     // attributes //

@@ -7,7 +7,8 @@ SOURCES += main.cpp \
     costfunction.cpp \
     dynamicmodel.cpp \
     ilqrsolver.cpp \
-    romeosimpleactuator.cpp
+    romeosimpleactuator.cpp \
+    costfunctionromeoactuator.cpp
 SOURCES +=
 
 include(deployment.pri)
@@ -20,6 +21,7 @@ HEADERS += \
     costfunction.h \
     dynamicmodel.h \
     ilqrsolver.h \
-    romeosimpleactuator.h
+    romeosimpleactuator.h \
+    costfunctionromeoactuator.h
 
 INCLUDEPATH += /usr/include/eigen3
