@@ -2,56 +2,56 @@
 
 CostFunctionRomeoActuator::CostFunctionRomeoActuator()
 {
-    this->Q << 100.0,0.0,0.0,0.0,
+    Q << 100.0,0.0,0.0,0.0,
                 0.0,0.0,0.0,0.0,
                 0.0,0.0,0.0,0.0,
                 0.0,0.0,0.0,0.0;
-    this->R << 0.1;
+    R << 0.1;
 
-    this->lxx = this->Q;
-    this->luu = this->R;
-    this->lux << 0.0,0.0,0.0,0.0;
-    this->lxu << 0.0,0.0,0.0,0.0;
+    lxx = Q;
+    luu = R;
+    lux << 0.0,0.0,0.0,0.0;
+    lxu << 0.0,0.0,0.0,0.0;
 }
 
 void CostFunctionRomeoActuator::computeAllCostDeriv(stateVec_t& X, stateVec_t& Xdes, commandVec_t& U)
 {
-    this->lx = this->Q*(X-Xdes);
-    this->lu = this->R*U;
+    lx = Q*(X-Xdes);
+    lu = R*U;
 }
 
 void CostFunctionRomeoActuator::commuteFinalCostDeriv(stateVec_t& X, stateVec_t& Xdes)
 {
-    this->lx = this->Q*(X-Xdes);
+    lx = Q*(X-Xdes);
 }
 
 // accessors //
 stateVec_t CostFunctionRomeoActuator::getlx()
 {
-    return this->lx;
+    return lx;
 }
 
 stateMat_t CostFunctionRomeoActuator::getlxx()
 {
-    return this->lxx;
+    return lxx;
 }
 
 commandVec_t CostFunctionRomeoActuator::getlu()
 {
-    return this->lu;
+    return lu;
 }
 
 commandMat_t CostFunctionRomeoActuator::getluu()
 {
-    return this->luu;
+    return luu;
 }
 
 stateR_commandC_t CostFunctionRomeoActuator::getlxu()
 {
-    return this->lxu;
+    return lxu;
 }
 
 commandR_stateC_t CostFunctionRomeoActuator::getlux()
 {
-    return this->lux;
+    return lux;
 }

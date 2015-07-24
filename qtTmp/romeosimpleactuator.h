@@ -4,7 +4,7 @@
 #include "config.h"
 
 #include "dynamicmodel.h"
-#include <Eigen/Core>
+#include <Eigen/Dense>
 
 using namespace Eigen;
 
@@ -47,9 +47,9 @@ public:
     // accessors //
     unsigned int getStateNb();
     unsigned int getCommandNb();
-    stateMat_t getfx();
+    stateMat_t &getfx();
     stateTens_t* getfxx();
-    stateR_commandC_t getfu();
+    stateR_commandC_t &getfu();
     stateR_commandC_commandD_t* getfuu();
     stateR_stateC_commandD_t* getfxu();
     stateR_commandC_stateD_t* getfux();

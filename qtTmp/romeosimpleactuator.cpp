@@ -1,65 +1,52 @@
 #include "romeosimpleactuator.h"
 #include <math.h>
 
-#define pi 3,141593
+#define pi M_PI
 
 RomeoSimpleActuator::RomeoSimpleActuator()
 {
-    this->commandNb = 1;
-    this->stateNb = 4;
-    this->k = 1000.0;
-    this->R = 200.0;
-    this->Jm = 138*1e-7;
-    this->Jl = 0.1;
-    this->fvm = 0.01;
-    this->Cf0 = 0.1;
-    this->a = 10.0;
+    commandNb = 1;
+    stateNb = 4;
+    k = 1000.0;
+    R = 200.0;
+    Jm = 138*1e-7;
+    Jl = 0.1;
+    fvm = 0.01;
+    Cf0 = 0.1;
+    a = 10.0;
 
-    this->Id <<     1.0,    0.0,      0.0,      0.0,
-                    0.0,      1.0,    0.0,      0.0,
-                    0.0,      0.0,      1.0,    0.0,
-                    0.0,      0.0,      0.0,      1.0;
+    Id.setIdentity();
 
-    this->A <<  0.0,      1.0,      0.0,      0.0,
-                0.0,      0.0,      0.0,      0.0,
-                0.0,      0.0,      1.0,      0.0,
-                0.0,      0.0,      0.0,      0.0;
-    this->A(1,0) = -(this->k/this->Jl)+(this->k/(this->Jm*this->R*this->R));
-    this->A(1,3) = -this->fvm*this->k/this->Jm;
-    this->A(3,0) =1.0/this->Jl;
-    this->A13atan = 2.0*this->Jm*this->R/(pi*this->Jl)*this->Cf0;
-    this->A33atan = 2.0/(pi*this->Jl)*this->Cf0;
+    A.setZero();
+    A(0,1) = 1.0;
+    A(2,2) = 1.0;
+    A(1,0) = -(k/Jl)+(k/(Jm*R*R));
+    A(1,3) = -fvm*k/Jm;
+    A(3,0) =1.0/Jl;
+    A13atan = 2.0*Jm*R/(pi*Jl)*Cf0;
+    A33atan = 2.0/(pi*Jl)*Cf0;
 
-    this->B <<  0.0,
-                this->k/(this->R*this->Jm),
+    B <<  0.0,
+                k/(R*Jm),
                 0.0,
                 0.0;
 
-    this->fxBase << 1.0,      1.0,      0.0,      0.0,
-                    -(this->k/this->Jl)-(this->k/(this->Jm*this->R*this->R)),      -this->fvm/this->Jm,      0.0,      -this->fvm*this->k/this->Jm,
+    fxBase << 1.0,      1.0,      0.0,      0.0,
+                    -(k/Jl)-(k/(Jm*R*R)),      -fvm/Jm,      0.0,      -fvm*k/Jm,
                     0.0,      0.0,      1.0,      1.0,
-                    1.0/this->Jl,      0.0,      0.0,      0.0;
-    this->fx = this->fxBase;
-    this->fxx[0] << 0.0,      0.0,      0.0,      0.0,
-                    0.0,      0.0,      0.0,      0.0,
-                    0.0,      0.0,      0.0,      0.0,
-                    0.0,      0.0,      0.0,      0.0;
-    this->fxx[1] = this->fxx[0];
-    this->fxx[2] = this->fxx[0];
-    this->fxx[3] = this->fxx[0];
-    this->fxu[0] <<    0.0,      0.0,      0.0,      0.0,
-                    0.0,      0.0,      0.0,      0.0,
-                    0.0,      0.0,      0.0,      0.0,
-                    0.0,      0.0,      0.0,      0.0;
-    this->fxu[0] <<    0.0,      0.0,      0.0,      0.0,
-                    0.0,      0.0,      0.0,      0.0,
-                    0.0,      0.0,      0.0,      0.0,
-                    0.0,      0.0,      0.0,      0.0;
-    this->fuBase << 0.0,
-                    this->k/(this->R*this->Jm),
+                    1.0/Jl,      0.0,      0.0,      0.0;
+    fx = fxBase;
+    fxx[0].setZero();
+    fxx[1].setZero();
+    fxx[2].setZero();
+    fxx[3].setZero();
+    fxu[0].setZero();
+    fxu[0].setZero();
+    fuBase << 0.0,
+                    k/(R*Jm),
                     0.0,
                     0.0;
-    this->fu << 0.0,0.0,0.0,0.0;
+    fu.setZero();;
 
 
 }
@@ -67,72 +54,72 @@ RomeoSimpleActuator::RomeoSimpleActuator()
 
 stateVec_t RomeoSimpleActuator::computeNextState(double dt,stateVec_t& X,commandVec_t& U)
 {
-    stateMat_t Ad = (this->A*dt+this->Id);
-    stateR_commandC_t Bd = dt*this->B;
+    stateMat_t Ad = (A*dt+Id);
+    stateR_commandC_t Bd = dt*B;
     stateVec_t result = Ad*X + Bd*U;
-    result(1,0)+=this->A13atan*atan(this->a*X(3,0));
-    result(3,0)+=this->A33atan*atan(this->a*X(3,0));
+    result(1,0)+=A13atan*atan(a*X(3,0));
+    result(3,0)+=A33atan*atan(a*X(3,0));
 
     return result;
 }
 
 void RomeoSimpleActuator::computeAllModelDeriv(double dt,stateVec_t& X,commandVec_t& U)
 {
-    this->fx = this->fxBase;
+    fx = fxBase;
 
-    this->fx(0,1) = dt;
-    this->fx(1,0) *= dt;
-    this->fx(1,1) *= dt;
-    this->fx(1,1) += 1.0;
-    this->fx(1,3) *= dt;
-    this->fx(1,3) += ((2*dt*this->Jm*this->R)/(pi*this->Jl))*this->Cf0*(this->a/(1.0+(this->a*this->a*X(3,0)*X(3,0))));
-    this->fx(2,3) *= dt;
-    this->fx(3,0) *= dt;
-    this->fx(3,3) += 1.0-((2*dt*this->Cf0)/(pi*this->Jl))*(this->a/(1.0+(this->a*this->a*X(3,0)*X(3,0))));
+    fx(0,1) = dt;
+    fx(1,0) *= dt;
+    fx(1,1) *= dt;
+    fx(1,1) += 1.0;
+    fx(1,3) *= dt;
+    fx(1,3) += ((2*dt*Jm*R)/(pi*Jl))*Cf0*(a/(1.0+(a*a*X(3,0)*X(3,0))));
+    fx(2,3) *= dt;
+    fx(3,0) *= dt;
+    fx(3,3) += 1.0-((2*dt*Cf0)/(pi*Jl))*(a/(1.0+(a*a*X(3,0)*X(3,0))));
 
-    this->fu = dt*this->fuBase;
+    fu = dt*fuBase;
 
-    this->fxx[3](3,3) = -((2*dt*this->Jm*this->R)/(pi*this->Jl))*this->Cf0*((2*this->a*this->a*this->a*X(3,0))/((1+(this->a*this->a*X(3,0)*X(3,0)))*(1+(this->a*this->a*X(3,0)*X(3,0)))));
-    this->fxx[3](3,3) = +((2*dt*this->Cf0)/(pi*this->Jl))*((2*this->a*this->a*this->a*X(3,0))/((1+(this->a*this->a*X(3,0)*X(3,0)))*(1+(this->a*this->a*X(3,0)*X(3,0)))));
+    fxx[3](3,3) = -((2*dt*Jm*R)/(pi*Jl))*Cf0*((2*a*a*a*X(3,0))/((1+(a*a*X(3,0)*X(3,0)))*(1+(a*a*X(3,0)*X(3,0)))));
+    fxx[3](3,3) = +((2*dt*Cf0)/(pi*Jl))*((2*a*a*a*X(3,0))/((1+(a*a*X(3,0)*X(3,0)))*(1+(a*a*X(3,0)*X(3,0)))));
 }
 
 /// accessors ///
 unsigned int RomeoSimpleActuator::getStateNb()
 {
-    return this->stateNb;
+    return stateNb;
 }
 
 unsigned int RomeoSimpleActuator::getCommandNb()
 {
-    return this->commandNb;
+    return commandNb;
 }
 
-stateMat_t RomeoSimpleActuator::getfx()
+stateMat_t& RomeoSimpleActuator::getfx()
 {
-    return this->fx;
+    return fx;
 }
 
 stateTens_t* RomeoSimpleActuator::getfxx()
 {
-    return &this->fxx;
+    return &fxx;
 }
 
-stateR_commandC_t RomeoSimpleActuator::getfu()
+stateR_commandC_t& RomeoSimpleActuator::getfu()
 {
-    return this->fu;
+    return fu;
 }
 
 stateR_commandC_commandD_t* RomeoSimpleActuator::getfuu()
 {
-    return &this->fuu;
+    return &fuu;
 }
 
 stateR_stateC_commandD_t* RomeoSimpleActuator::getfxu()
 {
-    return &this->fxu;
+    return &fxu;
 }
 
 stateR_commandC_stateD_t* RomeoSimpleActuator::getfux()
 {
-    return &this->fux;
+    return &fux;
 }

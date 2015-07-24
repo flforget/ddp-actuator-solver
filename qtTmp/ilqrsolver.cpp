@@ -1,63 +1,137 @@
 #include "ilqrsolver.h"
 
+/* Debug */
+#include <iostream>
+using namespace std;
+/* */
+
 using namespace Eigen;
 
 ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction)
 {
-    this->dynamicModel = myDynamicModel;
-    this->costFunction = myCostFunction;
-    this->stateNb = myDynamicModel.getStateNb();
-    this->commandNb = myDynamicModel.getCommandNb();
+    dynamicModel = &myDynamicModel;
+    costFunction = &myCostFunction;
+    stateNb = myDynamicModel.getStateNb();
+    commandNb = myDynamicModel.getCommandNb();
 }
 
 void ILQRSolver::initSolver(stateVec_t myxInit, stateVec_t myxDes, unsigned int myT,
                        double mydt, unsigned int myiterMax,double mystopCrit)
 {
-    this->xInit = myxInit;
-    this->xDes = myxDes;
-    this->T = myT;
-    this->dt = mydt;
-    this->iterMax = myiterMax;
-    this->stopCrit = mystopCrit;
+    xInit = myxInit;
+    xDes = myxDes;
+    T = myT;
+    dt = mydt;
+    iterMax = myiterMax;
+    stopCrit = mystopCrit;
 
-    this->xList = new stateVec_t[myT+1];
-    this->uList = new commandVec_t[myT];
-    this->updatedxList = new stateVec_t[myT+1];
-    this->updateduList = new commandVec_t[myT];
+    xList = new stateVec_t[myT+1];
+    uList = new commandVec_t[myT];
+    updatedxList = new stateVec_t[myT+1];
+    updateduList = new commandVec_t[myT];
+    k.setZero();
+    K.setZero();
+    kList = new commandVec_t[myT];
+    KList = new commandR_stateC_t[myT];
+
+    alphaList[0] = 1.0;
+    alphaList[1] = 0.8;
+    alphaList[2] = 0.6;
+    alphaList[3] = 0.4;
+    alphaList[4] = 0.2;
+    alpha = 0.0;
 }
 
 void ILQRSolver::solveTrajectory()
 {
-    this->initTrajectory();
-    for(this->iter=0;this->iter<this->iterMax;this->iter++)
+    initTrajectory();
+    for(iter=0;iter<iterMax;iter++)
     {
-        this->backwardLoop();
-        this->forwardLoop();
-        this->xList = this->updatedxList;
-        this->uList = this->updateduList;
-        if(this->changeAmount<this->stopCrit)
+        backwardLoop();
+        forwardLoop();
+        xList = updatedxList;
+        uList = updateduList;
+        if(changeAmount<stopCrit)
             break;
+        for(unsigned int i=0;i<T;i++)
+        {
+            xList[i] = updatedxList[i];
+            uList[i] = updateduList[i];
+        }
+        xList[T] = updatedxList[T];
     }
 }
 
 void ILQRSolver::initTrajectory()
 {
-    this->xList[0] = this->xInit;
+    xList[0] = xInit;
     commandVec_t zeroCommand;
     zeroCommand << commandVec_t::Zero(commandSize,1);
-    for(unsigned int i=0;i<this->T;i++)
+    for(unsigned int i=0;i<T;i++)
     {
-        this->uList[i] = zeroCommand;
-        this->xList[i+1] = this->dynamicModel.computeNextState(this->dt,this->xList[i],zeroCommand);
+        uList[i] = zeroCommand;
+        xList[i+1] = dynamicModel->computeNextState(dt,xList[i],zeroCommand);
     }
 }
 
 void ILQRSolver::backwardLoop()
 {
+    costFunction->commuteFinalCostDeriv(xList[T],xDes);
+    nextVx = costFunction->getlx();
+    nextVxx = costFunction->getlxx();
 
+    mu = 0.0;
+    muEye.setZero();
+    completeBackwardFlag = 0;
+
+    while(!completeBackwardFlag)
+    {
+        completeBackwardFlag = 1;
+        for(int i=T-1;i>=0;i--)
+        {
+            x = xList[i];
+            u = uList[i];
+
+            dynamicModel->computeAllModelDeriv(dt,x,u);
+            costFunction->computeAllCostDeriv(x,xDes,u);
+
+            Qx = costFunction->getlx() + dynamicModel->getfx().transpose() * nextVx;
+            Qu = costFunction->getlu() + dynamicModel->getfu().transpose() * nextVx;
+            Qxx = costFunction->getlxx() + dynamicModel->getfx().transpose() * nextVxx * dynamicModel->getfx();
+            Quu = costFunction->getluu() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfu();
+            Qux = costFunction->getlux() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfx();
+
+
+            /*
+              To be Implemented : dynamic second order derivatives
+            */
+
+            /*
+              To be Implemented : Regularization (is Quu definite positive ?)
+            */
+            QuuInv = Quu.inverse();
+            k = -QuuInv*Qu;
+            K = -QuuInv*Qux;
+
+            nextVx = Qx - K.transpose()*Quu*k;
+            nextVxx = Qxx - K.transpose()*Quu*K;
+
+            kList[i] = k;
+            KList[i] = K;
+        }
+    }
 }
 
 void ILQRSolver::forwardLoop()
 {
-
+    changeAmount = 0.0;
+    updatedxList[0] = xInit;
+    alpha = 0.0;
+    for(unsigned int i=0;i<T;i++)
+    {
+        updateduList[i] = uList[i] + alpha*kList[i] + KList[i]*(updatedxList[i]-xList[i]);
+        updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],updateduList[i]);
+        for(unsigned int j=0;j<commandNb;j++)
+            changeAmount += abs(uList[i](j,0) - updateduList[i](j,0));
+    }
 }

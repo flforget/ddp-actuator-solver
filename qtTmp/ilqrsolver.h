@@ -5,7 +5,7 @@
 
 #include "dynamicmodel.h"
 #include "costfunction.h"
-#include <Eigen/Core>
+#include <Eigen/Dense>
 
 using namespace Eigen;
 
@@ -18,10 +18,12 @@ protected:
     // attributes //
 public:
 private:
-    DynamicModel dynamicModel;
-    CostFunction costFunction;
+    DynamicModel* dynamicModel;
+    CostFunction* costFunction;
     unsigned int stateNb;
     unsigned int commandNb;
+    stateVec_t x;
+    commandVec_t u;
     stateVec_t xInit;
     stateVec_t xDes;
     unsigned int T;
@@ -36,6 +38,26 @@ private:
     stateVec_t* updatedxList;
     commandVec_t* updateduList;
 
+    stateVec_t nextVx;
+    stateMat_t nextVxx;
+    stateVec_t Qx;
+    stateMat_t Qxx;
+    commandVec_t Qu;
+    commandMat_t Quu;
+    commandMat_t QuuInv;
+    commandR_stateC_t Qux;
+    commandVec_t k;
+    commandR_stateC_t K;
+    commandVec_t* kList;
+    commandR_stateC_t* KList;
+    double alphaList[5];
+    double alpha;
+
+
+
+    double mu;
+    stateMat_t muEye;
+    unsigned char completeBackwardFlag;
 
 protected:
     // methods //

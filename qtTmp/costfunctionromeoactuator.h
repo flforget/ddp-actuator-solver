@@ -5,7 +5,7 @@
 
 #include "costfunction.h"
 
-#include <Eigen/Core>
+#include <Eigen/Dense>
 
 using namespace Eigen;
 

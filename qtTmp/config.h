@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <Eigen/Core>
+#include <Eigen/Dense>
 
 #define stateSize 4
 #define commandSize 1
