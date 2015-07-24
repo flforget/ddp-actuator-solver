@@ -1,22 +1,13 @@
 #ifndef ILQRSOLVER_H
 #define ILQRSOLVER_H
 
+#include "config.h"
+
 #include "dynamicmodel.h"
 #include "costfunction.h"
 #include <Eigen/Core>
 
 using namespace Eigen;
-
-#ifdef stateSize
-typedef Matrix<double,stateSize,1> stateVec;
-#else
-typedef Matrix<double,Dynamic,1> stateVec;
-#endif
-#ifdef commandSize
-typedef Matrix<double,commandSize,1> commandVec;
-#else
-typedef Matrix<double,Dynamic,1> commandVec;
-#endif
 
 class ILQRSolver
 {
@@ -31,8 +22,8 @@ private:
     CostFunction costFunction;
     unsigned int stateNb;
     unsigned int commandNb;
-    stateVec xInit;
-    stateVec xDes;
+    stateVec_t xInit;
+    stateVec_t xDes;
     unsigned int T;
     double dt;
     unsigned int iter;
@@ -40,16 +31,16 @@ private:
     double stopCrit;
     double changeAmount;
 
-    stateVec* xList;
-    stateVec* uList;
-    stateVec* updatedxList;
-    stateVec* updateduList;
+    stateVec_t* xList;
+    commandVec_t* uList;
+    stateVec_t* updatedxList;
+    commandVec_t* updateduList;
 
 
 protected:
     // methods //
 public:
-    void initSolver(stateVec myxInit, stateVec myxDes, unsigned int myT,
+    void initSolver(stateVec_t myxInit, stateVec_t myxDes, unsigned int myT,
                     double mydt, unsigned int myiterMax,double mystopCrit);
     void solveTrajectory();
     void initTrajectory();

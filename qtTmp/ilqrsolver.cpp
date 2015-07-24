@@ -10,7 +10,7 @@ ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunctio
     this->commandNb = myDynamicModel.getCommandNb();
 }
 
-void ILQRSolver::initSolver(Eigen::VectorXd myxInit, Eigen::VectorXd myxDes, unsigned int myT,
+void ILQRSolver::initSolver(stateVec_t myxInit, stateVec_t myxDes, unsigned int myT,
                        double mydt, unsigned int myiterMax,double mystopCrit)
 {
     this->xInit = myxInit;
@@ -20,10 +20,10 @@ void ILQRSolver::initSolver(Eigen::VectorXd myxInit, Eigen::VectorXd myxDes, uns
     this->iterMax = myiterMax;
     this->stopCrit = mystopCrit;
 
-    this->xList = new Eigen::VectorXd[myT+1];
-    this->uList = new Eigen::VectorXd[myT];
-    this->updatedxList = new Eigen::VectorXd[myT+1];
-    this->updateduList = new Eigen::VectorXd[myT];
+    this->xList = new stateVec_t[myT+1];
+    this->uList = new commandVec_t[myT];
+    this->updatedxList = new stateVec_t[myT+1];
+    this->updateduList = new commandVec_t[myT];
 }
 
 void ILQRSolver::solveTrajectory()
@@ -43,9 +43,12 @@ void ILQRSolver::solveTrajectory()
 void ILQRSolver::initTrajectory()
 {
     this->xList[0] = this->xInit;
-    for(unsigned int i=1;i<this->T;i++)
+    commandVec_t zeroCommand;
+    zeroCommand << commandVec_t::Zero(commandSize,1);
+    for(unsigned int i=0;i<this->T;i++)
     {
-
+        this->uList[i] = zeroCommand;
+        this->xList[i+1] = this->dynamicModel.computeNextState(this->dt,this->xList[i],zeroCommand);
     }
 }
 

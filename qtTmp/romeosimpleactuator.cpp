@@ -47,11 +47,11 @@ RomeoSimpleActuator::RomeoSimpleActuator()
     this->fxx[1] = this->fxx[0];
     this->fxx[2] = this->fxx[0];
     this->fxx[3] = this->fxx[0];
-    this->fxu <<    0.0,      0.0,      0.0,      0.0,
+    this->fxu[0] <<    0.0,      0.0,      0.0,      0.0,
                     0.0,      0.0,      0.0,      0.0,
                     0.0,      0.0,      0.0,      0.0,
                     0.0,      0.0,      0.0,      0.0;
-    this->fxu <<    0.0,      0.0,      0.0,      0.0,
+    this->fxu[0] <<    0.0,      0.0,      0.0,      0.0,
                     0.0,      0.0,      0.0,      0.0,
                     0.0,      0.0,      0.0,      0.0,
                     0.0,      0.0,      0.0,      0.0;
@@ -65,18 +65,18 @@ RomeoSimpleActuator::RomeoSimpleActuator()
 }
 
 
-V4 RomeoSimpleActuator::computeNextState(double dt,V4& X,double& U)
+stateVec_t RomeoSimpleActuator::computeNextState(double dt,stateVec_t& X,commandVec_t& U)
 {
-    M4 Ad = (this->A*dt+this->Id);
-    V4 Bd = dt*this->B;
-    V4 result = Ad*X + Bd*U;
+    stateMat_t Ad = (this->A*dt+this->Id);
+    stateR_commandC_t Bd = dt*this->B;
+    stateVec_t result = Ad*X + Bd*U;
     result(1,0)+=this->A13atan*atan(this->a*X(3,0));
     result(3,0)+=this->A33atan*atan(this->a*X(3,0));
 
     return result;
 }
 
-void RomeoSimpleActuator::computeAllModelDeriv(double dt,V4& X,double& U)
+void RomeoSimpleActuator::computeAllModelDeriv(double dt,stateVec_t& X,commandVec_t& U)
 {
     this->fx = this->fxBase;
 
@@ -107,32 +107,32 @@ unsigned int RomeoSimpleActuator::getCommandNb()
     return this->commandNb;
 }
 
-M4 RomeoSimpleActuator::getfx()
+stateMat_t RomeoSimpleActuator::getfx()
 {
     return this->fx;
 }
 
-M4* RomeoSimpleActuator::getfxx()
+stateTens_t* RomeoSimpleActuator::getfxx()
 {
-    return this->fxx;
+    return &this->fxx;
 }
 
-V4 RomeoSimpleActuator::getfu()
+stateR_commandC_t RomeoSimpleActuator::getfu()
 {
     return this->fu;
 }
 
-V4 RomeoSimpleActuator::getfuu()
+stateR_commandC_commandD_t* RomeoSimpleActuator::getfuu()
 {
-    return this->fuu;
+    return &this->fuu;
 }
 
-M4 RomeoSimpleActuator::getfxu()
+stateR_stateC_commandD_t* RomeoSimpleActuator::getfxu()
 {
-    return this->fxu;
+    return &this->fxu;
 }
 
-M4 RomeoSimpleActuator::getfux()
+stateR_commandC_stateD_t* RomeoSimpleActuator::getfux()
 {
-    return this->fux;
+    return &this->fux;
 }

@@ -1,26 +1,27 @@
 #ifndef COSTFUNCTIONROMEOACTUATOR_H
 #define COSTFUNCTIONROMEOACTUATOR_H
 
+#include "config.h"
+
+#include "costfunction.h"
+
 #include <Eigen/Core>
 
 using namespace Eigen;
 
-typedef Matrix<double,4,4> M4;
-typedef Matrix<double,4,1> V4;
-typedef Matrix<double,1,4> V4T;
-
-class CostFunctionRomeoActuator
+class CostFunctionRomeoActuator : public CostFunction
 {
 public:
     CostFunctionRomeoActuator();
 private:
-    M4 Q;
-    double R;
-    V4 lx;
-    M4 lxx;
-    double lu,luu;
-    V4T lux;
-    V4 lxu;
+    stateMat_t Q;
+    commandMat_t R;
+    stateVec_t lx;
+    stateMat_t lxx;
+    commandVec_t lu;
+    commandMat_t luu;
+    commandR_stateC_t lux;
+    stateR_commandC_t lxu;
 protected:
     // attributes //
 public:
@@ -29,18 +30,18 @@ private:
 protected:
     // methods //
 public:
-    void computeAllCostDeriv(V4& X, V4& Xdes, double& U);
-    void commuteFinalCostDeriv(V4& X, V4& Xdes);
+    void computeAllCostDeriv(stateVec_t& X, stateVec_t& Xdes, commandVec_t& U);
+    void commuteFinalCostDeriv(stateVec_t& X, stateVec_t& Xdes);
 private:
 protected:
     // accessors //
 public:
-    V4 getlx();
-    M4 getlxx();
-    double getlu();
-    double getluu();
-    V4T getlux();
-    V4 getlxu();
+    stateVec_t getlx();
+    stateMat_t getlxx();
+    commandVec_t getlu();
+    commandMat_t getluu();
+    commandR_stateC_t getlux();
+    stateR_commandC_t getlxu();
 };
 
 #endif // COSTFUNCTIONROMEOACTUATOR_H

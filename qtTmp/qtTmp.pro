@@ -22,6 +22,7 @@ HEADERS += \
     dynamicmodel.h \
     ilqrsolver.h \
     romeosimpleactuator.h \
-    costfunctionromeoactuator.h
+    costfunctionromeoactuator.h \
+    config.h
 
 INCLUDEPATH += /usr/include/eigen3

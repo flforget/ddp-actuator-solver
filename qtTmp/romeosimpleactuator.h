@@ -1,15 +1,12 @@
 #ifndef ROMEOSIMPLEACTUATOR_H
 #define ROMEOSIMPLEACTUATOR_H
 
-#include <iostream>
+#include "config.h"
 
 #include "dynamicmodel.h"
 #include <Eigen/Core>
 
 using namespace Eigen;
-
-typedef Matrix<double,4,4> M4;
-typedef Matrix<double,4,1> V4;
 
 class RomeoSimpleActuator : public DynamicModel
 {
@@ -30,31 +27,32 @@ private:
     double fvm;
     double Cf0;
     double a;
-    M4 Id;
-    M4 A;
-    V4 B;
+    stateMat_t Id;
+    stateMat_t A;
+    stateR_commandC_t B;
     double A13atan;
     double A33atan;
-    M4 fx,fxBase;
-    M4 fxx[4];
-    V4 fu,fuBase;
-    V4 fuu;
-    M4 fxu,fux;
+    stateMat_t fx,fxBase;
+    stateTens_t fxx;
+    stateR_commandC_t fu,fuBase;
+    stateR_commandC_commandD_t fuu;
+    stateR_stateC_commandD_t fxu;
+    stateR_commandC_stateD_t fux;
 
 protected:
     // methods //
 public:
-    V4 computeNextState(double dt,V4& X,double& U);
-    void computeAllModelDeriv(double dt,V4& X,double& U);
+    stateVec_t computeNextState(double dt,stateVec_t& X,commandVec_t &U);
+    void computeAllModelDeriv(double dt,stateVec_t& X,commandVec_t &U);
     // accessors //
     unsigned int getStateNb();
     unsigned int getCommandNb();
-    M4 getfx();
-    M4* getfxx();
-    V4 getfu();
-    V4 getfuu();
-    M4 getfxu();
-    M4 getfux();
+    stateMat_t getfx();
+    stateTens_t* getfxx();
+    stateR_commandC_t getfu();
+    stateR_commandC_commandD_t* getfuu();
+    stateR_stateC_commandD_t* getfxu();
+    stateR_commandC_stateD_t* getfux();
 private:
 protected:
 

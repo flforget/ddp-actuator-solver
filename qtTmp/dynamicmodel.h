@@ -1,6 +1,8 @@
 #ifndef DYNAMICMODEL_H
 #define DYNAMICMODEL_H
 
+#include "config.h"
+
 #include <Eigen/Core>
 
 using namespace Eigen;
@@ -14,15 +16,15 @@ public:
 // attributes //
 public:
 private:
-    static unsigned int stateNb;
-    static unsigned int commandNb;
+    unsigned int stateNb;
+    unsigned int commandNb;
 
 protected:
 
 // methods //
 public:
-    virtual void computeNextState(unsigned int dt,unsigned int X,unsigned int U);
-    virtual void computeAllModelDeriv(unsigned int dt,unsigned int X,unsigned int U);
+    virtual stateVec_t computeNextState(unsigned int dt,stateVec_t& X,commandVec_t& U);
+    virtual void computeAllModelDeriv(unsigned int dt,stateVec_t& X,commandVec_t& U);
     virtual unsigned int getStateNb();
     virtual unsigned int getCommandNb();
 private:

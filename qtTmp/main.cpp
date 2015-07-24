@@ -1,7 +1,7 @@
-#define stateSize 4
-#define commandSize 1
-
 #include <iostream>
+
+#include "config.h"
+
 #include "ilqrsolver.h"
 #include "romeosimpleactuator.h"
 #include "costfunctionromeoactuator.h"
@@ -10,8 +10,6 @@
 using namespace std;
 using namespace Eigen;
 
-typedef Matrix<double,4,1> V4;
-
 int main()
 {
     DynamicModel testModel;
@@ -19,6 +17,8 @@ int main()
     RomeoSimpleActuator romeoActuatorModel;
     CostFunctionRomeoActuator costRomeoActuator;
     ILQRSolver testSolver(testModel,testCostFun);
+    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
+
     return 0;
 }
 
