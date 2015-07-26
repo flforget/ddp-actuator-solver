@@ -12,6 +12,14 @@ using namespace Eigen;
 class ILQRSolver
 {
 public:
+    struct traj
+    {
+        stateVec_t* xList;
+        commandVec_t* uList;
+    };
+
+
+public:
     ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction);
 private:
 protected:
@@ -37,6 +45,7 @@ private:
     commandVec_t* uList;
     stateVec_t* updatedxList;
     commandVec_t* updateduList;
+    struct traj lastTraj;
 
     stateVec_t nextVx;
     stateMat_t nextVxx;
@@ -68,6 +77,7 @@ public:
     void initTrajectory();
     void backwardLoop();
     void forwardLoop();
+    struct traj getLastSolvedTrajectory();
 private:
 protected:
 

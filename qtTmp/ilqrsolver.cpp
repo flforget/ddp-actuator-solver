@@ -49,8 +49,6 @@ void ILQRSolver::solveTrajectory()
     {
         backwardLoop();
         forwardLoop();
-        xList = updatedxList;
-        uList = updateduList;
         if(changeAmount<stopCrit)
             break;
         for(unsigned int i=0;i<T;i++)
@@ -126,7 +124,7 @@ void ILQRSolver::forwardLoop()
 {
     changeAmount = 0.0;
     updatedxList[0] = xInit;
-    alpha = 0.0;
+    alpha = 1.0;
     for(unsigned int i=0;i<T;i++)
     {
         updateduList[i] = uList[i] + alpha*kList[i] + KList[i]*(updatedxList[i]-xList[i]);
@@ -134,4 +132,12 @@ void ILQRSolver::forwardLoop()
         for(unsigned int j=0;j<commandNb;j++)
             changeAmount += abs(uList[i](j,0) - updateduList[i](j,0));
     }
+}
+
+ILQRSolver::traj ILQRSolver::getLastSolvedTrajectory()
+{
+    lastTraj.xList = updatedxList;
+    lastTraj.uList = updateduList;
+
+    return lastTraj;
 }

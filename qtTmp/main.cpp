@@ -19,13 +19,16 @@ int main()
     double texec=0.0;
     stateVec_t xinit,xDes;
 
-    xinit << 0.0,0.0,0.0,0.0;
-    xDes << 1.0,0.0,0.0,0.0;
+    xinit << 1.0,0.0,0.0,0.0;
+    xDes << 2.0,0.0,0.0,0.0;
 
     unsigned int T = 50;
     double dt=1e-4;
     int iterMax = 20;
     double stopCrit = 1e-3;
+    stateVec_t* xList;
+    commandVec_t* uList;
+    ILQRSolver::traj lastTraj;
 
     RomeoSimpleActuator romeoActuatorModel;
     CostFunctionRomeoActuator costRomeoActuator;
@@ -36,12 +39,18 @@ int main()
     testSolverRomeoActuator.solveTrajectory();
     gettimeofday(&tend,NULL);
 
+    lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
+    xList = lastTraj.xList;
+    uList = lastTraj.uList;
+
     texec=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
 
-    cout << "temps d'execution total du solveeur ";
+    cout << "temps d'execution total du solveur ";
     cout << texec << endl;
     cout << "temps d'execution par pas de temps ";
     cout << texec/T << endl;
+
+    for(int i=0;i<T+1;i++) cout << uList[i];
 
     return 0;
 }
