@@ -8,14 +8,15 @@
 #include <Eigen/Dense>
 
 #include <time.h>
+#include <sys/time.h>
 
 using namespace std;
 using namespace Eigen;
 
 int main()
 {
-    clock_t t1,t2;
-    t1 = clock();
+    struct timeval tbegin,tend;
+    double texec=0.0;
     stateVec_t xinit,xDes;
 
     xinit << 0.0,0.0,0.0,0.0;
@@ -30,13 +31,17 @@ int main()
     CostFunctionRomeoActuator costRomeoActuator;
     ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
     testSolverRomeoActuator.initSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+
+    gettimeofday(&tbegin,NULL);
     testSolverRomeoActuator.solveTrajectory();
+    gettimeofday(&tend,NULL);
 
-    usleep(1000000);
-    t2 = clock();
+    texec=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
 
-    cout << t2 << endl;
-    cout << t1 << endl;
+    cout << "temps d'execution total du solveeur ";
+    cout << texec << endl;
+    cout << "temps d'execution par pas de temps ";
+    cout << texec/T << endl;
 
     return 0;
 }
