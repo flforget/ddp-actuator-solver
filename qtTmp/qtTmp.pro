@@ -9,8 +9,8 @@ SOURCES += main.cpp \
     ilqrsolver.cpp \
     romeosimpleactuator.cpp \
     costfunctionromeoactuator.cpp \
-    romeolinearactuator.cpp
-SOURCES +=
+    romeolinearactuator.cpp \
+    mainMPC.cpp
 
 include(deployment.pri)
 qtcAddDeployment()

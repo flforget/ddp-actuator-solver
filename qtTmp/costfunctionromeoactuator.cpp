@@ -20,7 +20,7 @@ void CostFunctionRomeoActuator::computeAllCostDeriv(const stateVec_t& X, const s
     lu = R*U;
 }
 
-void CostFunctionRomeoActuator::commuteFinalCostDeriv(const stateVec_t& X, const stateVec_t& Xdes)
+void CostFunctionRomeoActuator::computeFinalCostDeriv(const stateVec_t& X, const stateVec_t& Xdes)
 {
     lx = Q*(X-Xdes);
 }

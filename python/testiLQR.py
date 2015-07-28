@@ -46,8 +46,9 @@ solver = ILQRSolver(model,costFunction)
 for i in range(M):
     Xdes = trajList[i]
     initTime = time.time()
-    XListtmp,UListtmp = solver.solveTrajectory(Xinit,Xdes,N,dt,20,1e-3)
+    XListtmp,UListtmp,iter = solver.solveTrajectory(Xinit,Xdes,N,dt,20,1e-3)
     endTime = time.time() - initTime
+    print iter
     print costFunction.computeCostValue(N,XListtmp,Xdes,UListtmp)
     timeList.append(endTime/N)
     XList += XListtmp

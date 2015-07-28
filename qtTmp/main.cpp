@@ -25,7 +25,7 @@ int main()
     xinit << 0.0,0.0,0.0,0.0;
     xDes << 1.0,0.0,0.0,0.0;
 
-    unsigned int T = 3;
+    unsigned int T = 30;
     double dt=1e-4;
     unsigned int iterMax = 20;
     double stopCrit = 1e-3;
@@ -39,8 +39,10 @@ int main()
     ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
     testSolverRomeoActuator.initSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
+
+    int N = 1000;
     gettimeofday(&tbegin,NULL);
-    testSolverRomeoActuator.solveTrajectory();
+    for(int i=0;i<N;i++) testSolverRomeoActuator.solveTrajectory();
     gettimeofday(&tend,NULL);
 
     lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
@@ -49,12 +51,17 @@ int main()
     unsigned int iter = lastTraj.iter;
 
     texec=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
+    texec /= N;
 
     cout << "temps d'execution total du solveur ";
     cout << texec << endl;
     cout << "temps d'execution par pas de temps ";
     cout << texec/T << endl;
     cout << "Nombre d'itérations : " << iter << endl;
+
+
+
+
 
     ofstream fichier("results.csv",ios::out | ios::trunc);
     if(fichier)
@@ -66,7 +73,6 @@ int main()
     }
     else
         cerr << "erreur ouverte fichier" << endl;
-
-
     return 0;
+
 }

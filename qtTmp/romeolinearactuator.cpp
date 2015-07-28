@@ -91,9 +91,9 @@ stateMat_t& RomeoLinearActuator::getfx()
     return fx;
 }
 
-stateTens_t* RomeoLinearActuator::getfxx()
+stateTens_t& RomeoLinearActuator::getfxx()
 {
-    return &fxx;
+    return fxx;
 }
 
 stateR_commandC_t& RomeoLinearActuator::getfu()
@@ -101,17 +101,17 @@ stateR_commandC_t& RomeoLinearActuator::getfu()
     return fu;
 }
 
-stateR_commandC_commandD_t* RomeoLinearActuator::getfuu()
+stateR_commandC_commandD_t& RomeoLinearActuator::getfuu()
 {
-    return &fuu;
+    return fuu;
 }
 
-stateR_stateC_commandD_t* RomeoLinearActuator::getfxu()
+stateR_stateC_commandD_t& RomeoLinearActuator::getfxu()
 {
-    return &fxu;
+    return fxu;
 }
 
-stateR_commandC_stateD_t* RomeoLinearActuator::getfux()
+stateR_commandC_stateD_t& RomeoLinearActuator::getfux()
 {
-    return &fux;
+    return fux;
 }

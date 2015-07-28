@@ -45,7 +45,7 @@ protected:
     // methods //
 public:
     stateVec_t computeNextState(double& dt,const stateVec_t& X,const commandVec_t &U);
-    void computeAllModelDeriv(double& dt,const stateVec_t& X,const commandVec_t &U);
+    void computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t &U);
     stateMat_t computeTensorContxx(const stateVec_t& nextVx);
     commandMat_t computeTensorContuu(const stateVec_t& nextVx);
     commandR_stateC_t computeTensorContux(const stateVec_t& nextVx);
@@ -56,11 +56,11 @@ public:
     unsigned int getStateNb();
     unsigned int getCommandNb();
     stateMat_t &getfx();
-    stateTens_t* getfxx();
+    stateTens_t& getfxx();
     stateR_commandC_t &getfu();
-    stateR_commandC_commandD_t* getfuu();
-    stateR_stateC_commandD_t* getfxu();
-    stateR_commandC_stateD_t* getfux();
+    stateR_commandC_commandD_t& getfuu();
+    stateR_stateC_commandD_t& getfxu();
+    stateR_commandC_stateD_t& getfux();
 
 };
 

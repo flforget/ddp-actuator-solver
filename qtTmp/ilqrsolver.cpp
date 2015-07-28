@@ -39,7 +39,7 @@ void ILQRSolver::initSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned in
     alphaList[2] = 0.6;
     alphaList[3] = 0.4;
     alphaList[4] = 0.2;
-    alpha = 0.0;
+    alpha = 1.0;
 }
 
 void ILQRSolver::solveTrajectory()
@@ -76,16 +76,17 @@ void ILQRSolver::initTrajectory()
 
 void ILQRSolver::backwardLoop()
 {
-    costFunction->commuteFinalCostDeriv(xList[T],xDes);
+    costFunction->computeFinalCostDeriv(xList[T],xDes);
     nextVx = costFunction->getlx();
     nextVxx = costFunction->getlxx();
 
-    muEye.setZero();
+    mu = 0.0;
     completeBackwardFlag = 0;
 
     while(!completeBackwardFlag)
     {
         completeBackwardFlag = 1;
+        muEye = mu*stateMat_t::Zero();
         for(int i=T-1;i>=0;i--)
         {
             x = xList[i];
@@ -104,9 +105,18 @@ void ILQRSolver::backwardLoop()
             Qux += dynamicModel->computeTensorContux(nextVx);
             Quu += dynamicModel->computeTensorContuu(nextVx);
 
-            /*
-              To be Implemented : Regularization (is Quu definite positive ?)
-            */
+
+            if(!isQuudefinitePositive(Quu))
+            {
+                /*
+                  To be Implemented : Regularization (is Quu definite positive ?)
+                */
+                if(mu==0.0) mu += 1e-4;
+                else mu *= 10;
+                completeBackwardFlag = 0;
+                break;
+            }
+
             QuuInv = Quu.inverse();
             k = -QuuInv*Qu;
             K = -QuuInv*Qux;
@@ -143,4 +153,12 @@ ILQRSolver::traj ILQRSolver::getLastSolvedTrajectory()
     lastTraj.uList = updateduList;
     lastTraj.iter = iter;
     return lastTraj;
+}
+
+char ILQRSolver::isQuudefinitePositive(commandMat_t& Quu)
+{
+    /*
+      Todo : check if Quu is definite positive
+    */
+    return 1;
 }

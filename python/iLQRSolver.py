@@ -45,7 +45,7 @@ class ILQRSolver:
             if(self.changeAmount < self.stopCrit):
                 break
 
-        return XList,UList
+        return XList,UList,iter
 
 
     def initTrajectory(self):
@@ -77,6 +77,7 @@ class ILQRSolver:
         Kappend = KList.append
         nextVx,nextVxx = \
             self.costfunction.computeFinalCostDeriv(XList[self.T],self.Xdes)
+
         Xdes = self.Xdes
         stateNb = self.model.stateNumber
         dt = self.dt
@@ -108,6 +109,7 @@ class ILQRSolver:
                     Quxt += nextVx[j].item()*fux[j]
                     # Quu += nextVx[j].item()*fuu[j]
                     Quut += nextVx[j].item()*fuu[j]
+
 
                 if(np.all(np.linalg.eigvals(Quut) <= 0)): # check out if Quut is definite positive
                     if(mu==0):
