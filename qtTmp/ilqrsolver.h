@@ -16,8 +16,8 @@ public:
     {
         stateVec_t* xList;
         commandVec_t* uList;
+        unsigned int iter;
     };
-
 
 public:
     ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction);
@@ -35,8 +35,8 @@ private:
     stateVec_t xInit;
     stateVec_t xDes;
     unsigned int T;
-    double dt;
     unsigned int iter;
+    double dt;
     unsigned int iterMax;
     double stopCrit;
     double changeAmount;
@@ -71,8 +71,8 @@ private:
 protected:
     // methods //
 public:
-    void initSolver(stateVec_t myxInit, stateVec_t myxDes, unsigned int myT,
-                    double mydt, unsigned int myiterMax,double mystopCrit);
+    void initSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned int& myT,
+                    double& mydt, unsigned int& myiterMax,double& mystopCrit);
     void solveTrajectory();
     void initTrajectory();
     void backwardLoop();

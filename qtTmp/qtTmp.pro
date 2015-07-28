@@ -8,7 +8,8 @@ SOURCES += main.cpp \
     dynamicmodel.cpp \
     ilqrsolver.cpp \
     romeosimpleactuator.cpp \
-    costfunctionromeoactuator.cpp
+    costfunctionromeoactuator.cpp \
+    romeolinearactuator.cpp
 SOURCES +=
 
 include(deployment.pri)
@@ -23,6 +24,8 @@ HEADERS += \
     ilqrsolver.h \
     romeosimpleactuator.h \
     costfunctionromeoactuator.h \
-    config.h
+    config.h \
+    romeolinearactuator.h
 
 INCLUDEPATH += /usr/include/eigen3
+INCLUDEPATH += /usr/include/python2.7

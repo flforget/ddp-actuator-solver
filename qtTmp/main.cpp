@@ -1,14 +1,17 @@
 #include <iostream>
+#include <fstream>
 
 #include "config.h"
 
 #include "ilqrsolver.h"
 #include "romeosimpleactuator.h"
+#include "romeolinearactuator.h"
 #include "costfunctionromeoactuator.h"
 #include <Eigen/Dense>
 
 #include <time.h>
 #include <sys/time.h>
+
 
 using namespace std;
 using namespace Eigen;
@@ -19,18 +22,19 @@ int main()
     double texec=0.0;
     stateVec_t xinit,xDes;
 
-    xinit << 1.0,0.0,0.0,0.0;
-    xDes << 2.0,0.0,0.0,0.0;
+    xinit << 0.0,0.0,0.0,0.0;
+    xDes << 1.0,0.0,0.0,0.0;
 
-    unsigned int T = 50;
+    unsigned int T = 3;
     double dt=1e-4;
-    int iterMax = 20;
+    unsigned int iterMax = 20;
     double stopCrit = 1e-3;
     stateVec_t* xList;
     commandVec_t* uList;
     ILQRSolver::traj lastTraj;
 
     RomeoSimpleActuator romeoActuatorModel;
+    RomeoLinearActuator romeoLinearModel;
     CostFunctionRomeoActuator costRomeoActuator;
     ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
     testSolverRomeoActuator.initSolver(xinit,xDes,T,dt,iterMax,stopCrit);
@@ -42,6 +46,7 @@ int main()
     lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
     xList = lastTraj.xList;
     uList = lastTraj.uList;
+    unsigned int iter = lastTraj.iter;
 
     texec=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
 
@@ -49,9 +54,19 @@ int main()
     cout << texec << endl;
     cout << "temps d'execution par pas de temps ";
     cout << texec/T << endl;
+    cout << "Nombre d'itérations : " << iter << endl;
 
-    for(int i=0;i<T+1;i++) cout << uList[i];
+    ofstream fichier("results.csv",ios::out | ios::trunc);
+    if(fichier)
+    {
+        fichier << "tau,tauDot,q,qDot,u" << endl;
+        for(int i=0;i<T;i++) fichier << xList[i](0,0) << "," << xList[i](1,0) << "," << xList[i](2,0) << "," << xList[i](3,0) << "," << uList[i](0,0) << endl;
+        fichier << xList[T](0,0) << "," << xList[T](1,0) << "," << xList[T](2,0) << "," << xList[T](3,0) << "," << 0.0 << endl;
+        fichier.close();
+    }
+    else
+        cerr << "erreur ouverte fichier" << endl;
+
 
     return 0;
 }
-

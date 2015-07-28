@@ -22,6 +22,7 @@ private:
     commandMat_t luu;
     commandR_stateC_t lux;
     stateR_commandC_t lxu;
+    double dt;
 protected:
     // attributes //
 public:
@@ -30,8 +31,8 @@ private:
 protected:
     // methods //
 public:
-    void computeAllCostDeriv(stateVec_t& X, stateVec_t& Xdes, commandVec_t& U);
-    void commuteFinalCostDeriv(stateVec_t& X, stateVec_t& Xdes);
+    void computeAllCostDeriv(const stateVec_t& X, const stateVec_t& Xdes, const commandVec_t& U);
+    void commuteFinalCostDeriv(const stateVec_t& X, const stateVec_t& Xdes);
 private:
 protected:
     // accessors //

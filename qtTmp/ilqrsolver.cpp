@@ -15,8 +15,8 @@ ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunctio
     commandNb = myDynamicModel.getCommandNb();
 }
 
-void ILQRSolver::initSolver(stateVec_t myxInit, stateVec_t myxDes, unsigned int myT,
-                       double mydt, unsigned int myiterMax,double mystopCrit)
+void ILQRSolver::initSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned int& myT,
+                       double& mydt, unsigned int& myiterMax,double& mystopCrit)
 {
     xInit = myxInit;
     xDes = myxDes;
@@ -44,6 +44,8 @@ void ILQRSolver::initSolver(stateVec_t myxInit, stateVec_t myxDes, unsigned int 
 
 void ILQRSolver::solveTrajectory()
 {
+    stateVec_t* tmpxPtr;
+    commandVec_t* tmpuPtr;
     initTrajectory();
     for(iter=0;iter<iterMax;iter++)
     {
@@ -51,12 +53,12 @@ void ILQRSolver::solveTrajectory()
         forwardLoop();
         if(changeAmount<stopCrit)
             break;
-        for(unsigned int i=0;i<T;i++)
-        {
-            xList[i] = updatedxList[i];
-            uList[i] = updateduList[i];
-        }
-        xList[T] = updatedxList[T];
+        tmpxPtr = xList;
+        tmpuPtr = uList;
+        xList = updatedxList;
+        updatedxList = tmpxPtr;
+        uList = updateduList;
+        updateduList = tmpuPtr;
     }
 }
 
@@ -64,7 +66,7 @@ void ILQRSolver::initTrajectory()
 {
     xList[0] = xInit;
     commandVec_t zeroCommand;
-    zeroCommand << commandVec_t::Zero(commandSize,1);
+    zeroCommand.setZero();
     for(unsigned int i=0;i<T;i++)
     {
         uList[i] = zeroCommand;
@@ -78,7 +80,6 @@ void ILQRSolver::backwardLoop()
     nextVx = costFunction->getlx();
     nextVxx = costFunction->getlxx();
 
-    mu = 0.0;
     muEye.setZero();
     completeBackwardFlag = 0;
 
@@ -95,14 +96,13 @@ void ILQRSolver::backwardLoop()
 
             Qx = costFunction->getlx() + dynamicModel->getfx().transpose() * nextVx;
             Qu = costFunction->getlu() + dynamicModel->getfu().transpose() * nextVx;
-            Qxx = costFunction->getlxx() + dynamicModel->getfx().transpose() * nextVxx * dynamicModel->getfx();
+            Qxx = costFunction->getlxx() + dynamicModel->getfx().transpose() * (nextVxx+muEye) * dynamicModel->getfx();
             Quu = costFunction->getluu() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfu();
             Qux = costFunction->getlux() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfx();
 
-
-            /*
-              To be Implemented : dynamic second order derivatives
-            */
+            Qxx += dynamicModel->computeTensorContxx(nextVx);
+            Qux += dynamicModel->computeTensorContux(nextVx);
+            Quu += dynamicModel->computeTensorContuu(nextVx);
 
             /*
               To be Implemented : Regularization (is Quu definite positive ?)
@@ -124,13 +124,16 @@ void ILQRSolver::forwardLoop()
 {
     changeAmount = 0.0;
     updatedxList[0] = xInit;
+    // Line search to be implemented
     alpha = 1.0;
     for(unsigned int i=0;i<T;i++)
     {
         updateduList[i] = uList[i] + alpha*kList[i] + KList[i]*(updatedxList[i]-xList[i]);
         updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],updateduList[i]);
         for(unsigned int j=0;j<commandNb;j++)
+        {
             changeAmount += abs(uList[i](j,0) - updateduList[i](j,0));
+        }
     }
 }
 
@@ -138,6 +141,6 @@ ILQRSolver::traj ILQRSolver::getLastSolvedTrajectory()
 {
     lastTraj.xList = updatedxList;
     lastTraj.uList = updateduList;
-
+    lastTraj.iter = iter;
     return lastTraj;
 }

@@ -13,10 +13,10 @@ Xinit = np.matrix([ [0.0],
                     [0.0],
                     [0.0],
                     [0.0]])
-Xinit = np.matrix([ [uniform(-10,10)],
-                    [uniform(-1.0,1.0)],
-                    [uniform(-10,10)],
-                    [uniform(-1.0,1.0)]])
+# Xinit = np.matrix([ [uniform(-10,10)],
+#                     [uniform(-1.0,1.0)],
+#                     [uniform(-10,10)],
+#                     [uniform(-1.0,1.0)]])
 Xdes = np.matrix([  [1.0],
                     [0.0],
                     [0.0],
@@ -28,7 +28,7 @@ XListtmp = list()
 UListtmp = list()
 timeList = list()
 
-N = 20
+N = 3
 
 """Debug"""
 traj = False

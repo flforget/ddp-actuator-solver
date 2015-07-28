@@ -14,13 +14,13 @@ CostFunctionRomeoActuator::CostFunctionRomeoActuator()
     lxu << 0.0,0.0,0.0,0.0;
 }
 
-void CostFunctionRomeoActuator::computeAllCostDeriv(stateVec_t& X, stateVec_t& Xdes, commandVec_t& U)
+void CostFunctionRomeoActuator::computeAllCostDeriv(const stateVec_t& X, const stateVec_t& Xdes, const commandVec_t& U)
 {
     lx = Q*(X-Xdes);
     lu = R*U;
 }
 
-void CostFunctionRomeoActuator::commuteFinalCostDeriv(stateVec_t& X, stateVec_t& Xdes)
+void CostFunctionRomeoActuator::commuteFinalCostDeriv(const stateVec_t& X, const stateVec_t& Xdes)
 {
     lx = Q*(X-Xdes);
 }

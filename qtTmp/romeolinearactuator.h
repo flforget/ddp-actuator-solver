@@ -1,5 +1,5 @@
-#ifndef ROMEOSIMPLEACTUATOR_H
-#define ROMEOSIMPLEACTUATOR_H
+#ifndef ROMEOLINEARACTUATOR_H
+#define ROMEOLINEARACTUATOR_H
 
 #include "config.h"
 
@@ -8,10 +8,10 @@
 
 using namespace Eigen;
 
-class RomeoSimpleActuator : public DynamicModel
+class RomeoLinearActuator : public DynamicModel
 {
 public:
-    RomeoSimpleActuator();
+    RomeoLinearActuator();
 private:
 protected:
 
@@ -25,7 +25,7 @@ private:
     static const double R=200.0;
     static const double Jm=138*1e-7;
     static const double Jl=0.1;
-    static const double fvm=0.01;
+    double fvm;
     static const double Cf0=0.1;
     static const double a=10.0;
 
@@ -40,10 +40,6 @@ private:
     stateR_commandC_commandD_t fuu;
     stateR_stateC_commandD_t fxu;
     stateR_commandC_stateD_t fux;
-
-    stateMat_t QxxCont;
-    commandMat_t QuuCont;
-    commandR_stateC_t QuxCont;
 
 protected:
     // methods //
@@ -68,4 +64,4 @@ public:
 
 };
 
-#endif // ROMEOSIMPLEACTUATOR_H
+#endif // ROMEOLINEARACTUATOR_H

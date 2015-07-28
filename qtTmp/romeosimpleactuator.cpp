@@ -5,23 +5,13 @@
 
 RomeoSimpleActuator::RomeoSimpleActuator()
 {
-    commandNb = 1;
-    stateNb = 4;
-    k = 1000.0;
-    R = 200.0;
-    Jm = 138*1e-7;
-    Jl = 0.1;
-    fvm = 0.01;
-    Cf0 = 0.1;
-    a = 10.0;
-
     Id.setIdentity();
 
     A.setZero();
     A(0,1) = 1.0;
     A(2,2) = 1.0;
     A(1,0) = -(k/Jl)+(k/(Jm*R*R));
-    A(1,3) = -fvm*k/Jm;
+    A(1,3) = -(fvm*k)/Jm;
     A(3,0) =1.0/Jl;
     A13atan = 2.0*Jm*R/(pi*Jl)*Cf0;
     A33atan = 2.0/(pi*Jl)*Cf0;
@@ -32,7 +22,7 @@ RomeoSimpleActuator::RomeoSimpleActuator()
                 0.0;
 
     fxBase << 1.0,      1.0,      0.0,      0.0,
-                    -(k/Jl)-(k/(Jm*R*R)),      -fvm/Jm,      0.0,      -fvm*k/Jm,
+                    -(k/Jl)-(k/(Jm*R*R)),      -(fvm/Jm),      0.0,      -(fvm*k)/Jm,
                     0.0,      0.0,      1.0,      1.0,
                     1.0/Jl,      0.0,      0.0,      0.0;
     fx = fxBase;
@@ -47,23 +37,28 @@ RomeoSimpleActuator::RomeoSimpleActuator()
                     0.0,
                     0.0;
     fu.setZero();;
+    fuu[0].setZero();
+    fux[0].setZero();
+    fxu[0].setZero();
 
-
+    QxxCont.setZero();
+    QuuCont.setZero();
+    QuxCont.setZero();
 }
 
 
-stateVec_t RomeoSimpleActuator::computeNextState(double dt,stateVec_t& X,commandVec_t& U)
+stateVec_t RomeoSimpleActuator::computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)
 {
     stateMat_t Ad = (A*dt+Id);
     stateR_commandC_t Bd = dt*B;
     stateVec_t result = Ad*X + Bd*U;
-    result(1,0)+=A13atan*atan(a*X(3,0));
-    result(3,0)+=A33atan*atan(a*X(3,0));
+    result(1,0)+=dt*A13atan*atan(a*X(3,0));
+    result(3,0)+=dt*A33atan*atan(a*X(3,0));
 
     return result;
 }
 
-void RomeoSimpleActuator::computeAllModelDeriv(double dt,stateVec_t& X,commandVec_t& U)
+void RomeoSimpleActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
 {
     fx = fxBase;
 
@@ -81,6 +76,22 @@ void RomeoSimpleActuator::computeAllModelDeriv(double dt,stateVec_t& X,commandVe
 
     fxx[3](3,3) = -((2*dt*Jm*R)/(pi*Jl))*Cf0*((2*a*a*a*X(3,0))/((1+(a*a*X(3,0)*X(3,0)))*(1+(a*a*X(3,0)*X(3,0)))));
     fxx[3](3,3) = +((2*dt*Cf0)/(pi*Jl))*((2*a*a*a*X(3,0))/((1+(a*a*X(3,0)*X(3,0)))*(1+(a*a*X(3,0)*X(3,0)))));
+}
+
+stateMat_t RomeoSimpleActuator::computeTensorContxx(const stateVec_t& nextVx)
+{
+    QxxCont = nextVx[3]*fxx[3];
+    return QxxCont;
+}
+
+commandMat_t RomeoSimpleActuator::computeTensorContuu(const stateVec_t& nextVx)
+{
+    return QuuCont;
+}
+
+commandR_stateC_t RomeoSimpleActuator::computeTensorContux(const stateVec_t& nextVx)
+{
+    return QuxCont;
 }
 
 /// accessors ///

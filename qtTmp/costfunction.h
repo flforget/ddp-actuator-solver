@@ -12,11 +12,12 @@ protected:
     // attributes //
 public:
 private:
+    double dt;
 protected:
     // methods //
 public:
-    virtual void computeAllCostDeriv(stateVec_t& X, stateVec_t& Xdes, commandVec_t& U)=0;
-    virtual void commuteFinalCostDeriv(stateVec_t& X, stateVec_t& Xdes)=0;
+    virtual void computeAllCostDeriv(const stateVec_t& X, const stateVec_t& Xdes, const commandVec_t& U)=0;
+    virtual void commuteFinalCostDeriv(const stateVec_t& X, const stateVec_t& Xdes)=0;
 private:
 protected:
     // accessors //
