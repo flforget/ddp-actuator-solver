@@ -1,14 +1,15 @@
-include_directories(include)
+#SET(LIBRARY_NAME ${PROJECT_NAME})
+# SET(${LIBRARY_NAME}_SOURCES
+#    dynamicmodel.cpp
+#    costfunction.cpp
+#    romeolinearactuator.cpp
+#    costfunctionromeoactuator.cpp
+#    romeosimpleactuator.cpp
+#)
 
-ADD_LIBRARY(DDP ${SRC})
+#ADD_LIBRARY(${LIBRARY_NAME}
+#    SHARED
+#    ${${LIBRARY_NAME}_SOURCES}
+#    )
 
-install(TARGETS DDP DESTINATION lib)
-
-SET(PROJECT_LIBS DDP)
-
-add_executable(execmain main.cpp)
-
-TARGET_LINK_LIBRARIES(execmain ${PROJECT_LIBS})
-install(TARGETS execmain DESTINATION bin)
-
-
+#INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION lib)
