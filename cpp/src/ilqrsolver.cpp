@@ -15,7 +15,7 @@ ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunctio
     commandNb = myDynamicModel.getCommandNb();
 }
 
-void ILQRSolver::initSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned int& myT,
+void ILQRSolver::FirstInitSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned int& myT,
                        double& mydt, unsigned int& myiterMax,double& mystopCrit)
 {
     xInit = myxInit;
@@ -40,6 +40,12 @@ void ILQRSolver::initSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned in
     alphaList[3] = 0.4;
     alphaList[4] = 0.2;
     alpha = 1.0;
+}
+
+void ILQRSolver::initSolver(stateVec_t& myxInit, stateVec_t& myxDes)
+{
+    xInit = myxInit;
+    xDes = myxDes;
 }
 
 void ILQRSolver::solveTrajectory()

@@ -3,8 +3,9 @@
 
 #define pi M_PI
 
-RomeoLinearActuator::RomeoLinearActuator()
+RomeoLinearActuator::RomeoLinearActuator(double& mydt)
 {
+    dt = mydt;
     Id.setIdentity();
 
     A.setZero();
@@ -12,17 +13,19 @@ RomeoLinearActuator::RomeoLinearActuator()
     A(2,2) = 1.0;
     A(1,0) = -(k/Jl)+(k/(Jm*R*R));
     A(3,0) =1.0/Jl;
+    Ad = (A*dt+Id);
 
     B <<  0.0,
                 k/(R*Jm),
                 0.0,
                 0.0;
+    Bd = dt*B;
 
     fxBase << 1.0,      1.0,      0.0,      0.0,
                     -(k/Jl)-(k/(Jm*R*R)),      0.0,      0.0,      0.0,
                     0.0,      0.0,      1.0,      1.0,
                     1.0/Jl,      0.0,      0.0,      0.0;
-    fx = fxBase;
+    fx = (A*dt+Id);
     fxx[0].setZero();
     fxx[1].setZero();
     fxx[2].setZero();
@@ -33,7 +36,7 @@ RomeoLinearActuator::RomeoLinearActuator()
                 k/(R*Jm),
                 0.0,
                 0.0;
-    fu.setZero();
+    fu = dt*fuBase;
     fuu[0].setZero();
     fux[0].setZero();
     fxu[0].setZero();
@@ -41,17 +44,13 @@ RomeoLinearActuator::RomeoLinearActuator()
 
 stateVec_t RomeoLinearActuator::computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)
 {
-    const stateMat_t Ad = (A*dt+Id);
-    const stateR_commandC_t Bd = dt*B;
     stateVec_t result = Ad*X + Bd*U;
-
     return result;
 }
 
 void RomeoLinearActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
 {
-    fu = dt*fuBase;
-    fx = (A*dt+Id);
+
 }
 
 stateMat_t RomeoLinearActuator::computeTensorContxx(const stateVec_t& nextVx)

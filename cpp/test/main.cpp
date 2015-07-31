@@ -32,11 +32,11 @@ int main()
     commandVec_t* uList;
     ILQRSolver::traj lastTraj;
 
-    RomeoSimpleActuator romeoActuatorModel;
-    RomeoLinearActuator romeoLinearModel;
+    RomeoSimpleActuator romeoActuatorModel(dt);
+    RomeoLinearActuator romeoLinearModel(dt);
     CostFunctionRomeoActuator costRomeoActuator;
     ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
-    testSolverRomeoActuator.initSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+    testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
 
     int N = 100;
@@ -63,7 +63,7 @@ int main()
 
 
 
-    ofstream fichier("results.csv",ios::out | ios::trunc);
+    ofstream fichier("_build/cpp/results.csv",ios::out | ios::trunc);
     if(fichier)
     {
         fichier << "tau,tauDot,q,qDot,u" << endl;

@@ -12,17 +12,20 @@ CostFunctionRomeoActuator::CostFunctionRomeoActuator()
     luu = R;
     lux << 0.0,0.0,0.0,0.0;
     lxu << 0.0,0.0,0.0,0.0;
+    lx.setZero();
 }
 
 void CostFunctionRomeoActuator::computeAllCostDeriv(const stateVec_t& X, const stateVec_t& Xdes, const commandVec_t& U)
 {
-    lx = Q*(X-Xdes);
+//    lx = Q*(X-Xdes);
+    lx(0,0) = 100.0*(X(0,0)-Xdes(0,0));
     lu = R*U;
 }
 
 void CostFunctionRomeoActuator::computeFinalCostDeriv(const stateVec_t& X, const stateVec_t& Xdes)
 {
-    lx = Q*(X-Xdes);
+//    lx = Q*(X-Xdes);
+    lx(0,0) = 100.0*(X(0,0)-Xdes(0,0));
 }
 
 // accessors //

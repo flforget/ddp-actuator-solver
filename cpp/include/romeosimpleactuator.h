@@ -11,7 +11,7 @@ using namespace Eigen;
 class RomeoSimpleActuator : public DynamicModel
 {
 public:
-    RomeoSimpleActuator();
+    RomeoSimpleActuator(double& mydt);
 private:
 protected:
 
@@ -31,7 +31,9 @@ private:
 
     stateMat_t Id;
     stateMat_t A;
+    stateMat_t Ad;
     stateR_commandC_t B;
+    stateR_commandC_t Bd;
     double A13atan;
     double A33atan;
     stateMat_t fx,fxBase;

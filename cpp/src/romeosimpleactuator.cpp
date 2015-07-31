@@ -3,8 +3,9 @@
 
 #define pi M_PI
 
-RomeoSimpleActuator::RomeoSimpleActuator()
+RomeoSimpleActuator::RomeoSimpleActuator(double& mydt)
 {
+    dt = mydt;
     Id.setIdentity();
 
     A.setZero();
@@ -14,20 +15,21 @@ RomeoSimpleActuator::RomeoSimpleActuator()
     A(1,1) = -(fvm/Jm);
     A(1,3) = -((fvm*k)/Jm);
     A(3,0) = 1.0/Jl;
+    Ad = (A*dt+Id);
 
-    A13atan = (2.0*Jm*R/(pi*Jl))*Cf0;
-    A33atan = (2.0/(pi*Jl))*Cf0;
+    A13atan = dt*(2.0*Jm*R/(pi*Jl))*Cf0;
+    A33atan = dt*(2.0/(pi*Jl))*Cf0;
 
     B <<  0.0,
           k/(R*Jm),
           0.0,
           0.0;
+    Bd = dt*B;
 
-    fxBase << 1.0,      1.0,      0.0,      0.0,
-              -(k/Jl)-(k/(Jm*R*R)),      -(fvm/Jm),      0.0,      -(fvm*k)/Jm,
-              0.0,      0.0,      1.0,      1.0,
-              1.0/Jl,      0.0,      0.0,      0.0;
-    fx.setZero();
+    fxBase <<   1.0,      dt,      0.0,      0.0,
+                dt*(-(k/Jl)-(k/(Jm*R*R))),     1 - dt*(fvm/Jm),      0.0,      -dt*((fvm*k)/Jm),
+                0.0,      0.0,      1.0,      dt,
+                dt/Jl,      0.0,      0.0,      1.0;
 
     fxx[0].setZero();
     fxx[1].setZero();
@@ -40,7 +42,7 @@ RomeoSimpleActuator::RomeoSimpleActuator()
               k/(R*Jm),
               0.0,
               0.0;
-    fu.setZero();
+    fu = dt* fuBase;
     fuu[0].setZero();
     fux[0].setZero();
     fxu[0].setZero();
@@ -53,11 +55,9 @@ RomeoSimpleActuator::RomeoSimpleActuator()
 
 stateVec_t RomeoSimpleActuator::computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)
 {
-    stateMat_t Ad = (A*dt+Id);
-    stateR_commandC_t Bd = dt*B;
     stateVec_t result = Ad*X + Bd*U;
-    result(1,0)+=dt*A13atan*atan(a*X(3,0));
-    result(3,0)+=dt*A33atan*atan(a*X(3,0));
+    result(1,0)+=A13atan*atan(a*X(3,0));
+    result(3,0)+=A33atan*atan(a*X(3,0));
 
     return result;
 }
@@ -65,19 +65,8 @@ stateVec_t RomeoSimpleActuator::computeNextState(double& dt, const stateVec_t& X
 void RomeoSimpleActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
 {
     fx = fxBase;
-
-    fx(0,1) *= dt;
-    fx(1,0) *= dt;
-    fx(1,1) *= dt;
-    fx(1,1) += 1.0;
-    fx(1,3) *= dt;
-    fx(1,3) += ((2*dt*Jm*R)/(pi*Jl))*Cf0*(a/(1.0+(a*a*X(3,0)*X(3,0))));
-    fx(2,3) *= dt;
-    fx(3,0) *= dt;
-    fx(3,3) = 1.0-((2*dt*Cf0)/(pi*Jl))*(a/(1.0+(a*a*X(3,0)*X(3,0))));
-
-    fu = dt*fuBase;
-
+    fx(1,3) += A13atan*(a/(1+a*a*X(3,0)*X(3,0)));
+    fx(3,3) -= A33atan*(a/(1+(a*a*X(3,0)*X(3,0))));
     fxx[3](1,3) = -((2*dt*Jm*R)/(pi*Jl))*Cf0*((2*a*a*a*X(3,0))/((1+(a*a*X(3,0)*X(3,0)))*(1+(a*a*X(3,0)*X(3,0)))));
     fxx[3](3,3) = +((2*dt*Cf0)/(pi*Jl))*((2*a*a*a*X(3,0))/((1+(a*a*X(3,0)*X(3,0)))*(1+(a*a*X(3,0)*X(3,0)))));
 }

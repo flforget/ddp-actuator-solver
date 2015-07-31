@@ -34,14 +34,14 @@ int main()
     commandVec_t* uList;
     ILQRSolver::traj lastTraj;
 
-    RomeoSimpleActuator romeoActuatorModel;
-    RomeoLinearActuator romeoLinearModel;
+    RomeoSimpleActuator romeoActuatorModel(dt);
+    RomeoLinearActuator romeoLinearModel(dt);
     CostFunctionRomeoActuator costRomeoActuator;
     ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
 
 
 
-    ofstream fichier("resultsMPC.csv",ios::out | ios::trunc);
+    ofstream fichier("_build/cpp/resultsMPC.csv",ios::out | ios::trunc);
     if(!fichier)
     {
         cerr << "erreur fichier ! " << endl;
@@ -51,11 +51,12 @@ int main()
     fichier << "tau,tauDot,q,qDot,u" << endl;
 
 
+    testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
     gettimeofday(&tbegin,NULL);
     for(int i=0;i<M;i++)
     {
-        testSolverRomeoActuator.initSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+        testSolverRomeoActuator.initSolver(xinit,xDes);
         testSolverRomeoActuator.solveTrajectory();
         lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
         xList = lastTraj.xList;
@@ -67,7 +68,7 @@ int main()
     gettimeofday(&tend,NULL);
 
 
-    //texec=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
+    texec=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
     texec = (double)(tend.tv_usec - tbegin.tv_usec);
 
     cout << "temps d'execution total du solveur ";
@@ -75,7 +76,7 @@ int main()
     cout << "temps d'execution par pas de MPC ";
     cout << texec/(T*1000000) << endl;
 
-    fichier.close();
+//    fichier.close();
 
 
 
