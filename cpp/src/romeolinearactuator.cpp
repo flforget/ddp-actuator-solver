@@ -42,9 +42,10 @@ RomeoLinearActuator::RomeoLinearActuator(double& mydt)
     fxu[0].setZero();
 }
 
-stateVec_t RomeoLinearActuator::computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)
+stateVec_t RomeoLinearActuator::computeNextState(double& dt, unsigned int operatingpoint, const stateVec_t& X,const commandVec_t& U)
 {
-    stateVec_t result = Ad*X + Bd*U;
+    unsigned int i = operatingpoint;
+    stateVec_t result = Ad(i)*X + Bd(i)*U;
     return result;
 }
 

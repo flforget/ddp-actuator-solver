@@ -36,7 +36,7 @@ int main()
     commandVec_t* uList;
     ILQRSolver::traj lastTraj;
    
-    PneumaticarmElbowLinear pneumaticModel(dt);
+    PneumaticarmElbowPieceLinear pneumaticModel(dt);
     //CostFunctionRomeoActuator costRomeoActuator;
     CostFunctionPneumaticarmElbow costPneumatic;
     ILQRSolver testSolverRomeoActuator(pneumaticModel,costPneumatic);
