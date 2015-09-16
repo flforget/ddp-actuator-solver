@@ -9,6 +9,8 @@
 #include "costfunctionromeoactuator.h"
 #include "costfunctionpneumaticarmelbow.h"
 #include "pneumaticarmelbowlinear.h"
+#include "pneumaticarmelbowpiecelinear.h"
+#include "pneumaticarm2ordermodel.h"
 #include <time.h>
 #include <sys/time.h>
 
@@ -29,17 +31,18 @@ int main()
     
     
     unsigned int T = 30;
-    double dt=1e-4;
+    double dt=1e-3;
     unsigned int iterMax = 20;
     double stopCrit = 1e-3;
     stateVec_t* xList;
     commandVec_t* uList;
     ILQRSolver::traj lastTraj;
    
-    PneumaticarmElbowPieceLinear pneumaticModel(dt);
+    PneumaticarmElbowPieceLinear pneumaticPieceLinearModel(dt);
+    Pneumaticarm2orderModel pneumaticarm2orderModel(dt);
     //CostFunctionRomeoActuator costRomeoActuator;
     CostFunctionPneumaticarmElbow costPneumatic;
-    ILQRSolver testSolverRomeoActuator(pneumaticModel,costPneumatic);
+    ILQRSolver testSolverRomeoActuator(pneumaticarm2orderModel,costPneumatic);
 
     //RomeoSimpleActuator romeoActuatorModel(dt);
     //RomeoLinearActuator romeoLinearModel(dt);

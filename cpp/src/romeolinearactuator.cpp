@@ -45,7 +45,7 @@ RomeoLinearActuator::RomeoLinearActuator(double& mydt)
 stateVec_t RomeoLinearActuator::computeNextState(double& dt, unsigned int operatingpoint, const stateVec_t& X,const commandVec_t& U)
 {
     unsigned int i = operatingpoint;
-    stateVec_t result = Ad(i)*X + Bd(i)*U;
+    stateVec_t result = Ad*X + Bd*U;
     return result;
 }
 
