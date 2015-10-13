@@ -76,7 +76,7 @@ void ILQRSolver::initTrajectory()
     for(unsigned int i=0;i<T;i++)
     {
         uList[i] = zeroCommand;
-        xList[i+1] = dynamicModel->computeNextState(dt,i,xList[i],zeroCommand);
+        xList[i+1] = dynamicModel->computeNextState(dt,xList[i],zeroCommand);
     }
 }
 
@@ -145,7 +145,7 @@ void ILQRSolver::forwardLoop()
     for(unsigned int i=0;i<T;i++)
     {
         updateduList[i] = uList[i] + alpha*kList[i] + KList[i]*(updatedxList[i]-xList[i]);
-        updatedxList[i+1] = dynamicModel->computeNextState(dt,i,updatedxList[i],updateduList[i]);
+        updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],updateduList[i]);
         for(unsigned int j=0;j<commandNb;j++)
         {
             changeAmount += abs(uList[i](j,0) - updateduList[i](j,0));

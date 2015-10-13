@@ -74,7 +74,7 @@ void Pneumaticarm2orderModel::computeAllModelDeriv(double& dt, const stateVec_t&
 
 stateMat_t Pneumaticarm2orderModel::computeTensorContxx(const stateVec_t& nextVx)
 {
-    QxxCont = nextVx[3]*fxx[3];
+    QxxCont = nextVx[1]*fxx[1];
     return QxxCont;
 }
 

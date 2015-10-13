@@ -14,7 +14,7 @@ class CostFunctionPneumaticarmElbow : public CostFunction
 public:
     CostFunctionPneumaticarmElbow();
 private:
-    stateMat_t Q;
+    stateMat_t Q, Qf;
     commandMat_t R;
     stateVec_t lx;
     stateMat_t lxx;

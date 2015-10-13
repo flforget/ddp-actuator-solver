@@ -19,7 +19,7 @@ protected:
 public:
 private:
     double dt;
-    static const unsigned int stateNb=4;
+    static const unsigned int stateNb=2;
     static const unsigned int commandNb=1;
     static const double k=1000.0;
     static const double R=200.0;

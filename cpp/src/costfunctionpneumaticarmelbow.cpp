@@ -3,10 +3,13 @@
 CostFunctionPneumaticarmElbow::CostFunctionPneumaticarmElbow()
 
 {
-    Q << 50.0,0.0,0.0,
-                0.0,0.0,0.0,
-                0.0,0.0,0.0;
-    R << 0.0001;
+    Q << 1e-3*8.0, 0.0, 0.0,
+        0.0,0.0,0.0,
+        0.0,0.0,0.0;
+ Qf <<  1e-3*8.0,    0.0,    0.0,
+        0.0,    0.0 ,   0.0,
+        0.0,    0.0,   0.0;
+    R << 0.00001;
 
     lxx = Q;
     luu = R;
@@ -17,15 +20,15 @@ CostFunctionPneumaticarmElbow::CostFunctionPneumaticarmElbow()
 
 void CostFunctionPneumaticarmElbow::computeAllCostDeriv(const stateVec_t& X, const stateVec_t& Xdes, const commandVec_t& U)
 {
-//    lx = Q*(X-Xdes);
-    lx(0,0) = 50.0*(X(0,0)-Xdes(0,0));
+    //lx = Q*(X-Xdes);
+    lx(0,0) = 1e-3*8*(X(0,0)-Xdes(0,0));
     lu = R*U;
 }
 
 void CostFunctionPneumaticarmElbow::computeFinalCostDeriv(const stateVec_t& X, const stateVec_t& Xdes)
 {
-//    lx = Q*(X-Xdes);
-    lx(0,0) = 50.0*(X(0,0)-Xdes(0,0));
+   // lx = Qf*(X-Xdes);
+    lx(0,0) = 1e-3*8*1.0*(X(0,0)-Xdes(0,0));
 }
 
 // accessors //

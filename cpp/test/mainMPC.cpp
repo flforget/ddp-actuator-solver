@@ -7,7 +7,8 @@
 #include "romeosimpleactuator.h"
 #include "romeolinearactuator.h"
 #include "costfunctionromeoactuator.h"
-
+#include "costfunctionpneumaticarmelbow.h"
+#include "pneumaticarmelbowlinear.h"
 #include <time.h>
 #include <sys/time.h>
 
@@ -22,26 +23,31 @@ int main()
     double texec=0.0;
     stateVec_t xinit,xDes;
 
-    xinit << 0.0,0.0,0.0,0.0;
-    xDes << 1.0,0.0,0.0,0.0;
+    xinit << 0.0,0.0,0.0;
+    xDes << 1.0,0.0,0.0;
 
-    unsigned int T = 8;
-    unsigned int M = 30;
-    double dt=1e-4;
+    unsigned int T = 10;
+    unsigned int M = 200;
+    unsigned int finiter = (unsigned int) M/T;
+    unsigned int lp = 0;
+    double dt=5e-3;
     unsigned int iterMax = 20;
-    double stopCrit = 1e-3;
+    double stopCrit = 1e-5;
     stateVec_t* xList;
     commandVec_t* uList;
     ILQRSolver::traj lastTraj;
 
-    RomeoSimpleActuator romeoActuatorModel(dt);
-    RomeoLinearActuator romeoLinearModel(dt);
-    CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
+    //RomeoSimpleActuator romeoActuatorModel(dt);
+    //RomeoLinearActuator romeoLinearModel(dt);
+    
+    //PneumaticarmElbowPieceLinear pneumaticPieceLinearModel(dt);
+    PneumaticarmElbowLinear pneumaticarmLinearModel(dt);
+    //CostFunctionRomeoActuator costRomeoActuator;
+    CostFunctionPneumaticarmElbow costPneumatic;
+    ILQRSolver testSolverRomeoActuator(pneumaticarmLinearModel,costPneumatic);
+    
 
-
-
-    ofstream fichier("_build/cpp/resultsMPC.csv",ios::out | ios::trunc);
+    ofstream fichier("/home/gkharish/softdev/DDP/cpp/build/resultsMPC1.csv",ios::out | ios::trunc);
     if(!fichier)
     {
         cerr << "erreur fichier ! " << endl;
@@ -51,19 +57,27 @@ int main()
     fichier << "tau,tauDot,q,qDot,u" << endl;
 
 
-    testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+    //testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
     gettimeofday(&tbegin,NULL);
     for(int i=0;i<M;i++)
     {
+         testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
         testSolverRomeoActuator.initSolver(xinit,xDes);
         testSolverRomeoActuator.solveTrajectory();
         lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
         xList = lastTraj.xList;
         uList = lastTraj.uList;
         xinit = xList[1];
-        for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0) << "," << xList[j](3,0) << "," << uList[j](0,0) << endl;
-        fichier << xList[T](0,0) << "," << xList[T](1,0) << "," << xList[T](2,0) << "," << xList[T](3,0) << "," << 0.0 << endl;
+        lp = lp+1;
+        if(lp >= finiter)
+        {
+            lp =0;
+            T=T-1;
+
+        }
+        /*for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0)  << "," << uList[j](0,0) << endl;*/
+        fichier << xList[0](0,0) << "," << xList[0](1,0) << "," << xList[0](2,0) << "," << uList[0](0,0) << endl;
     }
     gettimeofday(&tend,NULL);
 
@@ -77,13 +91,6 @@ int main()
     cout << texec/(T*1000000) << endl;
 
 //    fichier.close();
-
-
-
-
-
-
-
 
 
     return 0;

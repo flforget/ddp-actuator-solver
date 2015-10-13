@@ -26,8 +26,8 @@ int main()
 
     //xinit << 0.0,0.0,0.0,0.0;
     //xDes << 1.0,0.0,0.0,0.0;
-    xinit << 0.0,0.0,0.0;
-    xDes << 1.0,0.0,0.0;
+    xinit << 0.0,0.0;
+    xDes << 1.0,0.0;
     
     
     unsigned int T = 30;
@@ -38,7 +38,7 @@ int main()
     commandVec_t* uList;
     ILQRSolver::traj lastTraj;
    
-    PneumaticarmElbowPieceLinear pneumaticPieceLinearModel(dt);
+    //PneumaticarmElbowPieceLinear pneumaticPieceLinearModel(dt);
     Pneumaticarm2orderModel pneumaticarm2orderModel(dt);
     //CostFunctionRomeoActuator costRomeoActuator;
     CostFunctionPneumaticarmElbow costPneumatic;
