@@ -26,8 +26,8 @@ int main()
     xinit << 0.0,0.0,0.0;
     xDes << 1.0,0.0,0.0;
 
-    unsigned int T = 10;
-    unsigned int M = 200;
+    unsigned int T = 80;
+    unsigned int M = 800;
     unsigned int finiter = (unsigned int) M/T;
     unsigned int lp = 0;
     double dt=5e-3;
@@ -62,7 +62,7 @@ int main()
     gettimeofday(&tbegin,NULL);
     for(int i=0;i<M;i++)
     {
-         testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+        testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
         testSolverRomeoActuator.initSolver(xinit,xDes);
         testSolverRomeoActuator.solveTrajectory();
         lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
@@ -77,7 +77,7 @@ int main()
 
         }
         /*for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0)  << "," << uList[j](0,0) << endl;*/
-        fichier << xList[0](0,0) << "," << xList[0](1,0) << "," << xList[0](2,0) << "," << uList[0](0,0) << endl;
+        fichier << xList[1](0,0) << "," << xList[1](1,0) << "," << xList[1](2,0) << "," << uList[1](0,0) << endl;
     }
     gettimeofday(&tend,NULL);
 

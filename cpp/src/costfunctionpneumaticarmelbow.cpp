@@ -28,7 +28,7 @@ void CostFunctionPneumaticarmElbow::computeAllCostDeriv(const stateVec_t& X, con
 void CostFunctionPneumaticarmElbow::computeFinalCostDeriv(const stateVec_t& X, const stateVec_t& Xdes)
 {
    // lx = Qf*(X-Xdes);
-    lx(0,0) = 1e-3*8*1.0*(X(0,0)-Xdes(0,0));
+    lx(0,0) = 1e-3*1.0*(X(0,0)-Xdes(0,0));
 }
 
 // accessors //
