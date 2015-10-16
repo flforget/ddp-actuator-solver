@@ -41,7 +41,7 @@ int main()
 
 
 
-    ofstream fichier("_build/cpp/resultsMPC.csv",ios::out | ios::trunc);
+    ofstream fichier("resultsMPC.csv",ios::out | ios::trunc);
     if(!fichier)
     {
         cerr << "erreur fichier ! " << endl;

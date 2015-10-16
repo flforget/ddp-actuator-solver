@@ -63,7 +63,7 @@ int main()
 
 
 
-    ofstream fichier("_build/cpp/results.csv",ios::out | ios::trunc);
+    ofstream fichier("results.csv",ios::out | ios::trunc);
     if(fichier)
     {
         fichier << "tau,tauDot,q,qDot,u" << endl;
