@@ -73,11 +73,9 @@ xf = [1.0 0.0 0.0 0.0];
 Qf = diag([100.0 0.0 0.0 0.0]);
 Q = Qf; %zeros(3);
 R = 0.1*eye(1);
-dt = 0.001;
+dt = 0.0001;
 iterations = 20;
-ethreshold = 0.00000001;
-Timeofsim = 1;
-N = Timeofsim/(100*dt);
+ethreshold = 0.0001;
 N = 30;
 u = zeros(N, 1);
 
@@ -88,18 +86,34 @@ xcur = x0;
 u = ilqr(u, xcur, xf, Qf, Q, R, dt, iterations, ethreshold);
 xtraj = ilqr_openloop(x0, u, dt); 
 figure(1)
-subplot(211), plot(x(:,1))
+subplot(221), plot(xtraj(:,1))
 hold on;
 grid on;
 xlabel('Time');
-ylabel('Angular postion of elbow joint (rad)')
+ylabel('Torque')
 
-subplot(212), plot(u(:,1))
+subplot(222), plot(xtraj(:,2))
 grid on;
 xlabel('Time');
-ylabel('Pressure variation (bar)')
-set(gca,'FontSize',30,'fontWeight','bold')
+ylabel('Torque derivative')
+%set(gca,'FontSize',30,'fontWeight','bold')
 
+subplot(223), plot(xtraj(:,3))
+hold on;
+grid on;
+xlabel('Time');
+ylabel('Angular postion')
+
+subplot(224), plot(xtraj(:,4))
+grid on;
+xlabel('Time');
+ylabel('Angular velocity')
+%set(gca,'FontSize',30,'fontWeight','bold')
+
+figure(2), plot(u(:,1))
+grid on;
+xlabel('time')
+ylabel('command')
 
 
 %% TIme evolution
