@@ -69,16 +69,16 @@
 % 
 % %ilqr_system(x0,u, dt);
 x0 = [0 0 0 ];
-xf = [1 0 0];
+xf = [2 0 0];
 Qf = diag([1 1 1]);
 Q = 1e-4*Qf; %zeros(3);
 R = 0.00001*eye(1);
-dt = 0.005;
+dt = 0.010;
 iterations = 20;
 ethreshold = 0.0000000001;
-Timeofsim = 4;
-N = Timeofsim/(10*dt);
-u = zeros(N, 1);
+Timeofsim = 2;
+N = 0.4/dt;% 0.4s is the transient time of th preiview gain Timeofsim/(10*dt);
+u = zeros(N, 1); 
 
 %% 
 xcur = x0;
@@ -127,7 +127,7 @@ for i = 1:1:finiter
         ucur = zeros(N-lpn,1);
         ucur = u(1:N+1-lpn,1);
         
-        lpn = lpn+1;   
+        lpn = lpn+1   
         lp=0;
     end
     

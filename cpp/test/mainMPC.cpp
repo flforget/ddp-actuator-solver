@@ -26,8 +26,8 @@ int main()
     xinit << 0.0,0.0,0.0;
     xDes << 1.0,0.0,0.0;
 
-    unsigned int T = 80;
-    unsigned int M = 800;
+    unsigned int T = 40;
+    unsigned int M = 400;
     unsigned int finiter = (unsigned int) M/T;
     unsigned int lp = 0;
     double dt=5e-3;
@@ -47,7 +47,7 @@ int main()
     ILQRSolver testSolverRomeoActuator(pneumaticarmLinearModel,costPneumatic);
     
 
-    ofstream fichier("/home/gkharish/softdev/DDP/cpp/build/resultsMPC1.csv",ios::out | ios::trunc);
+    ofstream fichier("/home/gkharish/softdev/DDP/cpp/src/matlab/resultsMPC1.csv",ios::out | ios::trunc);
     if(!fichier)
     {
         cerr << "erreur fichier ! " << endl;
