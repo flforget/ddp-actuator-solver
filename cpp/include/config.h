@@ -3,8 +3,8 @@
 
 #include <Eigen/Dense>
 
-#define stateSize 3
-#define commandSize 1
+#define stateSize 4
+#define commandSize 2
 
 // typedef for stateSize types
 typedef Eigen::Matrix<double,stateSize,1> stateVec_t;                       // stateSize x 1

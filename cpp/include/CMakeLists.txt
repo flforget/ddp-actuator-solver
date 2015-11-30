@@ -8,7 +8,7 @@ SET(${PROJECT_NAME}_HEADERS
     ilqrsolver.h
     costfunctionpneumaticarmelbow.h
     pneumaticarmelbowlinear.h 
-    
+    pneumaticarmnonlinearmodel.h
     pneumaticarmelbowpiecelinear.h
     
     pneumaticarmelbow2ordermodel.h
