@@ -1,2 +1,0 @@
-/home/gkharish/softdev/DDP/cpp/build/CMakeFiles/main.dir
-/home/gkharish/softdev/DDP/cpp/build/CMakeFiles/mainMPC.dir
