@@ -254,3 +254,49 @@ stateR_commandC_stateD_t& PneumaticarmNonlinearModel::getfux()
 {
     return fux;
 }
+
+
+/* Numerical Integrator Rungee Kutta */
+void PneumaticarmModel::integrateRK4 (double t, double h)
+{
+    vector<double> st1, st2, st3, st4, state_temp_;
+    st1.resize(n_);
+    st2.resize(n_);
+    st3.resize(n_);
+    st4.resize(n_);
+    state_temp_.resize(n_);
+    for (unsigned int i =0; i <n_; i++)
+    {
+        state_temp_[i] = state_vector_[i];
+    }
+    computeStateDerivative (t);
+    for (unsigned int i =0; i <n_; i++)
+    {
+        st1[i] = state_derivative_[i];
+        state_vector_[i] = state_temp_[i] + 0.5*h*st1[i];
+    }
+    ODEBUGL("After St1 inside integraterk4" << state_vector_[0], 4);
+
+    computeStateDerivative (t + (0.5 * h));
+    for (unsigned int i =0; i <n_; i++)
+    {
+        st2[i] = state_derivative_[i];
+        state_vector_[i] = state_temp_[i] + 0.5*h*st2[i];
+    }
+        
+   computeStateDerivative (t + (0.5 * h));
+   for (unsigned int i =0; i <n_; i++)
+   {
+        st3[i] = state_derivative_[i];
+        state_vector_[i] = state_temp_[i] + h*st3[i];
+   }
+   
+   computeStateDerivative (t + h);
+   for (unsigned int i =0; i <n_; i++)
+        st4[i] = state_derivative_[i];
+  
+  
+   for (unsigned int i =0; i <n_; i++)
+       state_vector_[i]= state_temp_[i] + ( (1/6.0) * h * (st1[i] + 2.0*st2[i] + 2.0*st3[i] + st4[i]) );
+   ODEBUGL("State vector: " << state_vector_[0],0);
+}
