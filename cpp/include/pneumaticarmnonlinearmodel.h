@@ -23,7 +23,7 @@ private:
     unsigned int commandNb;
     // Muscle parameters
     double lo, alphao, k,ro,R,a,b,emax,lb,lt,epsb,epst;
-    double time_constant;
+    double time_constant1, time_constant2;
 
    // Joint parameters 
     double m;

@@ -11,7 +11,7 @@ PneumaticarmNonlinearModel::PneumaticarmNonlinearModel(double& mydt)
    //////////////////////////////////////////////
    // double lo, alphao, k,ro,R,a,b,emax,lb,lt,epsb,epst;
     lo = 0.185;
-    alphao = 23.0*pi/180;
+    alphao = 20.0*pi/180;
     k = 1.25;
     ro = 0.0085;
     R = 0.015;
@@ -27,17 +27,17 @@ PneumaticarmNonlinearModel::PneumaticarmNonlinearModel(double& mydt)
     I = m*pow(link_l,2)/3;
     fv = 0.25;
    //////////////////////////////////////////////
-    time_constant = 0.17;
+    time_constant1 = 0.18;
+    time_constant2 = 0.13;
     dt = mydt;
     Id.setIdentity();
-    
-    I = m*link_l*link_l/3;
+  
     A.setZero();
     B.setZero();
     A(0,1) = 1.0;
-    A(2,2) = -1/time_constant;
-    A(3,3) = -1/time_constant;
-    A(1,1) = -fv;
+    A(2,2) = -1/time_constant1;
+    A(3,3) = -1/time_constant2;
+    A(1,1) = -fv/I;
     
     //A10 = dt*(m*g*0.5*link_l/I);
  
@@ -59,10 +59,10 @@ PneumaticarmNonlinearModel::PneumaticarmNonlinearModel(double& mydt)
     B(0,1) = 0.0;
     B(1,0) = 0.0;
     B(1,1) = 0.0;
-    B(2,0) = 1.0/time_constant;
+    B(2,0) = 1.0/time_constant1;
     B(2,1) = 0.0;
     B(3,0) = 0.0;
-    B(3,1) = 1.0/time_constant;
+    B(3,1) = 1.0/time_constant2;
     Bd = dt*B;
 
     fxx[0].setZero();
@@ -96,13 +96,13 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
     theta = X(0);
     P1 = X(2);
     P2 = X(3);
-    /*lb = lo- R*theta;
+    lb = lo- R*theta;
     epsb = (1-(lb/lo));
     lt = lo*(1-emax) + R*theta;
-    epst = (1-(lt/lo));*/
+    epst = (1-(lt/lo));
 
     co = pi*ro*ro;
-    tb1 = co*(a -b)*P1;
+    /*tb1 = co*(a -b)*P1;
     tb2 = co*a*(-2*k)*(R/lo)*P1*theta;
     tb3 = co*a*pow((k*R/lo),2)*P1*pow(theta,2);
     F1 = tb1 + tb2 + tb3;
@@ -120,10 +120,10 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
 
     T = (F1 -F2 )*R;
     //F = [F1 F2 T];
-    /*A(0,1) = 1.0;
-    A(2,2) = -1/time_constant;
-    A(3,3) = -1/time_constant;
-    A(1,1) = -fv;*/
+    A(0,1) = 1.0;
+    A(2,2) = -1/time_constant1;
+    A(3,3) = -1/time_constant2;
+    A(1,1) = -fv/I;
     
     //A10 = dt*(m*g*0.5*link_l/I);
 //%% J(2,1)
@@ -154,8 +154,17 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
     //tt3_1 = (R*theta/lo)^2 - 2*emax*(R*theta/lo);
     t3_j24 = co*a*(pow(k,2)*tt3_1 + 2*k*(R*theta/lo));
 
-    A(1,3) = -1*(t1_j24 + t2_j24 + t3_j24)*(R/I);
-    
+    A(1,3) = -1*(t1_j24 + t2_j24 + t3_j24)*(R/I);*/
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//          Alternative analytical jacobian calculation     //
+    double t1_j21, t1, t2;
+    t1_j21  = - m*g*0.5*link_l*cos(theta)/I;
+    t1 = -co*P1*(2*a*k*(1-k*epsb)*(R/lo));
+    t2 = -co*P2*(2*a*k*(1-k*epst)*(R/lo));
+    A(1,0) = t1_j21 + (t1 + t2)*(R/I);
+    A(1,1) = -fv/I;
+    A(1,2) = (R/I)*co*(a*pow((1-k*epsb),2) - b);
+    A(1,3) = (-R/I)*co*(a*pow((1-k*epst),2) - b);
     Ad = (A*dt + Id);
     stateVec_t result = Ad*X + Bd*U;
     fx = Ad;
@@ -174,7 +183,7 @@ void PneumaticarmNonlinearModel::computeAllModelDeriv(double& dt, const stateVec
     co = pi*ro*ro;
 
     fxx[0](1,0) = (m*g*0.5*link_l*sin(theta)/I) + 2*co*a*pow((k*R/lo),2)*(P1 - P2)*(R/I);
-    fxx[0](1,2) = (-2*co*a*k*(R/lo) + 2*co*a*pow((k*R/lo),2)*theta)*(R/I);
+    fxx[0](1,2) = ((-2*co*a*k*(R/lo)) + 2*co*a*pow((k*R/lo),2)*theta)*(R/I);
     double fxxt1 = pow((R/lo),2)*2*theta ;
     double fxxt2 = 2*emax*(R/lo);
     fxx[0](1,3) = co*a*( k*k*(fxxt1 - fxxt2) + 2*k*(R/lo) )*(-R/I);
