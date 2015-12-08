@@ -112,7 +112,7 @@
 %% Parameters for the muscles
 
 
-function [jointstate_deriv,F, T, Jx, Ju] = jointnonlineardynamics(joint_state, dt,Uc)
+function [Jx, Ju] = jointnonlineardynamics(joint_state, dt,Uc)
 %jointstate_deriv = zeros(4,1);
 theta = joint_state(1);
 theta_dot = joint_state(2);
@@ -274,13 +274,13 @@ Jx(2,4) = (f2_theta2 - f2_theta1)/(2*dx4);
 Ju = zeros(4,2);
 Ju(:,1) = [0 0 1/Tc1 0]';
 Ju(:,2) = [0 0 0 1/Tc2]';
-Ad = Jx*dt + eye(4);
-Bd = Ju*dt;
-
-
-jointstate_deriv = Ad*joint_state + Bd*Uc;
-F = 0;
-T =0;
+% Ad = Jx*dt + eye(4);
+% Bd = Ju*dt;
+% 
+% 
+% jointstate_deriv = Ad*joint_state + Bd*Uc;
+% F = 0;
+% T =0;
 end
 
 % function func1 = dtheta(joint_state)
