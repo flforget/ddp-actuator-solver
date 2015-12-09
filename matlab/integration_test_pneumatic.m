@@ -1,10 +1,10 @@
 clear all
 close all
 
-X = [0.0;0.0;0.0;4.0*1e5]
-X2 = [0.0;0.0;1.0;4.0*1e5]
-U1 = 2.0*1e5
-U2 = 2.0*1e5
+X = [0.0;0.0;1.0;4.0*e-5]
+X2 = [0.0;0.0;1.0;4.0*e-5]
+U1 = 0.0
+U2 = 0.0
 U1dot = 0.0
 U2dot = 0.0
 Xlist = [];
@@ -15,21 +15,16 @@ N = final_time/dt;
 
 
 for i=1:N
-  %Xdot = xdotpneu(X,U1,U2);
-  Uc = [U1 U2]';
-  [Jx,Ju] = jointnonlineardynamics(X,dt, Uc);
-%   Jx = J(1);
-%   Ju = J(2);
-  Xdot = Jx*X + Ju*Uc;
+  Xdot = xdotpneu(X,U1,U2);
   % Xddot = computeXddot(X,Xdot,U,Udot);
   X = X + dt*Xdot;
   % X2 = X2 + dt*Xdot + ((dt^2)/2)*Xddot;
   Xlist = [Xlist, X];
   % X2list = [X2list, X2];
-end
+endfor
 
-t = linspace(0, final_time, N);
-%xode = lsode ('xdotpneu', X, (t = linspace(0, final_time, N)));
+
+xode = lsode ("xdotpneu", X, (t = linspace(0, final_time, N)));
 
 figure()
 subplot(221)

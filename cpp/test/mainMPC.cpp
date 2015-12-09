@@ -94,7 +94,7 @@ int main()
     xinit << 0.0,   0.0,    0.0,    4.0*1e5;
     //xDes << 1.0,    0.0,    2.0*1e5,    2.0*1e5;
 
-    unsigned int T = 20;
+    unsigned int T = 10;
     unsigned int M = 800;
     unsigned int finiter = (unsigned int) M/T;
     unsigned int lp = 0;
@@ -111,10 +111,10 @@ int main()
     //PneumaticarmElbowPieceLinear pneumaticPieceLinearModel(dt);
     //CostFunctionRomeoActuator costRomeoActuator;
     CostFunctionPneumaticarmElbow costPneumatic;
-    ILQRSolver testSolverRomeoActuator(pneumaticarmModel,costPneumatic);
+    ILQRSolver testSolver(pneumaticarmModel,costPneumatic);
     
 
-    ofstream fichier("/home/gkharish/softdev/DDP/cpp/src/resultsMPC.csv",ios::out | ios::trunc);
+    ofstream fichier("/home/gkharish/softdev/DDP/matlab/resultsMPC.csv",ios::out | ios::trunc);
     if(!fichier)
     {
         cerr << "erreur fichier ! " << endl;
@@ -132,8 +132,8 @@ int main()
     
     for(int i=0;i<M;i++)
     {
-        refDes(0) = dt*i*20*3.14/180;
-        refDes(1) = 20*3.14/180;
+        refDes(0) = dt*i*10*3.14/180;
+        refDes(1) = 10*3.14/180;
         refDes(2) = 0;
         Pfeed = InverseModel(refDes);
         //cout << "Pfeed: " << Pfeed;
@@ -141,10 +141,10 @@ int main()
         xDes(1) = refDes(1);
         xDes(2) = Pfeed*1e5;
         xDes(3) = 4*1e5 - Pfeed*1e5;
-        testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
-        testSolverRomeoActuator.initSolver(xinit,xDes);
-        testSolverRomeoActuator.solveTrajectory();
-        lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
+        testSolver.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+        testSolver.initSolver(xinit,xDes);
+        testSolver.solveTrajectory();
+        lastTraj = testSolver.getLastSolvedTrajectory();
         xList = lastTraj.xList;
         uList = lastTraj.uList;
         xinit = xList[1];
@@ -156,7 +156,7 @@ int main()
 
         }*/
         /*for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0)  << "," << uList[j](0,0) << endl;*/
-        fichier << xList[1](0,0) << "," << refDes(0) << "," << xList[1](2,0) << "," << Pfeed << "," << uList[1](0,0) << "," << uList[1](1,0) << endl;
+        fichier << xList[1](0,0) << "," << refDes(0) << "," << xList[1](2,0) << "," << xList[1](3,0)<< "," << uList[1](0,0) << "," << uList[1](1,0) << endl;
     }
     gettimeofday(&tend,NULL);
 

@@ -92,16 +92,10 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
 {
     //    result(1,0)-=A10*sin(X(0));
     //result(3,0)+=A33atan*atan(a*X(3,0));
-    stateVec_t jointstate_deriv;
-    double co,theta, theta_dot, tb1,tb2,tb3,tt1,tt2_1,tt2,tt3_1,tt3,F1,F2,T,P1,P2,u1,u2, Tc1, Tc2;    
+    double co,theta,tb1,tb2,tb3,tt1,tt2_1,tt2,tt3_1,tt3,F1,F2,T,P1,P2;    
     theta = X(0);
-    theta_dot = X(1);
     P1 = X(2);
     P2 = X(3);
-    u1 = U(0);
-    u2 = U(1);
-    Tc1 = time_constant1;
-    Tc2 = time_constant2;
     lb = lo- R*theta;
     epsb = (1-(lb/lo));
     lt = lo*(1-emax) + R*theta;
@@ -172,15 +166,7 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
     A(1,2) = (R/I)*co*(a*pow((1-k*epsb),2) - b);
     A(1,3) = (-R/I)*co*(a*pow((1-k*epst),2) - b);
     Ad = (A*dt + Id);
-    //stateVec_t result = Ad*X + Bd*U;*/
-    F1 =  pi*ro*ro*P1*(a*pow((1-k*epsb),2) - b);
-    F2 =  pi*ro*ro*P2*(a*pow((1-k*epst),2) - b);
-    jointstate_deriv(0) = theta_dot; //%joint_state(2);
-    jointstate_deriv(1) = ((F1 -F2 )*R  - fv*theta_dot - m*g*0.5*link_l*sin(theta))/I;
-    jointstate_deriv(2) = (-P1/Tc1) + (u1/Tc1);
-    jointstate_deriv(3) = (-P2/Tc2) + (u2/Tc2);
-    stateVec_t result = X + dt*jointstate_deriv; 
-   
+    stateVec_t result = Ad*X + Bd*U;
     fx = Ad;
     return result;
 }
@@ -188,7 +174,8 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
 void PneumaticarmNonlinearModel::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
 {
     //fx = fxBase;
-  
+    //fx(1,0) -= A10*cos(X(0));
+    //fxx[0](1,0)+= A10*sin(X(0));
     double co,theta,P1,P2;    
     theta = X(0);
     P1 = X(2);
@@ -270,7 +257,7 @@ stateR_commandC_stateD_t& PneumaticarmNonlinearModel::getfux()
 
 
 /* Numerical Integrator Rungee Kutta */
-/*void PneumaticarmModel::integrateRK4 (double t, double h)
+void PneumaticarmModel::integrateRK4 (double t, double h)
 {
     vector<double> st1, st2, st3, st4, state_temp_;
     st1.resize(n_);
@@ -312,4 +299,4 @@ stateR_commandC_stateD_t& PneumaticarmNonlinearModel::getfux()
    for (unsigned int i =0; i <n_; i++)
        state_vector_[i]= state_temp_[i] + ( (1/6.0) * h * (st1[i] + 2.0*st2[i] + 2.0*st3[i] + st4[i]) );
    ODEBUGL("State vector: " << state_vector_[0],0);
-}*/
+}
