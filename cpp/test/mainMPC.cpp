@@ -9,8 +9,8 @@
 //#include "costfunctionromeoactuator.h"
 #include "costfunctionpneumaticarmelbow.h"
 //#include "pneumaticarmelbowlinear.h"
-#include "pneumaticarm2nonlinearmodel.h"
-#inlcude "pneumaticarm_model.h"
+#include "pneumaticarmnonlinearmodel.h"
+#include "pneumaticarm_model.h"
 #include <time.h>
 #include <sys/time.h>
 
@@ -69,15 +69,6 @@ double  InverseModel (stateVec_t reference)
     t2dot2 = (I*theta_dot4 + fv*theta_dot3 - m*g*link_l*0.5*sin(theta))/(R*Fmax);
     P_real_dot2 = Pmax*(t1dot2 + t2dot2);
 
-    P1 = P1o + P_real;
-    P2 = P2o - P_real;
-
-    P1dot = P_real_dot;
-    P2dot = -P_real_dot;
-
-    P1dot2 = P_real_dot2;
-    P2dot2 = -P_real_dot2   
-
     P = [P1 P2];
     Pdot = [P1dot P2dot];
     Pdot2 = [P1dot2 P2dot2];*/
@@ -89,12 +80,12 @@ int main()
    
     struct timeval tbegin,tend;
     double texec=0.0;
-    stateVec_t xinit,xDes;
+    stateVec_t xinit,xDes, refDes;
     //VectorXd refDes;
     double Pfeed;
     PneumaticarmModel model;
-    xinit << 0.0,   0.0;
-    xDes << 1.0,    0.0;
+    xinit << 0.0,   0.0, 0.0,   4.0*1e5;
+    //xDes << 1.0,    0.0, 2.0*1e5, 2.0*1e5;
 
     unsigned int T = 10;
     unsigned int M = 800;
@@ -109,7 +100,7 @@ int main()
 
     //RomeoSimpleActuator romeoActuatorModel(dt);
     //RomeoLinearActuator romeoLinearModel(dt);
-    Pneumaticarm2NonlinearModel pneumaticarmModel(dt);
+    PneumaticarmNonlinearModel pneumaticarmModel(dt);
     //PneumaticarmElbowPieceLinear pneumaticPieceLinearModel(dt);
     //CostFunctionRomeoActuator costRomeoActuator;
     CostFunctionPneumaticarmElbow costPneumatic;
@@ -123,7 +114,7 @@ int main()
         return 1;
     }
     fichier << T << "," << M << endl;
-    fichier << "theta,thetaDot,u1,u2" << endl;
+    fichier << "theta,ref, thetaDot,P1,P2,u1,u2" << endl;
 
 
     //testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
@@ -131,25 +122,35 @@ int main()
 
 
     gettimeofday(&tbegin,NULL);
-    
+    model.setParameters();
+    for(unsigned int ix =0;ix<4;ix++)
+        model.Set_StateVector(xinit(ix),ix);
+
     for(int i=0;i<M;i++)
     {
-        /*refDes(0) = dt*i*10*3.14/180;
-        refDes(1) = 10*3.14/180;
-        refDes(2) = 0;
-        Pfeed = InverseModel(refDes);
-        //cout << "Pfeed: " << Pfeed;
-        xDes(0) = refDes(0);
-        xDes(1) = refDes(1);*/
-        //xDes(2) = Pfeed*1e5;
-       // xDes(3) = 4*1e5 - Pfeed*1e5;
-        testSolver.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
-        testSolver.initSolver(xinit,xDes);
-        testSolver.solveTrajectory();
-        lastTraj = testSolver.getLastSolvedTrajectory();
-        xList = lastTraj.xList;
-        uList = lastTraj.uList;
-        xinit = xList[1];
+       refDes(0) = dt*i*10*3.14/180;
+       refDes(1) = 10*3.14/180;
+       refDes(2) = 0;
+       Pfeed = InverseModel(refDes);
+       //cout << "Pfeed: " << Pfeed;
+       xDes(0) = dt*i*10*3.14/180;
+       xDes(1) = 10*3.14/180;
+       xDes(2) = Pfeed*1e5;
+       xDes(3) = 4*1e5 - Pfeed*1e5;
+       for(unsigned int ix =0;ix<4;ix++)
+           xinit(ix) = model.Get_StateVector(ix);
+
+       testSolver.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+       testSolver.initSolver(xinit,xDes);
+       testSolver.solveTrajectory();
+       lastTraj = testSolver.getLastSolvedTrajectory();
+       xList = lastTraj.xList;
+       uList = lastTraj.uList;
+       for(unsigned int ic =0;ic<2;ic++) 
+           model.Set_ControlVector(uList[0](ic,0),ic);
+       double t = i*dt;
+       model.integrateRK4(t,dt);
+       //xinit = xList[1];
        /* lp = lp+1;
         if(lp >= finiter)
         {
@@ -158,7 +159,7 @@ int main()
 
         }*/
         /*for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0)  << "," << uList[j](0,0) << endl;*/
-        fichier << xList[1](0,0) << ","   << xList[1](1,0)<< "," << uList[1](0,0) << "," << uList[1](1,0) << endl;
+        fichier << xList[1](0,0) << "," << refDes(0) << "," << xList[1](1,0) << "," << xList[1](2,0) << "," << xList[1](3,0)<< "," << uList[1](0,0) << "," << uList[1](1,0) << endl;
     }
     gettimeofday(&tend,NULL);
 

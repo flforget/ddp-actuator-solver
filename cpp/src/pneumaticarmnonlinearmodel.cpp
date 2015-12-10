@@ -172,7 +172,7 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
     A(1,2) = (R/I)*co*(a*pow((1-k*epsb),2) - b);
     A(1,3) = (-R/I)*co*(a*pow((1-k*epst),2) - b);
     Ad = (A*dt + Id);
-    //stateVec_t result = Ad*X + Bd*U;*/
+    //stateVec_t result = Ad*X + Bd*U;
     F1 =  pi*ro*ro*P1*(a*pow((1-k*epsb),2) - b);
     F2 =  pi*ro*ro*P2*(a*pow((1-k*epst),2) - b);
     jointstate_deriv(0) = theta_dot; //%joint_state(2);

@@ -16,9 +16,9 @@
 #include <time.h>
 #include <string.h>
 #include <sstream>
-#include <debug.hh>
+//#include <debug.hh>
 
-#include "pneumaticarm_model.hh"
+#include "pneumaticarm_model.h"
 
 double pi =3.14;
 PneumaticarmModel::PneumaticarmModel()
@@ -44,7 +44,7 @@ void PneumaticarmModel::setParameters (void)
     mass_ = 1.0;   // kg
     friction_ = 0.1; // kg/s
     pressure_musclebase_ = 2.5; //bar
-    n_ = 2; // Number of states in the state space model
+    n_ = 4; // Number of states in the state spase model
     /* M=1; //Mass (kg)
     K = 30000; //stiffness 
     L = 1; //Length of the rod
@@ -60,25 +60,27 @@ void PneumaticarmModel::computeStateDerivative(double time)
     //VectorXd state_derivative(statevector.size());
     //Parameters Muscles
     //double Tmax, fk,fs, a, b, K0, K1, K2, P_m1, P_m2;        
-    double lo = 0.185;
-    double alphao = 20.0*PI/180;
+    lo = 0.185;
+    alphao = 20.0*PI/180;
     //double epsilono = 0.15;
-    double k = 1.25;
-    double ro = 0.0085;
+    k = 1.25;
+    ro = 0.0085;
     // Parameters Joint
-    double R = 0.015;
-    double m = 2.6;
-    double link_l = 0.32;
-    double g = 9.81;
+    R = 0.015;
+    m = 2.6;
+    link_l = 0.32;
+    g = 9.81;
     time_constant1 = 0.18;
-    time_constant2 = 0.13
+    time_constant2 = 0.13;
     //double velocity_constant = 0.15;
-    double I = m*link_l*link_l/3; //0.0036;
-    double fv = 0.25;
-    double F1, F2, P1, P2, Tc1,Tc2;
+    I = m*link_l*link_l/3; //0.0036;
+    fv = 0.25;
+    double F1, F2, P1, P2, Tc1,Tc2, u1,u2;
     
     P1 = state_vector_[2];
     P2 = state_vector_[3];
+    u1 = control_vector_[0];
+    u2 = control_vector_[1];
     Tc1 = time_constant1;
     Tc2 = time_constant2;
     a = 3/pow(tan(alphao), 2);
@@ -89,8 +91,8 @@ void PneumaticarmModel::computeStateDerivative(double time)
     epsb = (1-(lb/lo));
     lt = lo*(1-emax) + R*state_vector_[0];
     epst = (1-(lt/lo));
-    F1 =  pi*pow(ro,2)*P1*1e5*(a*pow((1-k*epsb),2) - b);
-    F2 =  pi*pow(ro,2)*P2*1e5*(a*pow((1-k*epst),2) - b);
+    F1 =  pi*pow(ro,2)*P1*(a*pow((1-k*epsb),2) - b);
+    F2 =  pi*pow(ro,2)*P2*(a*pow((1-k*epst),2) - b);
     //F2max = 1*pi*ro^2*4*1e5*(a*(1-k*emax)^2 - b);
     Torque_ = (F1 -F2 )*R;
     state_derivative_[0] = state_vector_[1];
@@ -136,7 +138,7 @@ jointstate_deriv(2) = ((F1 -F2 )*R  - fv*theta_dot - m*g*0.5*link_l*sin(theta))/
     ///////////////////////////////////////////////////////////////////////////
 
 
-    ODEBUGL("State derivative: "<< state_derivative_[0],0);
+   // ODEBUGL("State derivative: "<< state_derivative_[0],0);
 }
  
         
@@ -159,8 +161,7 @@ void PneumaticarmModel::integrateRK4 (double t, double h)
         st1[i] = state_derivative_[i];
         state_vector_[i] = state_temp_[i] + 0.5*h*st1[i];
     }
-    ODEBUGL("After St1 inside integraterk4" << state_vector_[0], 4);
-
+   
     computeStateDerivative (t + (0.5 * h));
     for (unsigned int i =0; i <n_; i++)
     {
@@ -182,7 +183,7 @@ void PneumaticarmModel::integrateRK4 (double t, double h)
   
    for (unsigned int i =0; i <n_; i++)
        state_vector_[i]= state_temp_[i] + ( (1/6.0) * h * (st1[i] + 2.0*st2[i] + 2.0*st3[i] + st4[i]) );
-   ODEBUGL("State vector: " << state_vector_[0],0);
+   //ODEBUGL("State vector: " << state_vector_[0],0);
 }
         
 /* Numerical Integrator Euler */
@@ -262,7 +263,7 @@ void PneumaticarmModel::Set_ControlVector (double value, unsigned int idx)
 
 {
     control_vector_[idx] = value;
-    ODEBUGL("Control vector is set" << control_vector_[idx],0);
+    //ODEBUGL("Control vector is set" << control_vector_[idx],0);
 }
 
 double PneumaticarmModel::Get_ControlVector(unsigned int idx)

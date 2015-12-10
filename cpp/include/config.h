@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 
-#define stateSize 2
+#define stateSize 4
 #define commandSize 2
 
 // typedef for stateSize types
