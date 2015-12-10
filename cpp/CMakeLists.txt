@@ -23,4 +23,4 @@ FILE(
 
 ADD_EXECUTABLE(main test/main.cpp ${source_files})
 ADD_EXECUTABLE(mainMPC test/mainMPC.cpp ${source_files})
-ADD_EXECUTABLE(testModel test/testModel.cpp ${source_files})
+# ADD_EXECUTABLE(testModel test/testModel.cpp ${source_files})

@@ -5,7 +5,7 @@
 
 #include "ilqrsolver.h"
 #include "costfunctionpneumaticarmelbow.h"
-#include "pneumaticarmnonlinearmodel.h"
+#include "pneumaticarm2nonlinearmodel.h"
 #include <time.h>
 #include <sys/time.h>
 
@@ -34,7 +34,7 @@ int main()
     commandVec_t* uList;
     ILQRSolver::traj lastTraj;
    
-    PneumaticarmNonlinearModel pneumaticarmModel(dt);
+    Pneumaticarm2NonlinearModel pneumaticarmModel(dt);
     CostFunctionPneumaticarmElbow costPneumatic;
     ILQRSolver testSolverRomeoActuator(pneumaticarmModel,costPneumatic);
 
