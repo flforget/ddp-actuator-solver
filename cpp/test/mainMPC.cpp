@@ -88,7 +88,7 @@ int main()
     //xDes << 1.0,    0.0, 2.0*1e5, 2.0*1e5;
 
     unsigned int T = 10;
-    unsigned int M = 800;
+    unsigned int M = 3200;
     unsigned int finiter = (unsigned int) M/T;
     unsigned int lp = 0;
     double dt=5e-3;
@@ -120,7 +120,7 @@ int main()
     //testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
     // Xdes Reference trajectory
 
-
+    double pi = 3.14;
     gettimeofday(&tbegin,NULL);
     model.setParameters();
     for(unsigned int ix =0;ix<4;ix++)
@@ -128,13 +128,13 @@ int main()
 
     for(int i=0;i<M;i++)
     {
-       refDes(0) = dt*i*10*3.14/180;
-       refDes(1) = 10*3.14/180;
-       refDes(2) = 0;
+       refDes(0) = sin(2*pi*0.2*dt*i); //*10*3.14/180;
+       refDes(1) = 2*pi*0.2*cos(2*pi*0.2*dt*i); //10*3.14/180;
+       refDes(2) = -2*pi*0.2*2*pi*0.2*sin(2*pi*0.2*dt*i);
        Pfeed = InverseModel(refDes);
        //cout << "Pfeed: " << Pfeed;
-       xDes(0) = dt*i*10*3.14/180;
-       xDes(1) = 10*3.14/180;
+       xDes(0) = refDes(0);
+       xDes(1) = refDes(1);
        xDes(2) = Pfeed*1e5;
        xDes(3) = 4*1e5 - Pfeed*1e5;
        for(unsigned int ix =0;ix<4;ix++)
@@ -159,7 +159,7 @@ int main()
 
         }*/
         /*for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0)  << "," << uList[j](0,0) << endl;*/
-        fichier << xList[1](0,0) << "," << refDes(0) << "," << xList[1](1,0) << "," << xList[1](2,0) << "," << xList[1](3,0)<< "," << uList[1](0,0) << "," << uList[1](1,0) << endl;
+        fichier << xList[1](0,0) << "," << refDes(0) << "," << xList[1](1,0) <<"," << xList[1](2,0) <<"," << xList[1](3,0)  <<  "," << uList[1](0,0) << "," << uList[1](1,0) << "," << endl;
     }
     gettimeofday(&tend,NULL);
 

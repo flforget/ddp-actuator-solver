@@ -1,10 +1,10 @@
 clear all
 close all
 
-X = [0.0;0.0;1.0;4.0*e-5]
-X2 = [0.0;0.0;1.0;4.0*e-5]
-U1 = 0.0
-U2 = 0.0
+X = [0.0;0.0;0.0*1e5;2.0*1e5]
+X2 = [0.0;0.0;1.0;4.0*1e5]
+U1 = 2.0
+U2 = 2.0
 U1dot = 0.0
 U2dot = 0.0
 Xlist = [];
@@ -21,10 +21,10 @@ for i=1:N
   % X2 = X2 + dt*Xdot + ((dt^2)/2)*Xddot;
   Xlist = [Xlist, X];
   % X2list = [X2list, X2];
-endfor
+end
 
 
-xode = lsode ("xdotpneu", X, (t = linspace(0, final_time, N)));
+%xode = lsode ("xdotpneu", X, (t = linspace(0, final_time, N)));
 
 figure()
 subplot(221)
