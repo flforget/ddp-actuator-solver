@@ -161,10 +161,21 @@ ILQRSolver::traj ILQRSolver::getLastSolvedTrajectory()
     return lastTraj;
 }
 
-char ILQRSolver::isQuudefinitePositive(commandMat_t& Quu)
+bool ILQRSolver::isQuudefinitePositive(const commandMat_t & Quu)
 {
     /*
       Todo : check if Quu is definite positive
     */
-    return 1;
+    //Eigen::JacobiSVD<commandMat_t> svd_Quu (Quu, ComputeThinU | ComputeThinV);
+    Eigen::VectorXcd singular_values = Quu.eigenvalues();
+
+    for(long i = 0; i < Quu.cols(); ++i)
+    {
+        if (singular_values[i].real() < 0.)
+        {
+            std::cout << "not sdp" << std::endl;
+            return false;
+        }
+    }
+    return true;
 }
