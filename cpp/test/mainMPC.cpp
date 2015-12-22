@@ -51,12 +51,12 @@ int main()
     fichier << "tau,tauDot,q,qDot,u" << endl;
 
 
-    testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+    testSolverRomeoActuator.FirstInitSolver(xinit,T,dt,iterMax,stopCrit);
 
     gettimeofday(&tbegin,NULL);
     for(int i=0;i<M;i++)
     {
-        testSolverRomeoActuator.initSolver(xinit,xDes);
+        testSolverRomeoActuator.initSolver(xinit);
         testSolverRomeoActuator.solveTrajectory();
         lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
         xList = lastTraj.xList;
