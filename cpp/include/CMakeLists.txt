@@ -6,12 +6,6 @@ SET(${PROJECT_NAME}_HEADERS
     romeosimpleactuator.h
     costfunction.h
     ilqrsolver.h
-    costfunctionpneumaticarmelbow.h
-    pneumaticarmelbowlinear.h 
-    pneumaticarmnonlinearmodel.h
-    pneumaticarmelbowpiecelinear.h
-    
-    pneumaticarmelbow2ordermodel.h
 )
 
 INSTALL(FILES ${${PROJECT_NAME}_HEADER} DESTINATION include)
