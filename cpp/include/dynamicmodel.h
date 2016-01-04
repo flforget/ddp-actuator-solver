@@ -24,8 +24,8 @@ protected:
 
 // methods //
 public:
-    virtual stateVec_t computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)=0;
-    virtual void computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)=0;
+    virtual stateVec_t computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)=0;
+    virtual void computeAllModelDeriv(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)=0;
     virtual stateMat_t computeTensorContxx(const stateVec_t& nextVx)=0;
     virtual commandMat_t computeTensorContuu(const stateVec_t& nextVx)=0;
     virtual commandR_stateC_t computeTensorContux(const stateVec_t& nextVx)=0;

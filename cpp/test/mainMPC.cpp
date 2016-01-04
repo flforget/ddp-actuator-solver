@@ -25,7 +25,7 @@ int main()
     xinit << 0.0,0.0,0.0,0.0;
     xDes << 1.0,0.0,0.0,0.0;
 
-    unsigned int T = 8;
+    unsigned int T = 300;
     unsigned int M = 30;
     double dt=1e-4;
     unsigned int iterMax = 20;

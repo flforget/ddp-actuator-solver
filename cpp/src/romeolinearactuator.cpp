@@ -42,13 +42,13 @@ RomeoLinearActuator::RomeoLinearActuator(double& mydt)
     fxu[0].setZero();
 }
 
-stateVec_t RomeoLinearActuator::computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)
+stateVec_t RomeoLinearActuator::computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
 {
-    stateVec_t result = Ad*X + Bd*U;
+    stateVec_t result = Ad*(X+Xdes) + Bd*U;
     return result;
 }
 
-void RomeoLinearActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
+void RomeoLinearActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
 {
 
 }

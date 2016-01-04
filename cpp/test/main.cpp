@@ -21,10 +21,10 @@ int main()
     double texec=0.0;
     stateVec_t xinit,xDes;
 
-    xinit << 0.0,0.0,0.0,0.0;
-    xDes << 1.0,0.0,0.0,0.0;
+    xinit << -1.0,0.0,0.0,0.0;
+    xDes << 2.0,0.0,0.0,0.0;
 
-    unsigned int T = 30;
+    unsigned int T = 300;
     double dt=1e-4;
     unsigned int iterMax = 20;
     double stopCrit = 1e-3;

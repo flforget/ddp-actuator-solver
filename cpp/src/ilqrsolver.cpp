@@ -18,7 +18,7 @@ ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunctio
 void ILQRSolver::FirstInitSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned int& myT,
                        double& mydt, unsigned int& myiterMax,double& mystopCrit)
 {
-    xInit = myxInit;
+    xInit = myxInit-myxDes;
     xDes = myxDes;
     T = myT;
     dt = mydt;
@@ -76,13 +76,13 @@ void ILQRSolver::initTrajectory()
     for(unsigned int i=0;i<T;i++)
     {
         uList[i] = zeroCommand;
-        xList[i+1] = dynamicModel->computeNextState(dt,xList[i],zeroCommand);
+        xList[i+1] = dynamicModel->computeNextState(dt,xList[i],xDes,zeroCommand);
     }
 }
 
 void ILQRSolver::backwardLoop()
 {
-    costFunction->computeFinalCostDeriv(xList[T],xDes);
+    costFunction->computeFinalCostDeriv(xList[T]);
     nextVx = costFunction->getlx();
     nextVxx = costFunction->getlxx();
 
@@ -98,8 +98,8 @@ void ILQRSolver::backwardLoop()
             x = xList[i];
             u = uList[i];
 
-            dynamicModel->computeAllModelDeriv(dt,x,u);
-            costFunction->computeAllCostDeriv(x,xDes,u);
+            dynamicModel->computeAllModelDeriv(dt,x,xDes,u);
+            costFunction->computeAllCostDeriv(x,u);
 
             Qx = costFunction->getlx() + dynamicModel->getfx().transpose() * nextVx;
             Qu = costFunction->getlu() + dynamicModel->getfu().transpose() * nextVx;
@@ -145,7 +145,7 @@ void ILQRSolver::forwardLoop()
     for(unsigned int i=0;i<T;i++)
     {
         updateduList[i] = uList[i] + alpha*kList[i] + KList[i]*(updatedxList[i]-xList[i]);
-        updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],updateduList[i]);
+        updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],xDes,updateduList[i]);
         for(unsigned int j=0;j<commandNb;j++)
         {
             changeAmount += abs(uList[i](j,0) - updateduList[i](j,0));
@@ -156,6 +156,7 @@ void ILQRSolver::forwardLoop()
 ILQRSolver::traj ILQRSolver::getLastSolvedTrajectory()
 {
     lastTraj.xList = updatedxList;
+    for(int i=0;i<T+1;i++)lastTraj.xList[i] += xDes;
     lastTraj.uList = updateduList;
     lastTraj.iter = iter;
     return lastTraj;
