@@ -16,8 +16,8 @@ private:
 protected:
     // methods //
 public:
-    virtual void computeAllCostDeriv(const stateVec_t& X, const commandVec_t& U)=0;
-    virtual void computeFinalCostDeriv(const stateVec_t& X)=0;
+    virtual void computeAllCostDeriv(const stateVec_t& X, const stateVec_t& Xdes, const commandVec_t& U)=0;
+    virtual void computeFinalCostDeriv(const stateVec_t& X, const stateVec_t& Xdes)=0;
 private:
 protected:
     // accessors //

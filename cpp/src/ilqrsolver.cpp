@@ -15,10 +15,11 @@ ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunctio
     commandNb = myDynamicModel.getCommandNb();
 }
 
-void ILQRSolver::FirstInitSolver(stateVec_t& myxInit, unsigned int& myT,
+void ILQRSolver::FirstInitSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned int& myT,
                        double& mydt, unsigned int& myiterMax,double& mystopCrit)
 {
     xInit = myxInit;
+    xDes = myxDes;
     T = myT;
     dt = mydt;
     iterMax = myiterMax;
@@ -41,9 +42,10 @@ void ILQRSolver::FirstInitSolver(stateVec_t& myxInit, unsigned int& myT,
     alpha = 1.0;
 }
 
-void ILQRSolver::initSolver(stateVec_t& myxInit)
+void ILQRSolver::initSolver(stateVec_t& myxInit, stateVec_t& myxDes)
 {
     xInit = myxInit;
+    xDes = myxDes;
 }
 
 void ILQRSolver::solveTrajectory()
@@ -80,15 +82,9 @@ void ILQRSolver::initTrajectory()
 
 void ILQRSolver::backwardLoop()
 {
-    costFunction->computeFinalCostDeriv(xList[T]);
+    costFunction->computeFinalCostDeriv(xList[T],xDes);
     nextVx = costFunction->getlx();
     nextVxx = costFunction->getlxx();
-
-    cout << nextVx << endl;
-    cout << "-" << endl;
-    cout << nextVxx << endl;
-    cout << "-" << endl;
-    cout << "-" << endl;
 
     mu = 0.0;
     completeBackwardFlag = 0;
@@ -103,7 +99,7 @@ void ILQRSolver::backwardLoop()
             u = uList[i];
 
             dynamicModel->computeAllModelDeriv(dt,x,u);
-            costFunction->computeAllCostDeriv(x,u);
+            costFunction->computeAllCostDeriv(x,xDes,u);
 
             Qx = costFunction->getlx() + dynamicModel->getfx().transpose() * nextVx;
             Qu = costFunction->getlu() + dynamicModel->getfu().transpose() * nextVx;
@@ -118,6 +114,9 @@ void ILQRSolver::backwardLoop()
 
             if(!isQuudefinitePositive(Quu))
             {
+                /*
+                  To be Implemented : Regularization (is Quu definite positive ?)
+                */
                 if(mu==0.0) mu += 1e-4;
                 else mu *= 10;
                 completeBackwardFlag = 0;
