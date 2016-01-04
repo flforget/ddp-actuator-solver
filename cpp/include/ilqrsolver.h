@@ -78,7 +78,7 @@ public:
     void initTrajectory();
     void backwardLoop();
     void forwardLoop();
-    char isQuudefinitePositive(commandMat_t& Quu);
+    bool isQuudefinitePositive(const commandMat_t & Quu);
     struct traj getLastSolvedTrajectory();
 private:
 protected:
