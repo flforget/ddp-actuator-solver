@@ -44,7 +44,7 @@ void ILQRSolver::FirstInitSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsign
 
 void ILQRSolver::initSolver(stateVec_t& myxInit, stateVec_t& myxDes)
 {
-    xInit = myxInit;
+    xInit = myxInit-myxDes;
     xDes = myxDes;
 }
 
