@@ -10,15 +10,14 @@ fprintf(['\nA demonstration of the iLQG algorithm '...
 % dynamics. This will make iterations more expensive, but 
 % final convergence will be much faster (quadratic)
 full_DDP = false;
-global goal;
-goal = [0,0,0e5,4e5]';
+
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP);
 T       = 500;              % horizon
-x0      = [1;0;2e5;2e5];   % initial state
+x0      = [0;0;0e5;4e5];   % initial state
 %u0      = 0.1*randn(2,T);    % initial controls
-u0(1,1:T) = 2e5*ones(1,1:T);
-u0(2,1:T) = 2e5*ones(1,1:T);
+u0(1,1:T) = 0e5*ones(1,1:T);
+u0(2,1:T) = 4e5*ones(1,1:T);
 %Op.lims  = [-.5 .5;         % wheel angle limits (radians)
 %             -2  2];        % acceleration limits (m/s^2)
 %Op.maxIter = 2;
@@ -131,7 +130,7 @@ F_triceps = P2.*ftterm;
 %F2max = 1*pi*ro^2*4*1e5*(a*(1-k*emax)^2 - b);
 F = [F_biceps; F_triceps];
 
-%% Joint Dynamjointstate_deriv(:,1,:);ics
+%% Joint Dynamics
 jointstate_deriv(1,:) = theta_dot(1,:); %joint_state(2);
 jointstate_deriv(2,:) = ((F_biceps -F_triceps ).*R  - fv.*theta_dot - (m*g*0.5*link_l).*sin(theta))/I;
 %jointstate_deriv(3:6,:,:) = Pstate_deriv(1:4,:,:);
@@ -139,31 +138,7 @@ jointstate_deriv(2,:) = ((F_biceps -F_triceps ).*R  - fv.*theta_dot - (m*g*0.5*l
 y = x + dt.*jointstate_deriv;
 
 %% END
-% === states and controls:
-% x = [x y t v]' = [x; y; car_angle; front_wheel_velocity]
-% u = [w a]'     = [front_wheel_angle; accelaration]
-% 
-% % constants
-% d  = 2.0;      % d = distance between back and front axles
-% h  = 0.03;     % h = timestep (seconds)
-% 
-% % controls
-% w  = u(1,:,:); % w = front wheel angle
-% a  = u(2,:,:); % a = front wheel acceleration
-% 
-% o  = x(3,:,:); % o = car angle
-%                % z = unit_vector(o)
-% z  = [cos(o); sin(o)]; 
-% 
-% v  = x(4,:,:); % v = front wheel velocity
-% f  = h*v;      % f = front wheel rolling distance
-%                % b = back wheel rolling distance
-% b  = d + f.*cos(w) - sqrt(d^2 - (f.*sin(w)).^2);
-%                % do = change in car angle
-% do = asin(sin(w).*f/d);
-% 
-% dy = [tt(b, z); do; h*a];   % change in state
-% y  = x + dy;                % new state
+
 
 
 function c = pneumatic_cost(x, u)
@@ -178,10 +153,10 @@ u(:,final)  = 0;
 
 cu  = 1e-5*[0.01 .01];         % control cost coefficients
 
-cf  = 1e3*[ 1  0  1  1];    % final cost coefficients
+cf  = 1e-1*[ 1  0  1  1];    % final cost coefficients
 %pf  = [.01 .01 .01 0 1 0]';    % smoothness scales for final cost
 
-cx  = 1e3*[1 0 1 1 ];          % running cost coefficients
+cx  = 1e-1*[1 0 1 1 ];          % running cost coefficients
 %px  = [.1 .1]';             % smoothness scales for running cost
 
 % control cost
@@ -221,7 +196,7 @@ y = pp( sqrt(pp(x.^2,p.^2)), -p);
 function [f,c,fx,fu,fxx,fxu,fuu,cx,cu,cxx,cxu,cuu] = pneumatic_dyn_cst(x,u,full_DDP)
 % combine car dynamics and cost
 % use helper function finite_difference() to compute derivatives
-
+dt = 0.005;
 if nargout == 2
     f = pneumatics6st_dynamics(x,u);
     c = pneumatic_cost(x,u);
@@ -232,27 +207,27 @@ else
     
     % dynamics derivatives
     xu_dyn  = @(xu) pneumatics6st_dynamics(xu(ix,:),xu(iu,:));
-    J       = finite_difference(xu_dyn, [x; u]);
+    J       = finite_difference(xu_dyn, [x; u], dt);
     fx      = J(:,ix,:);
     fu      = J(:,iu,:);
     
     % cost first derivatives
     xu_cost = @(xu) pneumatic_cost(xu(ix,:),xu(iu,:));
-    J       = squeeze(finite_difference(xu_cost, [x; u]));
+    J       = squeeze(finite_difference(xu_cost, [x; u], dt));
     cx      = J(ix,:);
     cu      = J(iu,:);
     
     % cost second derivatives
-    xu_Jcst = @(xu) squeeze(finite_difference(xu_cost, xu));
-    JJ      = finite_difference(xu_Jcst, [x; u]);
+    xu_Jcst = @(xu) squeeze(finite_difference(xu_cost, xu, dt));
+    JJ      = finite_difference(xu_Jcst, [x; u], dt);
     cxx     = JJ(ix,ix,:);
     cxu     = JJ(ix,iu,:);
     cuu     = JJ(iu,iu,:);
     
     % dynamics second derivatives
     if full_DDP
-        xu_Jcst = @(xu) finite_difference(xu_dyn, xu);
-        JJ      = finite_difference(xu_Jcst, [x; u]);
+        xu_Jcst = @(xu) finite_difference(xu_dyn, xu, dt);
+        JJ      = finite_difference(xu_Jcst, [x; u], dt);
         JJ      = reshape(JJ, [4 6 size(J)]);
         JJ      = 0.5*(JJ + permute(JJ,[1 3 2 4]));
         fxx     = JJ(:,ix,ix,:);
