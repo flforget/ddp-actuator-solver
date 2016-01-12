@@ -37,12 +37,12 @@ private:
 protected:
     // accessors //
 public:
-    stateVec_t getlx();
-    stateMat_t getlxx();
-    commandVec_t getlu();
-    commandMat_t getluu();
-    commandR_stateC_t getlux();
-    stateR_commandC_t getlxu();
+    stateVec_t& getlx();
+    stateMat_t& getlxx();
+    commandVec_t& getlu();
+    commandMat_t& getluu();
+    commandR_stateC_t& getlux();
+    stateR_commandC_t& getlxu();
 };
 
 #endif // COSTFUNCTIONROMEOACTUATOR_H
