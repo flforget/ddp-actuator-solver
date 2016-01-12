@@ -28,7 +28,7 @@ figure(4)
 subplot(221), plot(x(1,:));
 subplot(222), plot(u(1,:));
 hold on;
-subplot(222), plot(u(2,:));
+subplot(222), plot(u(2,:),'g');
 
 subplot(223), plot(x(3,:));
 subplot(224), plot(x(4,:));
@@ -151,7 +151,7 @@ goal = [1,0,2e5,2e5]';
 final = isnan(u(1,:));
 u(:,final)  = 0;
 
-cu  = 1e-5*[0.01 .01];         % control cost coefficients
+cu  = 1e-3*[0.01 .01];         % control cost coefficients
 
 cf  = 1e-1*[ 1  0  1  1];    % final cost coefficients
 %pf  = [.01 .01 .01 0 1 0]';    % smoothness scales for final cost
