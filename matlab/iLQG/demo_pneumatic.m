@@ -18,8 +18,8 @@ x0      = [0;0;0e5;4e5];   % initial state
 %u0      = 0.1*randn(2,T);    % initial controls
 u0(1,1:T) = 0e5*ones(1,1:T);
 u0(2,1:T) = 4e5*ones(1,1:T);
-%Op.lims  = [-.5 .5;         % wheel angle limits (radians)
-%             -2  2];        % acceleration limits (m/s^2)
+Op.lims  = [0 4.5e5;         % wheel angle limits (radians)
+            0  4.5e5];        % acceleration limits (m/s^2)
 %Op.maxIter = 2;
 % run the optimization
 Op.plot = -1;
