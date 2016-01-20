@@ -11,14 +11,14 @@ fprintf(['\nA demonstration of the iLQG algorithm '...
 % final convergence will be much faster (quadratic)
 full_DDP = false;
 
-N=5;
+N=1;
 dt = 1; % 0.005;
 sub_dt = 0.005;
-T       = dt/sub_dt;              % horizon
+T       = 200; %dt/sub_dt;              % horizon
 x0      = [0;0;0e5;4e5];   % initial state
-%u0      = N=10.1*randn(2,T);    % initial controls
-u0(1,1:T) = 0e5*ones(1,1:T);
-u0(2,1:T) = 4e5*ones(1,1:T);
+u0      = 10.1*randn(2,T);    % initial controls
+% u0(1,1:T) = 0e5*ones(1,1:T);
+% u0(2,1:T) = 4e5*ones(1,1:T);
 Op.lims  = [0 4.5e5;         % muscle 1 pressure limits (pascal)
             0  4.5e5];       % muscle 2 pressure limits (pascal)
 %Op.maxIter = 2;
@@ -26,21 +26,21 @@ Op.lims  = [0 4.5e5;         % muscle 1 pressure limits (pascal)
 Op.plot = -1;
 dt =0.005;
 
-for i=1:N
+
     % optimization problem
-    xgoal(1,1) = i*(45/N)*(pi/180);
-    xgoal(2,1) = (45/(N*dt))*(pi/180);
-    xgoal(3,1) = i*(2/N)*1e5;
-    xgoal(4,1) = 4e5 - i*(2/N)*1e5;
-    xgoal
-    DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,xgoal,u,full_DDP);
+%     xgoal(1,1) = i*(45/N)*(pi/180);
+%     xgoal(2,1) = (45/(N*dt))*(pi/180);
+%     xgoal(3,1) = i*(2/N)*1e5;
+%     xgoal(4,1) = 4e5 - i*(2/N)*1e5;
+%     xgoal
+    DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP);
     [x,u]= iLQG(DYNCST, x0, u0, Op);
-    x0 = x(:,end);
-    u0 = u(:,1);
-    xplot(:,i) = x0
-    uplot(:,i) = u0
-    i    
-end
+%     x0 = x(:,end);
+%     u0 = u(:,1);
+%     xplot(:,i) = x0;
+%     uplot(:,i) = u0;
+     
+
 figure(4)
 subplot(221), plot(xplot(1,:));
 subplot(222), plot(uplot(1,:));
@@ -158,13 +158,13 @@ y = x + dt.*jointstate_deriv;
 
 
 
-function c = pneumatic_cost(x, xgoal,u)
+function c = pneumatic_cost(x, u)
 % cost function for car-parking problem
 % sum of 3 terms:
 % lu: quadratic cost on controls
 % lf: final cost on distance from target parking configuration
 % lx: small running cost on distance from origin to encourage tight turns
-goal = xgoal; %[1,0,2e5,2e5]';
+goal = [1,0,2e5,2e5]';
 final = isnan(u(1,:));
 u(:,final)  = 0;
 
