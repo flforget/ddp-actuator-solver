@@ -1,4 +1,4 @@
-function demo_pneumatic
+function demo_pneumatic6st
 % A demo of iLQG/DDP with car-parking dynamics
 
 fprintf(['\nA demonstration of the iLQG algorithm '...
@@ -13,25 +13,40 @@ full_DDP = false;
 
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP);
-T       = 500;              % horizon
-x0      = [0.0;0];   % initial state
-%u0      = 0.1*randn(2,T);    % initial controls
-u0(1,1:T) = 0*ones(1,1:T);
-u0(2,1:T) = 4*ones(1,1:T);
-Op.lims  = [0 4.5];         % wheel angle limits (radians)
+T       = 200;              % horizon
+x0      = [0.0;0;0e5;0;4e5;0];   % initial state
+u0      = 0.1*randn(2,T);    % initial controls
+% u0(1,1:T) = 0*ones(1,1:T);
+% u0(2,1:T) = 4e5*ones(1,1:T);
+% Op.lims  = [0 4.5e5;
+%             0 4.5e5];         % wheel angle limits (radians)
                     % acceleration limits (m/s^2)
 %Op.maxIter = 2;
 % run the optimization
 Op.plot = -1;
-[x,u]= iLQG(DYNCST, x0, u0, Op);
+[x,u,L]= iLQG(DYNCST, x0, u0, Op);
 figure(4)
 subplot(221), plot(x(1,:));
 subplot(222), plot(u(1,:));
 hold on;
 subplot(222), plot(u(2,:),'g');
 
-% subplot(223), plot(x(3,:));
-% subplot(224), plot(x(4,:));
+subplot(223), plot(x(3,:));
+subplot(224), plot(x(5,:));
+L;
+for lp=1:T
+ L1(lp) = L(1,1,lp);
+ L2(lp) = L(1,2,lp);
+ L3(lp) = L(1,3,lp);
+ L4(lp) = L(1,4,lp);
+ L5(lp) = L(1,5,lp);
+ L6(lp) = L(1,6,lp);
+end
+figure(5)
+plot(L1, 'g')
+hold on;
+plot(L2, 'r');
+plot(L3, 'cy');
 % ==== graphics ====
 
 %function y = car_dynamics(x,u)
@@ -48,7 +63,7 @@ dt = 0.005;
 theta = x(1,:,:);
 theta_dot = x(2,:,:);
 Pdes1 = u(1,:,:);
-Pdes2 = bsxfun(@minus, 4, u(1,:,:));
+Pdes2 = u(2,:,:); % bsxfun(@minus, 4e5, u(1,:,:)); %
 %% Parameters for the muscles
 lo = 0.185;
 alphaob = 23.0*pi/180;
@@ -101,16 +116,16 @@ Vt = tt(elementt1,elementt2);
 %Vt = 1630;
 wnt = 2*pi*380*(1./Vt);
 
-V = [Vb;Vt];
+V = [Pdes1;Pdes2]
 
 %% Pressure Dynamics
 %%%%%%% 2nd order  %%%%%%%%%%%%%%%
-% jointstate_deriv(3,:) = x(4,:);
-% %Pstate_deriv(2,:,:) = (-wnb.^2).*Pb_state(1,:,:) - 2*wnb.*Pb_state(2,:,:) + (wnb.^2).*Pdes1;
-% jointstate_deriv(4,:) = (-wnb.^2).*x(3,:,:) - 2*wnb.*x(4,:,:) + (wnb.^2).*Pdes1;
-% jointstate_deriv(5,:) = x(6,:,:);
-% %Pstate_deriv(4,:,:) = -wnt.^2*Pt_state(1,:,:) - 2*wnt.*Pt_state(2,:,:) + (wnt.^2).*Pdes2;
-% jointstate_deriv(6,:) = (-wnt.^2).*x(5,:,:) - 2*wnt.*x(5,:,:) + (wnt.^2).*Pdes2;
+jointstate_deriv(3,:) = x(4,:);
+%Pstate_deriv(2,:,:) = (-wnb.^2).*Pb_state(1,:,:) - 2*wnb.*Pb_state(2,:,:) + (wnb.^2).*Pdes1;
+jointstate_deriv(4,:) = (-wnb.^2).*x(3,:,:) - 2*wnb.*x(4,:,:) + (wnb.^2).*Pdes1;
+jointstate_deriv(5,:) = x(6,:,:);
+%Pstate_deriv(4,:,:) = -wnt.^2*Pt_state(1,:,:) - 2*wnt.*Pt_state(2,:,:) + (wnt.^2).*Pdes2;
+jointstate_deriv(6,:) = (-wnt.^2).*x(5,:,:) - 2*wnt.*x(6,:,:) + (wnt.^2).*Pdes2;
 %%%%%%% 1st order %%%%%%%%%%%%%%%%
 % time_constant1 = 0.18;
 % time_constant2 = 0.13;
@@ -121,11 +136,11 @@ V = [Vb;Vt];
 
 
 %% Force calculation
-P1 = u(1,:,:);
-P2 = u(2,:,:);
-fbterm = 1e5*pi*ro^2*(a_biceps*(1-k.*epsb).^2 - b_biceps);
+P1 = x(3,:,:);
+P2 = x(5,:,:);
+fbterm = pi*ro^2*(a_biceps*(1-k.*epsb).^2 - b_biceps);
 F_biceps =  P1.*fbterm;
-ftterm = 1e5*pi*ro^2*(a_triceps*(1-k.*epst).^2 - b_triceps);
+ftterm = pi*ro^2*(a_triceps*(1-k.*epst).^2 - b_triceps);
 F_triceps = P2.*ftterm;
 %F2max = 1*pi*ro^2*4*1e5*(a*(1-k*emax)^2 - b);
 F = [F_biceps; F_triceps];
@@ -147,16 +162,16 @@ function c = pneumatic_cost(x, u)
 % lu: quadratic cost on controls
 % lf: final cost on distance from target parking configuration
 % lx: small running cost on distance from origin to encourage tight turns
-goal = [0.2;0];
+goal = [0.2;0;0.4e5;0;3.6e5;0];
 final = isnan(u(1,:));
 u(:,final)  = 0;
 
-cu  = 1*1e-1*[0.01 .01];         % control cost coefficients
+cu  = 1*1e-4*[0.01 .01];         % control cost coefficients
 
-cf  = 1e-3*[ 1  0 ];    % final cost coefficients
+cf  = 1e-3*[ 1  1 1 0 1 0];    % final cost coefficients
 %pf  = [.01 .01 .01 0 1 0]';    % smoothness scales for final cost
 
-cx  = 1e-3*[1 0 ];          % running cost coefficients
+cx  = 1e-3*[1 1 1 0 1 0];          % running cost coefficients
 %px  = [.1 .1]';             % smoothness scales for running cost
 
 % control cost
@@ -177,15 +192,29 @@ end
 % for r=1:1:6
 % lx1(r) = cx(r)*(x(r,:) - goal(r,1)).^2;
 % end
-
-lx1 = cx(1)*(x(1,:) - goal(1,1)).^2;
-lx2 = cx(2)*(x(2,:) - goal(2,1)).^2;
-% lx3 = cx(3)*(x(3,:) - goal(3,1)).^2;
-% lx4 = cx(4)*(x(4,:) - goal(4,1)).^2;
+c1 = mm(x(1,:), goal(1,1));
+c2 = mm(x(2,:), goal(2,1));
+c3 = mm(x(3,:), goal(3,1));
+c4 = mm(x(4,:), goal(4,1));
+c5 = mm(x(5,:), goal(5,1));
+c6 = mm(x(6,:), goal(6,1));
+lx1 = cx(1)*c1.^2;
+lx2 = cx(2)*c2.^2;
+lx3 = cx(3)*c3.^2;
+lx4 = cx(4)*c4.^2;
+lx5 = cx(5)*c4.^2;
+lx6 = cx(6)*c4.^2;
+% lx1 = cx(1)*x(1,:).^2;
+% lx2 = cx(2)*x(2,:).^2;
+% lx3 = cx(3)*x(3,:).^2;
+% lx4 = cx(4)*x(4,:).^2;
+% lx5 = cx(5)*x(5,:).^2;
+% lx6 = cx(6)*x(6,:).^2;
+%lx4 = cx(4)*(x(4,:) - goal(4,1)).^2;
 % lx5 = cx(5)*(x(5,:) - goal(5,1)).^2;
 % lx6 = cx(6)*(x(6,:) - goal(6,1)).^2;
 %lx = cx*(x-goal);%cx*sabs(x(1:2,:),px);
-lx = lx1 + lx2 ; %+ lx3 + lx4; % +lx5 + lx6;
+lx = lx1 + lx2 + lx3 + lx4 +lx5 + lx6;
 %lf = cf*x(:,end);
 % total const
 c = lu + lx + lf;
@@ -204,8 +233,8 @@ if nargout == 2
     c = pneumatic_cost(x,u);
 else
     % state and control indices
-    ix = 1:2;
-    iu = 3:4;
+    ix = 1:6;
+    iu = 7:8;
     
     % dynamics derivatives
     xu_dyn  = @(xu) pneumatics6st_dynamics(xu(ix,:),xu(iu,:));
@@ -230,7 +259,7 @@ else
     if full_DDP
         xu_Jcst = @(xu) finite_difference(xu_dyn, xu, dt);
         JJ      = finite_difference(xu_Jcst, [x; u], dt);
-        JJ      = reshape(JJ, [2 4 size(J)]);
+        JJ      = reshape(JJ, [6 8 size(J)]);
         JJ      = 0.5*(JJ + permute(JJ,[1 3 2 4]));
         fxx     = JJ(:,ix,ix,:);
         fxu     = JJ(:,ix,iu,:);
@@ -270,3 +299,6 @@ c = bsxfun(@plus,a,b);
 
 function c=tt(a,b)
 c = bsxfun(@times,a,b);
+
+function c=mm(a,b)
+c = bsxfun(@minus,a,b);
