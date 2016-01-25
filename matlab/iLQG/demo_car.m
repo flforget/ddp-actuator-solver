@@ -9,7 +9,7 @@ fprintf(['\nA demonstration of the iLQG algorithm '...
 % Set full_DDP=true to compute 2nd order derivatives of the 
 % dynamics. This will make iterations more expensive, but 
 % final convergence will be much faster (quadratic)
-full_DDP = false;
+full_DDP = true;
 
 % optimization problem
 DYNCST  = @(x,u,i) car_dyn_cst(x,u,full_DDP);
