@@ -12,10 +12,10 @@ fprintf(['\nA demonstration of the iLQG algorithm '...
 full_DDP = false;
 
 dt = 5e-3; % dt for dynamics
-ToT = 4;       %(in seconds)
+ToT = 2;       %(in seconds)
 N_tot = ToT/dt;
 %T_horizon = 0.5;  %(in seconds)
-T       = 20; %T_horizon/dt;
+T       = 10; %T_horizon/dt;
 %N_DT = ToT/T_horizon;
 
 
@@ -35,34 +35,26 @@ for k=1:N_tot
     testgoal(k) = slope_pos*k*dt;
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP, xGoal);
-%T       = 5*T_horizon/dt %200;              % horizon
-    % initial controls
-%u0(1,1:T) = 0*ones(1,1:T);
-%u0(2,1:T) = 4e5*ones(1,1:T);
 Op.lims  = [0 4.5e5];
-            %0 4.5e5];         % wheel angle limits (radians)
-                    % acceleration limits (m/s^2)
 Op.maxIter = 250;
 % run the optimization
-Op.plot = -1;
+Op.plot = -1;    
+[xhat,uhat, Lhat]= iLQG(DYNCST, x0, u0, Op);
 
-    
-[xhat,uhat]= iLQG(DYNCST, x0, u0, Op);
 xhat0 = xhat(1:4,1);
 uhat0 = uhat(1:2,1);
 x0 = pneumatics6st_dynamics(xhat0,uhat0);
 x1test(k) = x0(1,1);
 u0 = uhat0;
 uk(k) = u0(1,1);
-xinit = T*(k-1)+1; 
-xfin = T*k;
+Lk(k) = Lhat(1,1);
 k
 % size(x(1:4,1:T))
 % size(xtot(1:4,xinit:xfin))
 % xtot(1:4,xinit:xfin) = x(1:4,1:T);
 % utot(1,T*(k-1)+1:T*k) = u(1,1:T);
 end
-print('END OF LOOP')
+%print('END OF LOOP')
 %% PLOT
 
 %figure(4)
@@ -73,15 +65,25 @@ print('END OF LOOP')
 % 
 % subplot(223), plot(x(3,:));
 % subplot(224), plot(x(4,:));
-figure(5)
-subplot(211), plot(x1test(1,:));
+figure(4)
+subplot(211), plot((1:N_tot)*dt, (180/pi)*x1test(1,:), 'Linewidth', 2.0);
 hold on;
 grid on;
-subplot(211), plot(testgoal(1,:),'r');
-xlabel('Time');
-ylabel('position')
-subplot(212), plot(uk(1,:),'g');
-ylabel('Control Input (Bar)')
+subplot(211), plot((1:N_tot)*dt, (180/pi)*testgoal(1,:),'r', 'Linewidth', 2.0);
+ylabel('Position (Degrees)')
+legend('Model response', 'Reference');
+title('MPC based Trajectory tracking', 'FontSize',30)
+
+subplot(212), plot(1e-5*uk(1,:), 'Linewidth', 2.0);
+ylabel('Control Input (Bar)');
+xlabel('Time (s)');
+
+figure(5)
+plot((1:N_tot)*dt, Lk(1,:), 'Linewidth', 2.0);
+ylabel('Gain at X1');
+xlabel('Time (s)');
+title('Gain Matrix', 'FontSize',30)
+
 % ==== graphics ====
 
 %function y = car_dynamics(x,u)
@@ -188,13 +190,12 @@ F_triceps = P2.*ftterm;
 F = [F_biceps; F_triceps];
 
 %% Joint Dynamics
-jointstate_deriv(1,:) = x(2,:); %joint_state(2);
+jointstate_deriv(1,:) = theta_dot(1,:); %joint_state(2);
 jointstate_deriv(2,:) = ((F_biceps -F_triceps ).*R  - fv.*theta_dot - (m*g*0.5*link_l).*sin(theta))/I;
-%testvar =((F_biceps -F_triceps ).*R  - fv.*theta_dot - (m*g*0.5*link_l).*sin(theta))/I
 %jointstate_deriv(3:6,:,:) = Pstate_deriv(1:4,:,:);
 %dy = jointstate_deriv(:,1);
 y = x + dt.*jointstate_deriv;
-
+%y = state_deriv;
 %% END
 
 
@@ -208,7 +209,7 @@ function c = pneumatic_cost(x, u, xGoal)
 goal(1:4,1) = xGoal(1:4,1); %[0.5;0;1e5;0];
 final = isnan(u(1,:));
 u(:,final)  = 0;
-
+u
 cu  = 1*1e-3*[0.01 .01];         % control cost coefficients
 
 cf  = 1e1*[ 1  1 1 1];    % final cost coefficients
@@ -218,13 +219,13 @@ cx  = 1e1*[1 1 1 1 ];          % running cost coefficients
 %px  = [.1 .1]';             % smoothness scales for running cost
 
 % control cost
-lu    = cu*u.^2;
+lu    = cu*u.^2
 %l     = E.cx(1)*(x(1,:)-goal(1,1)).^2 +E.cx(2)*(x(2,:)-goal(2,1)).^2 +E.cx(3)*(x(3,:)-goal(3,1)).^2 +E.cx(4)*(x(4,:)-goal(4,1)).^2 +E.cx(5)*(x(5,:)-goal(5,1)).^2 +E.cx(6)*(x(6,:)-goal(6,1)).^2);
 
 % final cost
 if any(final)
    %llf      = cf*(x(:,final) - goal); %cf*sabs(x(:,final),pf);
-   llf      = cf* (bsxfun(@minus, x(:,final), goal));
+   llf      = cf* ((bsxfun(@minus, x(:,final), goal)).^2)
    lf       = real(final);
    lf(final)= llf;
 else

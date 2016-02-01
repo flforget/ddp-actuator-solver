@@ -13,7 +13,7 @@ full_DDP = false;
 
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP);
-T       = 800;              % horizon
+T       = 400;              % horizon
 x0      = [0.1;0;0.2e5;0e5];   % initial state
 u0      = 0.1*randn(2,T);    % initial controls
 %u0(1,1:T) = 0*ones(1,1:T);
@@ -158,7 +158,7 @@ function c = pneumatic_cost(x, u)
 goal = [0.5;0;1e5;0];
 final = isnan(u(1,:));
 u(:,final)  = 0;
-
+u
 cu  = 1*1e-3*[0.01 .01];         % control cost coefficients
 
 cf  = 1e-2*[ 1  1 1 1];    % final cost coefficients
@@ -180,7 +180,7 @@ if any(final)
 else
    lf    = 0;
 end
-
+lf
 % running cost
 % for r=1:1:6
 % lx1(r) = cx(r)*(x(r,:) - goal(r,1)).^2;

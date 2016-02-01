@@ -87,7 +87,7 @@ function c = car_cost(x, u)
 
 final = isnan(u(1,:));
 u(:,final)  = 0;
-
+u
 cu  = 1e-2*[1 .01];         % control cost coefficients
 
 cf  = [ .1  .1   1  .3];    % final cost coefficients
@@ -97,7 +97,7 @@ cx  = 1e-3*[1  1];          % running cost coefficients
 px  = [.1 .1]';             % smoothness scales for running cost
 
 % control cost
-lu    = cu*u.^2;
+lu    = cu*u.^2
 
 % final cost
 if any(final)
