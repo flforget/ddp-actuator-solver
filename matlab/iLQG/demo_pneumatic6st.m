@@ -13,7 +13,7 @@ full_DDP = false;
 
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP);
-T       = 200;              % horizon
+T       = 1000;              % horizon
 x0      = [0.0;0;0e5;0;4e5;0];   % initial state
 u0      = 0.1*randn(2,T);    % initial controls
 % u0(1,1:T) = 0*ones(1,1:T);
@@ -23,7 +23,7 @@ u0      = 0.1*randn(2,T);    % initial controls
                     % acceleration limits (m/s^2)
 %Op.maxIter = 2;
 % run the optimization
-Op.plot = -1;
+Op.plot = 0;
 [x,u,L]= iLQG(DYNCST, x0, u0, Op);
 figure(4)
 subplot(221), plot(x(1,:));
@@ -116,7 +116,7 @@ Vt = tt(elementt1,elementt2);
 %Vt = 1630;
 wnt = 2*pi*380*(1./Vt);
 
-V = [Pdes1;Pdes2]
+V = [Pdes1;Pdes2];
 
 %% Pressure Dynamics
 %%%%%%% 2nd order  %%%%%%%%%%%%%%%
@@ -162,7 +162,7 @@ function c = pneumatic_cost(x, u)
 % lu: quadratic cost on controls
 % lf: final cost on distance from target parking configuration
 % lx: small running cost on distance from origin to encourage tight turns
-goal = [0.2;0;0.4e5;0;3.6e5;0];
+goal = [0.0;0;1e5;0;3e5;0];
 final = isnan(u(1,:));
 u(:,final)  = 0;
 

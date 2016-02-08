@@ -23,7 +23,7 @@ Op.lims  = [0 4.5e5];
                     % acceleration limits (m/s^2)
 Op.maxIter = 250;
 % run the optimization
-Op.plot = -1;
+Op.plot = 0;
 [x,u]= iLQG(DYNCST, x0, u0, Op)
 figure(4)
 subplot(221), plot(x(1,:));
@@ -155,7 +155,7 @@ function c = pneumatic_cost(x, u)
 % lu: quadratic cost on controls
 % lf: final cost on distance from target parking configuration
 % lx: small running cost on distance from origin to encourage tight turns
-goal = [0.5;0;1e5;0];
+goal = [0.5;0;1.2e5;0];
 final = isnan(u(1,:));
 u(:,final)  = 0;
 u

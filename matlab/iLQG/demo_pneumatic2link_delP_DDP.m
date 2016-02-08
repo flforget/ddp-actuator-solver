@@ -1,4 +1,4 @@
-function demo_pneumatic2link_delP_MPC
+function demo_pneumatic2link_delP_DDP
 % A demo of iLQG/DDP with pneumatic 2link manipulator-dynamics
 
 fprintf(['\nA demonstration of the iLQG algorithm '...
@@ -12,69 +12,45 @@ fprintf(['\nA demonstration of the iLQG algorithm '...
 full_DDP = false;
 
 dt = 5e-3; % dt for dynamics
-ToT = 10;       %(in seconds)
+ToT = 4;       %(in seconds)
 N_tot = ToT/dt;
 %T_horizon = 0.5;  %(in seconds)
-T       = 10; %T_horizon/dt;
+T       = N_tot; %10; %T_horizon/dt;
 %N_DT = ToT/T_horizon;
 
 
 x0      = zeros(8,1); %[0.0;0;0.0e5;0e5];   % initial state
 u0      = 0.1*randn(2,T);
 xtot = zeros(8,ToT/dt);
-final_goal = [0.5 1 0 0 1.238e5 1.578e5 0 0]';
-slope_pos1 = (final_goal(1) - x0(1))/ToT;
-slope_pres1 = (final_goal(5) - x0(5))/ToT;
+final_goal = [0.5 1 0 0 0*1.238e5 0*1.578e5 0 0]';
 
-slope_pos2 = (final_goal(2) - x0(2))/ToT;
-slope_pres2 = (final_goal(6) - x0(6))/ToT;
 xGoal = zeros(8,1);
+xGoal = [0.5 1 0 0 1.238 1.578 0 0]';
 %% MPC
-for k=1:N_tot
-    % Trajectory for Joint 1
-    freq1 = 0.2;
-    freq2 = 0.2;
-    f1 = 2*pi*freq1;
-    f2 = 2*pi*freq2;
-    a1 = 0.5;
-    a2 = 0.7;
-    xGoal(1,1) = a1*sin(f1*k*dt); 
-    xGoal(3,1) = f1*a1*cos(f1*k*dt); %slope_pos1;
+for k=1:1
+    xGoal(1,1) = 0.5; %a1*sin(f1*k*dt); 
+    xGoal(3,1) = 0; %f1*a1*cos(f1*k*dt); %slope_pos1;
     xGoal(5,1) = 0;  %slope_pres1*k*dt;
     xGoal(7,1) = 0;  %slope_pres1;
-    testgoal1(k) = a1*sin(f1*k*dt);
+    %testgoal1(k) = a1*sin(f1*k*dt);
      % Trajectory for Joint 2
-    xGoal(2,1) = a2*sin(f2*k*dt); 
-    xGoal(4,1) = f2*a2*cos(f2*k*dt);  %slope_pos2;
+    xGoal(2,1) = 1 %a2*sin(f2*k*dt); 
+    xGoal(4,1) = 0 %f2*a2*cos(f2*k*dt);  %slope_pos2;
     xGoal(6,1) = 0;  %slope_pres2*k*dt;
     xGoal(8,1) = 0;  %slope_pres2;
-    testgoal2(k) = a2*sin(f2*k*dt); 
-    xGoal(9,1) =  -f1*f1*a1*sin(f1*k*dt); %0;
-    xGoal(10,1) =  -f2*f2*a2*sin(f2*k*dt);%0;
-    xGoal(11,1) = -f1*f1*f1*a1*cos(f1*k*dt);
-    xGoal(12,1) = -f2*f2*f2*a2*cos(f2*k*dt);
+    %testgoal2(k) = a2*sin(f2*k*dt); 
+    xGoal(9,1) =  0; %-f1*f1*a1*sin(f1*k*dt); %0;
+    xGoal(10,1) =  0; %-f2*f2*a2*sin(f2*k*dt);%0;
+    xGoal(11,1) = 0; %-f1*f1*f1*a1*cos(f1*k*dt);
+    xGoal(12,1) = 0; %-f2*f2*f2*a2*cos(f2*k*dt);
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP, xGoal);
-Op.lims  = [-3.0e5 3.0e5; -4.0e5 4.0e5];
+Op.lims  = [0.0e5 3.0; 0.0e5 5.0];
 Op.maxIter = 250;
 % run the optimization
 Op.plot = 0;    
 [xhat,uhat, Lhat]= iLQG(DYNCST, x0, u0, Op);
 
-xhat0 = xhat(1:8,1);
-uhat0 = uhat(1:2,1);
-x0 = pneumatics6st_dynamics(xhat0,uhat0);
-x1test(1:8,k) = x0(1:8,1);
-x2test(1:8,k) = x0(2,1);
-u0 = uhat0;
-KL = 1e5*0.5;
-% u0(1,1) = uhat0(1,1) - KL*(x(1,1) - xGoal(1,1));
-% u0(2,1) = uhat0(2,1) - KL*(x(2,1) - xGoal(2,1));
-u1k(1:2,k) = u0(1:2,1);
-u2k(k) = u0(2,1);
-L1k(k) = Lhat(1,1);
-L2k(k) = Lhat(1,2);
-k
 % size(x(1:4,1:T))
 % size(xtot(1:4,xinit:xfin))
 % xtot(1:4,xinit:xfin) = x(1:4,1:T);
@@ -92,34 +68,36 @@ end
 % subplot(223), plot(x(3,:));
 % subplot(224), plot(x(4,:));
 figure(4)
-subplot(211), plot((1:N_tot)*dt, (180/pi)*x1test(1,:), 'Linewidth', 2.0);
+subplot(211), plot((1:N_tot)*dt, (180/pi)*xhat(1,1:N_tot), 'b', 'Linewidth', 2.0);
 hold on;
 grid on;
-subplot(211), plot((1:N_tot)*dt, (180/pi)*testgoal1(1,:),'r', 'Linewidth', 2.0);
-subplot(211), plot((1:N_tot)*dt, (180/pi)*x1test(2,:), 'k', 'Linewidth', 2.0);
-subplot(211), plot((1:N_tot)*dt, (180/pi)*testgoal2(1,:),'m', 'Linewidth', 2.0);
+subplot(211), plot((1:N_tot)*dt, (180/pi)*xGoal(1), 'r', 'Linewidth', 2.0);
+% subplot(211), plot((1:N_tot)*dt, (180/pi)*testgoal1(1,:),'r', 'Linewidth', 2.0);
+subplot(211), plot((1:N_tot)*dt, (180/pi)*xhat(2,1:N_tot), 'k', 'Linewidth', 2.0);
+subplot(211), plot((1:N_tot)*dt, (180/pi)*xGoal(2), 'cy','Linewidth', 2.0);
+% subplot(211), plot((1:N_tot)*dt, (180/pi)*testgoal2(1,:),'m', 'Linewidth', 2.0);
 ylabel('Position (Degrees)')
-legend('Model response', 'Reference');
-title('MPC based Trajectory tracking', 'FontSize',30)
+legend('Joint 1 ', 'Joint 2');
+title('DDP optimal weight lifting', 'FontSize',30)
 
-subplot(212), plot(1e-5*u1k(1,:), 'Linewidth', 2.0);
+subplot(212), plot((1:N_tot)*dt, uhat(1,1:N_tot), 'Linewidth', 2.0);
 hold on;
-subplot(212), plot(1e-5*u2k(1,:), 'c','Linewidth', 2.0);
+subplot(212), plot((1:N_tot)*dt, uhat(2,:), 'c','Linewidth', 2.0);
 ylabel('Control Input (Bar)');
 xlabel('Time (s)');
+legend('Input 1 ', 'Input 2');
+% figure(5)
+% plot((1:N_tot)*dt, L1k(1,:), 'Linewidth', 2.0);
+% hold on;
+% plot((1:N_tot)*dt, L2k(1,:),'r', 'Linewidth', 2.0);
+% ylabel('Gain at X1');
+% xlabel('Time (s)');
+% title('Gain Matrix', 'FontSize',30)
 
-figure(5)
-plot((1:N_tot)*dt, L1k(1,:), 'Linewidth', 2.0);
-hold on;
-plot((1:N_tot)*dt, L2k(1,:),'r', 'Linewidth', 2.0);
-ylabel('Gain at X1');
-xlabel('Time (s)');
-title('Gain Matrix', 'FontSize',30)
-
-figure(6)
-subplot(211), plot((1:N_tot)*dt, 1e-5*x1test(5,:), 'Linewidth', 2.0);
-hold on;
-subplot(211), plot((1:N_tot)*dt, 1e-5*x1test(6,:), 'r', 'Linewidth', 2.0);
+% figure(6)
+% subplot(211), plot((1:N_tot)*dt, 1e-5*x1test(5,:), 'Linewidth', 2.0);
+% hold on;
+% subplot(211), plot(, 1e-5*x1test(6,:), 'r', 'Linewidth', 2.0);
 % ==== graphics ====
 
 %function y = car_dynamics(x,u)
@@ -131,14 +109,14 @@ n_joint = 2; % number of joints in the manipulator;
 % q_dot = x(3:4,1);
 %state_deriv = zeros(8,1);
 %Link 1 parameters
-% link1_lc = 125.4e-3;
-% link1_l = 351.1e-3;
-% m1 = 2.7;
-% link1_I = 0.02;
-link1_lc = 178e-3;
-link1_l = 307e-3;
-m1 = 2.578;
-link1_I = 0.0144;
+link1_lc = 125.4e-3;
+link1_l = 351.1e-3;
+m1 = 2.7;
+link1_I = 0.02;
+% link1_lc = 178e-3;
+% link1_l = 307e-3;
+% m1 = 2.578;
+% link1_I = 0.0144;
 % %Link 2 parameters
 link2_lc = 178e-3;
 link2_l = 307e-3;
@@ -146,7 +124,7 @@ m2 = 2.578;
 link2_I = 0.0144;
 
 %External load parametrs
-mb = 0.01;
+mb = 0.1;
 
 dt = 0.005;
 %jointstate_deriv = zeros(6,1);
@@ -166,13 +144,13 @@ Pdes2 = u(2,:,:); %bsxfun(@minus, 4e5, u(1,:,:));
 %% Parameters for the muscles at Joint 1
 p1 = -0.009338;   %(-0.01208, -0.006597)
 p2 = 0.01444;
-%joint1_R = p1*x(1,1) + p2;
+joint1_R = p1*x(1,1) + p2;
 joint1_lo = 0.23;
 joint1_alphaob = 20.0*pi/180;
 joint1_alphaot = 20.0*pi/180;
 joint1_k = 1.1;
 joint1_ro = 0.012;
-joint1_R = 0.0095;
+%joint1_R = 0.0095;
 fv1 = 3.0;
 wnb1 = omegacal(theta1,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R);
 
@@ -195,8 +173,8 @@ state_deriv(7,:) = (-wnb1.^2).*x(5,:,:) - 2*wnb1.*x(7,:,:) + (wnb1.^2).*Pdes1;
 state_deriv(8,:) = (-wnb2.^2).*x(6,:,:) - 2*wnb2.*x(8,:,:) + (wnb2.^2).*Pdes2;
 
 %% Force calculation
-T1 = forcecal(x,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R,1,3e5);
-T2 = forcecal(x,joint2_lo,joint2_alphaob,joint2_k,joint2_ro,joint2_R,2,4e5);
+T1 = forcecal(x,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R,1,3);
+T2 = forcecal(x,joint2_lo,joint2_alphaob,joint2_k,joint2_ro,joint2_R,2,4);
 % T = [T1 T2]';
 
 %% Mass Inertia Matrix 
@@ -245,7 +223,7 @@ end
 % st =size(T)
 % sc =size(C)
 %% Joint Dynamics
-
+% Mat = [q1_dotdot, q2_dotdot]'
 for k=1:col
   Mat(:,1,k)   = inv(M(:,:,k))*(T(:,:,k)+Tf(:,:,k) - C(:,:,k) - G(:,:,k));
 end 
@@ -269,6 +247,7 @@ function c = pneumatic_cost(x, u, xGoal)
 dt = 0.005;
 
 xGoaltemp = xGoal;
+xGoaltemp = xGoal;
 %h = [dx1 dx1 dx1 dx1 dx2 dx2 dx2 dx2 dx1 dx1]';
 % href = h(5:6,1); %Pxmat(h)
 [Pref,Pref_dot] = Pxmat(xGoaltemp);
@@ -280,21 +259,20 @@ xGoaltemp = xGoal;
 % Pref_Deriv(2) = (Pref2(2) - Pref1(2))/2*href(2,1)
 % Pxfun = @(xGoal) Pxmat(xGoal);
 % Pref_Deriv = finite_difference(Pxfun,xGoal,dt)
-xGoal(5,1) = Pref(1,1);
-xGoal(6,1) = Pref(2,1);
-xGoal(7,1) = Pref_dot(1,1);
-xGoal(8,1) = Pref_dot(2,1);
-
+% xGoal(5,1) = Pref(1,1);
+% xGoal(6,1) = Pref(2,1);
+% xGoal(7,1) = Pref_dot(1,1);
+% xGoal(8,1) = Pref_dot(2,1);
 goal(1:8,1) = xGoal(1:8,1); %[0.5;0;1e5;0];
 final = isnan(u(1,:));
 u(:,final)  = 0;
 
-cu  = 1*1e-4*[0.01 .01];         % control cost coefficients
+cu  = 1*1e-1*[0.001 .001];         % control cost coefficients
 
-cf  = 1e1*[0e4 0e4 0 0 2 2 2 2];    % final cost coefficients
+cf  = 8e-2*[1 1 0 0 0 0 0 0];    % final cost coefficients
 %pf  = [.01 .01.01 0 1 0]';    % smoothness scales for final cost
 
-cx  = 1e1*[0e4 0e4 0 0 2 2 2 2];          % running cost coefficients
+cx  = 8e-2*[1 1 0 0 0 0 0 0];          % running cost coefficients
 %px  = [.1 .1]';             % smoothness scales for running cost
 
 % control cost
@@ -480,9 +458,9 @@ epst = (1-(lt./lo));
 P1 = x(i+4,:,:);
 P2 = bsxfun(@minus, pmax, x(i+4,:,:)); %x(4,:,:);
 P = [P1;P2];
-fbterm = pi*ro^2*(a_biceps*(1-k.*epsb).^2 - b_biceps);
+fbterm = 1e5*pi*ro^2*(a_biceps*(1-k.*epsb).^2 - b_biceps);
 F_biceps =  P1.*fbterm;
-ftterm = pi*ro^2*(a_triceps*(1-k.*epst).^2 - b_triceps);
+ftterm = 1e5*pi*ro^2*(a_triceps*(1-k.*epst).^2 - b_triceps);
 F_triceps = P2.*ftterm;
 %F2max = 1*pi*ro^2*4*1e5*(a*(1-k*emax)^2 - b);
 Fmat = [F_biceps; F_triceps];
@@ -516,13 +494,13 @@ dt = 0.005;
 %% Parameters for the muscles at Joint 1
 p1 = -0.009338;   %(-0.01208, -0.006597)
 p2 = 0.01444;
-%joint1_R = p1*x(1,1) + p2;
+joint1_R = p1*x(1,1) + p2;
 joint1_lo = 0.23;
 joint1_alphaob = 20.0*pi/180;
 joint1_alphaot = 20.0*pi/180;
 joint1_k = 1.1;
 joint1_ro = 0.012;
-joint1_R = 0.0095;
+% joint1_R = 0.0095;
 fv1 = 3.0;
 %wnb1 = omegacal(theta1,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R);
 
@@ -539,8 +517,8 @@ fv2 = 0.25;
 %wn = [wnb1 wnb2]';
 
 %% Muslces force parameter calculation
-[fx1term,Pst1,fx1term_dot,Pst1_dot] = fxparcal(x,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R,1,3e5);
-[fx2term,Pst2,fx2term_dot,Pst2_dot] = fxparcal(x,joint2_lo,joint2_alphaob,joint2_k,joint2_ro,joint2_R,2,4e5);
+[fx1term,Pst1,fx1term_dot,Pst1_dot] = fxparcal(x,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R,1,3);
+[fx2term,Pst2,fx2term_dot,Pst2_dot] = fxparcal(x,joint2_lo,joint2_alphaob,joint2_k,joint2_ro,joint2_R,2,4);
 % T = [T1 T2]';
 
 %% Mass Inertia Matrix 
@@ -662,11 +640,11 @@ epst = (1-(lt./lo));
 P1 = x(i+4,:,:);
 P2 = bsxfun(@minus, pmax, x(i+4,:,:)); %x(4,:,:);
 P = [P1;P2];
-fbterm = R*pi*ro^2*(a_biceps*(1-k.*epsb).^2 - b_biceps);
-fbterm_dot = R*pi*ro^2*a_biceps*2*(-k)*(R/lo).*(1-k.*epsb).*x(i+2,:,:);
+fbterm = 1e5*R*pi*ro^2*(a_biceps*(1-k.*epsb).^2 - b_biceps);
+fbterm_dot = 1e5*R*pi*ro^2*a_biceps*2*(-k)*(R/lo).*(1-k.*epsb).*x(i+2,:,:);
 %F_biceps =  P1.*fbterm;
-ftterm = R*pi*ro^2*(a_triceps*(1-k.*epst).^2 - b_triceps);
-ftterm_dot = R*pi*ro^2*a_triceps*2*(k)*(R/lo).*(1-k.*epst).*x(i+2,:,:);
+ftterm = 1e5*R*pi*ro^2*(a_triceps*(1-k.*epst).^2 - b_triceps);
+ftterm_dot = 1e5*R*pi*ro^2*a_triceps*2*(k)*(R/lo).*(1-k.*epst).*x(i+2,:,:);
 fxterm = fbterm + ftterm;
 fxterm_dot = fbterm_dot + ftterm_dot;
 Pst = pmax.*ftterm;
