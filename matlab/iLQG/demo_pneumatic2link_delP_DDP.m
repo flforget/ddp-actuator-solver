@@ -1,4 +1,4 @@
-function demo_pneumatic2link_delP_DDP
+function [xhat, Tnet, s] = demo_pneumatic2link_delP_DDP
 % A demo of iLQG/DDP with pneumatic 2link manipulator-dynamics
 
 fprintf(['\nA demonstration of the iLQG algorithm '...
@@ -50,6 +50,24 @@ Op.maxIter = 250;
 % run the optimization
 Op.plot = 0;    
 [xhat,uhat, Lhat]= iLQG(DYNCST, x0, u0, Op);
+[row,col] = size(uhat)
+for i=1:col
+xhat0 = xhat(1:8,i);
+uhat0 = uhat(1:2,i);
+xtraj(1:8,i) = pneumatics6st_dynamics(xhat0,uhat0);
+%% Stiffness calculation
+dx = [1e-2;1e-2];
+Tnet(1:2,i) = Net_Torue(xhat0,uhat0);
+xtemp(1:8,i) = xhat0;
+xtemp(1:2,i) = xhat0(1:2,1)+dx; 
+f2(1:2,i) = Net_Torue(xtemp,uhat0);
+
+xtemp(1:8,i) = xhat0;
+xtemp(1:2,i) = xhat0(1:2,1)-dx; 
+f1(1:2,i) = Net_Torue(xtemp,uhat0);
+s= -(f2 -f1)./(2*dx(1));
+end
+%st = finite_difference(fun,xu,h);
 
 % size(x(1:4,1:T))
 % size(xtot(1:4,xinit:xfin))
@@ -67,7 +85,7 @@ end
 % 
 % subplot(223), plot(x(3,:));
 % subplot(224), plot(x(4,:));
-figure(4)
+figure(1)
 subplot(211), plot((1:N_tot)*dt, (180/pi)*xhat(1,1:N_tot), 'b', 'Linewidth', 2.0);
 hold on;
 grid on;
@@ -86,6 +104,27 @@ subplot(212), plot((1:N_tot)*dt, uhat(2,:), 'c','Linewidth', 2.0);
 ylabel('Control Input (Bar)');
 xlabel('Time (s)');
 legend('Input 1 ', 'Input 2');
+
+%% PLOT of stiffness
+figure(2)
+subplot(211), plot((1:N_tot)*dt, Tnet(1,1:N_tot),  'Linewidth', 2.0);
+hold on;
+grid on;
+subplot(211), plot((1:N_tot)*dt, Tnet(2,1:N_tot), 'r', 'Linewidth', 2.0);
+ylabel('Net Torque (Degrees)')
+legend('Joint 1 ', 'Joint 2');
+title('Net Joint Torues: 0ptimal weight lifting', 'FontSize',30)
+
+subplot(212), plot((1:N_tot)*dt, s(1,1:N_tot), 'Linewidth', 2.0);
+hold on;
+subplot(212), plot((1:N_tot)*dt, s(2,1:N_tot), 'r','Linewidth', 2.0);
+ylabel('Stifness');
+xlabel('Time (s)');
+legend('Joint 1 ', 'Joint 2');
+
+
+%%
+
 % figure(5)
 % plot((1:N_tot)*dt, L1k(1,:), 'Linewidth', 2.0);
 % hold on;
@@ -124,7 +163,7 @@ m2 = 2.578;
 link2_I = 0.0144;
 
 %External load parametrs
-mb = 0.1;
+mb = 0.5;
 
 dt = 0.005;
 %jointstate_deriv = zeros(6,1);
@@ -144,13 +183,13 @@ Pdes2 = u(2,:,:); %bsxfun(@minus, 4e5, u(1,:,:));
 %% Parameters for the muscles at Joint 1
 p1 = -0.009338;   %(-0.01208, -0.006597)
 p2 = 0.01444;
-joint1_R = p1*x(1,1) + p2;
+%joint1_R = p1*x(1,1) + p2;
 joint1_lo = 0.23;
 joint1_alphaob = 20.0*pi/180;
 joint1_alphaot = 20.0*pi/180;
 joint1_k = 1.1;
 joint1_ro = 0.012;
-%joint1_R = 0.0095;
+joint1_R = 0.0095;
 fv1 = 3.0;
 wnb1 = omegacal(theta1,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R);
 
@@ -488,7 +527,7 @@ m2 = 2.578;
 link2_I = 0.0144;
 
 %External load parametrs
-mb = 0.01;
+mb = 0.5;
 
 dt = 0.005;
 %% Parameters for the muscles at Joint 1
@@ -654,6 +693,134 @@ Pst_dot = pmax.*ftterm_dot;
 %Fmat = [F_biceps; F_triceps];
 % Torqe_pneumatics = (F_biceps -F_triceps ).*R;
 % utility functions, singleton-expanded addition and multiplication
+%% Net Torque at Joint and stiffness calculation
+function Net_T = Net_Torue(x,u)
+
+%%
+n_joint = 2; % number of joints in the manipulator;
+% q = x(1:2,1);
+% q_dot = x(3:4,1);
+%state_deriv = zeros(8,1);
+%Link 1 parameters
+link1_lc = 125.4e-3;
+link1_l = 351.1e-3;
+m1 = 2.7;
+link1_I = 0.02;
+% link1_lc = 178e-3;
+% link1_l = 307e-3;
+% m1 = 2.578;
+% link1_I = 0.0144;
+% %Link 2 parameters
+link2_lc = 178e-3;
+link2_l = 307e-3;
+m2 = 2.578;
+link2_I = 0.0144;
+
+%External load parametrs
+mb = 0.5;
+
+dt = 0.005;
+%jointstate_deriv = zeros(6,1);
+%joint_state = x;
+
+% F = zeros(2,1);
+% V = zeros(2,1);
+
+%Pstate_deriv = zeros(4,1);
+%%
+theta1 = x(1,:,:);
+theta2 = x(2,:,:);
+% theta_dot = x(3,:);
+Pdes1 = u(1,:,:);
+Pdes2 = u(2,:,:); %bsxfun(@minus, 4e5, u(1,:,:));
+
+%% Parameters for the muscles at Joint 1
+p1 = -0.009338;   %(-0.01208, -0.006597)
+p2 = 0.01444;
+joint1_R = p1*x(1,1) + p2;
+joint1_lo = 0.23;
+joint1_alphaob = 20.0*pi/180;
+joint1_alphaot = 20.0*pi/180;
+joint1_k = 1.1;
+joint1_ro = 0.012;
+%joint1_R = 0.0095;
+fv1 = 3.0;
+wnb1 = omegacal(theta1,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R);
+
+%% Parameters for the muscles at Joint 2
+joint2_lo = 0.185;
+joint2_alphaob = 23.0*pi/180;
+joint2_alphaot = 23.0*pi/180;
+joint2_k = 1.25;
+joint2_ro = 0.0085;
+joint2_R = 0.015;
+fv2 = 0.25;
+wnb2 = omegacal(theta2,joint2_lo,joint2_alphaob,joint2_k,joint2_ro,joint2_R);
+
+wn = [wnb1 wnb2]';
+%% Delta P Pressure Dynamics
+%%%%%%% 2nd order  %%%%%%%%%%%%%%%
+state_deriv(5,:) = x(7,:);
+state_deriv(6,:) = x(8,:);
+state_deriv(7,:) = (-wnb1.^2).*x(5,:,:) - 2*wnb1.*x(7,:,:) + (wnb1.^2).*Pdes1;
+state_deriv(8,:) = (-wnb2.^2).*x(6,:,:) - 2*wnb2.*x(8,:,:) + (wnb2.^2).*Pdes2;
+
+%% Force calculation
+T1 = forcecal(x,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R,1,3);
+T2 = forcecal(x,joint2_lo,joint2_alphaob,joint2_k,joint2_ro,joint2_R,2,4);
+% T = [T1 T2]';
+
+%% Mass Inertia Matrix 
+m11_const = link1_I + m1*(link1_lc)^2 + link2_I + m2*(link1_l^2 + link2_lc^2) + mb*(link1_l^2 + link2_l^2);
+m11_var = m2*2*link1_l*link2_lc.*cos(x(2,:)) + mb*2*link1_l*link2_l.*cos(x(2,:));
+m11 = pp(m11_var,m11_const);
+
+m12_const = link2_I + m2*link2_lc^2 + mb*link2_l^2;
+m12_var = m2*link1_l*link2_lc.*cos(x(2,:)) + mb*link1_l*link2_l.*cos(x(2,:));
+m12 = pp(m12_var,m12_const);
+col = size(m12,2);
+m22 = link2_I + m2*link2_lc^2 + mb*link2_l^2;
+for k=1:col
+    M(1:2,1:2,k) = [m11(1,k) m12(1,k);m12(1,k) m22];
+end
+% sm = size(M)
+%M() = [m11 m12;m12 m22];
+%% Coriolis Matrix
+c1_const = -(m2*link2_lc + mb*link2_l)*link1_l;
+c1_var1 = sin(x(2,:));
+c1_var2 = 2*x(3,:).*x(4,:) + x(4,:).^2;
+c1 = c1_const.*tt(c1_var1,c1_var2);
+
+c2_const = (m2*link2_lc + mb*link2_l)*link1_l;
+c2_var1 = sin(x(2,:));
+c2_var2 = x(3,:).^2;
+c2 = c2_const.*tt(c2_var1,c2_var2);
+% C = [c1 c2]';
+%% Gravity Matrix
+g1 = (m1*link1_lc + m2*link1_l + mb*link1_l).*sin(x(1,:)) + (m2*link2_lc + mb*link2_l).*sin(x(1,:) + x(2,:));
+g2 = (m2*link2_lc + mb*link2_l).*sin(x(1,:) + x(2,:));
+sg = size(g1,2);
+%% viscous friction matrix
+tf1 = -fv1.*x(3,:);
+tf2 = -fv2.*x(4,:);
+
+
+for k=1:sg
+    T(1:2,1,k) = [T1(1,k);T2(1,k)];
+    G(1:2,1,k) = 9.8.*[g1(1,k);g2(1,k)];
+    C(1:2,1,k) = [c1(1,k);c2(1,k)];
+    Tf(1:2,1,k) = [tf1(1,k);tf2(1,k)];
+end
+%G = 9.8.*[g1 g2]';
+% sg = size(G);
+% st =size(T)
+% sc =size(C)
+%% Joint Dynamics
+% Mat = [q1_dotdot, q2_dotdot]'
+Net_T = (T(:,:,k)+Tf(:,:,k) - C(:,:,k) - G(:,:,k));
+
+
+
 function c=pp(a,b)
 c = bsxfun(@plus,a,b);
 
