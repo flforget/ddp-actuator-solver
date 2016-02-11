@@ -1,4 +1,4 @@
-function [xhat, Tnet, s] = demo_pneumatic2link_delP_DDP
+function [xtrajout, Tnet, s] = demo_pneumatic2link_delP_DDP
 % A demo of iLQG/DDP with pneumatic 2link manipulator-dynamics
 
 fprintf(['\nA demonstration of the iLQG algorithm '...
@@ -12,7 +12,7 @@ fprintf(['\nA demonstration of the iLQG algorithm '...
 full_DDP = false;
 
 dt = 5e-3; % dt for dynamics
-ToT = 4;       %(in seconds)
+ToT = 10;       %(in seconds)
 N_tot = ToT/dt;
 %T_horizon = 0.5;  %(in seconds)
 T       = N_tot; %10; %T_horizon/dt;
@@ -45,7 +45,7 @@ for k=1:1
     xGoal(12,1) = 0; %-f2*f2*f2*a2*cos(f2*k*dt);
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP, xGoal);
-Op.lims  = [0.0e5 3.0; 0.0e5 5.0];
+Op.lims  = [0.0e5 4.0; 0.0e5 5.0];
 Op.maxIter = 250;
 % run the optimization
 Op.plot = 0;    
@@ -75,6 +75,8 @@ end
 % utot(1,T*(k-1)+1:T*k) = u(1,1:T);
 end
 %print('END OF LOOP')
+
+xtrajout = [(180/pi)*xhat(1:8,1:N_tot)];
 %% PLOT
 
 %figure(4)
