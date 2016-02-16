@@ -29,32 +29,32 @@ void CostFunctionRomeoActuator::computeFinalCostDeriv(const stateVec_t& X)
 }
 
 // accessors //
-stateVec_t CostFunctionRomeoActuator::getlx()
+stateVec_t& CostFunctionRomeoActuator::getlx()
 {
     return lx;
 }
 
-stateMat_t CostFunctionRomeoActuator::getlxx()
+stateMat_t& CostFunctionRomeoActuator::getlxx()
 {
     return lxx;
 }
 
-commandVec_t CostFunctionRomeoActuator::getlu()
+commandVec_t& CostFunctionRomeoActuator::getlu()
 {
     return lu;
 }
 
-commandMat_t CostFunctionRomeoActuator::getluu()
+commandMat_t& CostFunctionRomeoActuator::getluu()
 {
     return luu;
 }
 
-stateR_commandC_t CostFunctionRomeoActuator::getlxu()
+stateR_commandC_t& CostFunctionRomeoActuator::getlxu()
 {
     return lxu;
 }
 
-commandR_stateC_t CostFunctionRomeoActuator::getlux()
+commandR_stateC_t& CostFunctionRomeoActuator::getlux()
 {
     return lux;
 }
