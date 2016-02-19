@@ -1,4 +1,4 @@
-function [xtrajout, uhat, Tnet, s] = demo_pneumatic2link_P1P2_DDP
+function [xtrajout, uhat, Tnet, s] = demo_pneumatic2link_delPPm_DDP
 % A demo of iLQG/DDP with pneumatic 2link manipulator-dynamics
 
 fprintf(['\nA demonstration of the iLQG algorithm '...
@@ -19,8 +19,8 @@ T       = N_tot; %10; %T_horizon/dt;
 %N_DT = ToT/T_horizon;
 
 
-x0      = zeros(12,1); %[0.0;0;0.0e5;0e5];   % initial state
-u0      = 0.1*randn(4,T)
+x0   = zeros(12,1); %[0.0;0;0.0e5;0e5];   % initial state
+u0   = 0.1*randn(4,T)
 xtot = zeros(8,ToT/dt);
 final_goal = [0.5 1 0 0 0*1.238e5 0*1.578e5 0 0]';
 
@@ -50,7 +50,7 @@ for k=1:1
     
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP, xGoal);
-Op.lims  = [0.0e5 2.0; -2.0 2.0; 0.0 2.5; -2.5 2.5];
+Op.lims  = [0.0e5 3.0; 0.0 3.0; 0.0 4; 0 4];
 Op.maxIter = 250;
 % run the optimization
 Op.plot = 0;    
@@ -106,17 +106,17 @@ ylabel('Position (Degrees)')
 legend('Joint 1 ', 'Joint 2');
 title('DDP optimal weight lifting', 'FontSize',30)
 
-subplot(212), plot((1:N_tot)*dt, uhat(1,1:N_tot), 'Linewidth', 2.0);
+subplot(212), plot((1:N_tot)*dt, uhat(1,1:N_tot), 'b', 'Linewidth', 2.0);
 hold on;
 subplot(212), plot((1:N_tot)*dt, uhat(3,1:N_tot), 'c','Linewidth', 2.0);
 
-subplot(212), plot((1:N_tot)*dt, uhat(2,1:N_tot), 'Linewidth', 2.0);
+subplot(212), plot((1:N_tot)*dt, uhat(2,1:N_tot), 'b--', 'Linewidth', 2.0);
 hold on;
-subplot(212), plot((1:N_tot)*dt, uhat(4,1:N_tot), 'c','Linewidth', 2.0);
+subplot(212), plot((1:N_tot)*dt, uhat(4,1:N_tot), 'c--','Linewidth', 2.0);
 
 ylabel('Control Input (Bar)');
 xlabel('Time (s)');
-legend('Input 1 ', 'Input 2');
+legend('Input 1 at Joint 1', 'Input 1 at Joint2', 'Input 2 at Joint 1', 'Input 2 at Joint2');
 
 %% PLOT of stiffness
 figure(2)
@@ -190,9 +190,9 @@ dt = 0.005;
 theta1 = x(1,:,:);
 theta2 = x(2,:,:);
 % theta_dot = x(3,:);
-Pdes1_agn = u(1,:,:) + u(2,:,:);
+Pdes1_agn =  u(2,:,:);
 Pdes1_ant = u(1,:,:) - u(2,:,:); % u1 is control input for stiffness and u2 for equilibrium position at joint1;
-Pdes2_agn = u(3,:,:) + u(4,:,:);
+Pdes2_agn =  u(4,:,:);
 Pdes2_ant = u(3,:,:) - u(4,:,:); % u3 is control input for stiffness and u4 for equilibrium position at joint2;
 %% Parameters for the muscles at Joint 1
 p1 = -0.009338;   %(-0.01208, -0.006597)
@@ -294,6 +294,7 @@ state_deriv(3,:) = Mat(1,:);
 state_deriv(4,:) = Mat(2,:);
 %((F_biceps -F_triceps ).*R  - fv.*theta_dot - (m*g*0.5*link_l).*sin(theta))/I;
 
+
 y = x + dt.*state_deriv;
 %y = state_deriv;
 %% END
@@ -316,7 +317,24 @@ ho(4,1) = 0; %-f2*f2*f2*a2*cos(f2*k*dt);
 %h = [dx1 dx1 dx1 dx1 dx2 dx2 dx2 dx2 dx1 dx1]';
 % href = h(5:6,1); %Pxmat(h)
 [Pref,Pref_dot] = Pxmat(xGoaltemp,ho);
-% xGoaltemp = xGoal + [h;0;0]
+[rowx, colx] = size(x);
+% Stiffness calculation
+dx = [1e-2;1e-2];
+xhat0 = x; uhat0 = u;
+Tnet(1:2,:) = Net_Torue(xhat0,uhat0);
+xtemp(1:rowx,:) = xhat0;
+xtemp(1:2,:) = pp(xhat0(1:2,:) , dx); 
+f2(1:2,:) = Net_Torue(xtemp,uhat0);
+
+xtemp(1:rowx,:) = xhat0;
+xtemp(1:2,:) = mm(xhat0(1:2,:) , dx); 
+f1(1:2,:) = Net_Torue(xtemp,uhat0);
+s= -(f2 -f1)./(2*dx(1));
+s_end = s(1:2,end);
+s_goal = [20;5];
+
+%%
+% xGoaltemp = xGoal+ [h;0;0]
 % Pref2 = Pxmat(xGoaltemp)
 % xGoaltemp = xGoal - [h;0;0]
 % Pref1 = Pxmat(xGoaltemp)
@@ -328,6 +346,7 @@ ho(4,1) = 0; %-f2*f2*f2*a2*cos(f2*k*dt);
 % xGoal(6,1) = Pref(2,1);
 % xGoal(7,1) = Pref_dot(1,1);
 % xGoal(8,1) = Pref_dot(2,1);
+%%
 goal(1:12,1) = xGoal(1:12,1); %[0.5;0;1e5;0];
 final = isnan(u(1,:));
 u(:,final)  = 0;
@@ -339,10 +358,15 @@ cf  = 8e-2*[1 1 0 0 0 0 0 0 0 0 0 0];    % final cost coefficients
 
 cx  = 8e-2*[1 1 0 0 0 0 0 0 0 0 0 0];          % running cost coefficients
 %px  = [.1 .1]';             % smoothness scales for running cost
-
+cs  = 1*1e-1*[0.01 .005];         % control cost coefficients
 % control cost
-u;
-lu    = cu*u.^2;
+
+lu    = cu*u.^2; %cu(1)*u(2,:).^2 + cu(4)*u(4,:).^2;
+alpha1 = 2.0;
+alpha2 = 2.0;
+alpha3 = 2.5;
+alpha4 = 2.5;
+%lu = (alpha1^2).*( cosh(u(1,:)./alpha1) - 1) + (alpha2^2).*( cosh(u(2,:)./alpha2) - 1) + (alpha3^2).*( cosh(u(3,:)./alpha3) - 1) + (alpha4^2).*( cosh(u(4,:)./alpha4) - 1);
 %l     = E.cx(1)*(x(1,:)-goal(1,1)).^2 +E.cx(2)*(x(2,:)-goal(2,1)).^2 +E.cx(3)*(x(3,:)-goal(3,1)).^2 +E.cx(4)*(x(4,:)-goal(4,1)).^2 +E.cx(5)*(x(5,:)-goal(5,1)).^2 +E.cx(6)*(x(6,:)-goal(6,1)).^2);
 
 % final cost
@@ -361,6 +385,13 @@ curcos(r,:) = cx(r).*(mm(x(r,:),goal(r,1))).^2;
 end
 curcos;
 lx = sum(curcos);
+%ls = cs*(mm(s_end,s_goal)).^2;
+sum_pres1 = pp(x(5,:) , x(6,:));
+sum_pres2 = pp(x(9,:) , x(10,:));
+sum_pres = [sum_pres1;sum_pres2];
+sum_goal = [3;4];
+lp = cs*(mm(sum_pres,sum_goal)).^2;
+
 % c1 = mm(x(1,:), goal(1,1));
 % c2 = mm(x(2,:), goal(2,1));
 % c3 = mm(x(3,:), goal(3,1));
@@ -380,7 +411,7 @@ lx = sum(curcos);
 %lx = lx1 + lx2 + lx3 + lx4; % +lx5 + lx6;
 %lf = cf*x(:,end);
 % total const
-c = lu + lx + lf;
+c = lu + lx + lf; % + lp;
 
 function y = sabs(x,p)
 % smooth absolute-value function (a.k.a pseudo-Huber)
@@ -404,7 +435,7 @@ else
     J       = finite_difference(xu_dyn, [x; u], dt);
     fx      = J(:,ix,:);
     fu      = J(:,iu,:);
-    
+        
     % cost first derivatives
     xu_cost = @(xu) pneumatic_cost(xu(ix,:),xu(iu,:),xGoal);
     J       = squeeze(finite_difference(xu_cost, [x; u], dt));

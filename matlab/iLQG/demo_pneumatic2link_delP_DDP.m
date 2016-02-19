@@ -1,4 +1,4 @@
-function [xtrajout, Tnet, s] = demo_pneumatic2link_delP_DDP
+function [xtrajout, uhat, Tnet, s] = demo_pneumatic2link_delP_DDP
 % A demo of iLQG/DDP with pneumatic 2link manipulator-dynamics
 
 fprintf(['\nA demonstration of the iLQG algorithm '...
@@ -12,7 +12,7 @@ fprintf(['\nA demonstration of the iLQG algorithm '...
 full_DDP = false;
 
 dt = 5e-3; % dt for dynamics
-ToT = 10;       %(in seconds)
+ToT = 1;       %(in seconds)
 N_tot = ToT/dt;
 %T_horizon = 0.5;  %(in seconds)
 T       = N_tot; %10; %T_horizon/dt;
@@ -20,6 +20,7 @@ T       = N_tot; %10; %T_horizon/dt;
 
 
 x0      = zeros(8,1); %[0.0;0;0.0e5;0e5];   % initial state
+
 u0      = 0.1*randn(2,T);
 xtot = zeros(8,ToT/dt);
 final_goal = [0.5 1 0 0 0*1.238e5 0*1.578e5 0 0]';
@@ -45,7 +46,7 @@ for k=1:1
     xGoal(12,1) = 0; %-f2*f2*f2*a2*cos(f2*k*dt);
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP, xGoal);
-Op.lims  = [0.0e5 4.0; 0.0e5 5.0];
+Op.lims  = [0.0e5 3.0; 0.0e5 3.5];
 Op.maxIter = 250;
 % run the optimization
 Op.plot = 0;    
@@ -76,7 +77,7 @@ end
 end
 %print('END OF LOOP')
 
-xtrajout = [(180/pi)*xhat(1:8,1:N_tot)];
+xtrajout = xhat(1:8,1:N_tot);
 %% PLOT
 
 %figure(4)
@@ -185,13 +186,13 @@ Pdes2 = u(2,:,:); %bsxfun(@minus, 4e5, u(1,:,:));
 %% Parameters for the muscles at Joint 1
 p1 = -0.009338;   %(-0.01208, -0.006597)
 p2 = 0.01444;
-%joint1_R = p1*x(1,1) + p2;
+joint1_R = p1*x(1,1) + p2;
 joint1_lo = 0.23;
 joint1_alphaob = 20.0*pi/180;
 joint1_alphaot = 20.0*pi/180;
 joint1_k = 1.1;
 joint1_ro = 0.012;
-joint1_R = 0.0095;
+%joint1_R = 0.0095;
 fv1 = 3.0;
 wnb1 = omegacal(theta1,joint1_lo,joint1_alphaob,joint1_k,joint1_ro,joint1_R);
 
@@ -311,6 +312,7 @@ u(:,final)  = 0;
 cu  = 1*1e-1*[0.001 .001];         % control cost coefficients
 
 cf  = 8e-2*[1 1 0 0 0 0 0 0];    % final cost coefficients
+cf2 = 1e-1;
 %pf  = [.01 .01.01 0 1 0]';    % smoothness scales for final cost
 
 cx  = 8e-2*[1 1 0 0 0 0 0 0];          % running cost coefficients
@@ -324,7 +326,8 @@ lu    = cu*u.^2;
 % final cost
 if any(final)
    %llf      = cf*(x(:,final) - goal); %cf*sabs(x(:,final),pf);
-   llf      = cf* (bsxfun(@minus, x(:,final), goal)).^2;
+   %llf      = cf* (bsxfun(@minus, x(:,final), goal)).^2;
+   llf      = -cf2* x(4,final).^2;
    lf       = real(final);
    lf(final)= llf;
 else
@@ -337,26 +340,9 @@ curcos(r,:) = cx(r).*(mm(x(r,:),goal(r,1))).^2;
 end
 curcos;
 lx = sum(curcos);
-% c1 = mm(x(1,:), goal(1,1));
-% c2 = mm(x(2,:), goal(2,1));
-% c3 = mm(x(3,:), goal(3,1));
-% c4 = mm(x(4,:), goal(4,1));
-% c5 = mm(x(1,:), goal(1,1));
-% c2 = mm(x(2,:), goal(2,1));
-% c3 = mm(x(3,:), goal(3,1));
-% c4 = mm(x(4,:), goal(4,1));
-% lx1 = cx(1)*c1.^2;
-% lx2 = cx(2)*c2.^2;
-% lx3 = cx(3)*c3.^2;
-% lx4 = cx(4)*c4.^2;
-%lx4 = cx(4)*(x(4,:) - goal(4,1)).^2;
-% lx5 = cx(5)*(x(5,:) - goal(5,1)).^2;
-% lx6 = cx(6)*(x(6,:) - goal(6,1)).^2;
-%lx = cx*(x-goal);%cx*sabs(x(1:2,:),px);
-%lx = lx1 + lx2 + lx3 + lx4; % +lx5 + lx6;
-%lf = cf*x(:,end);
+
 % total const
-c = lu + lx + lf;
+c = lf;
 
 function y = sabs(x,p)
 % smooth absolute-value function (a.k.a pseudo-Huber)
