@@ -32,7 +32,7 @@ int main()
 
     unsigned int T = 50;
     double dt=1e-4;
-    unsigned int iterMax = 100;
+    unsigned int iterMax = 50;
     double stopCrit = 1e-5;
     stateVec_t* xList;
     commandVec_t* uList;

@@ -150,19 +150,17 @@ void ILQRSolver::backwardLoop()
                 lb = lowerCommandBounds - u;
                 ub = upperCommandBounds - u;
                 qp->init(H.data(),g.data(),lb.data(),ub.data(),nWSR);
-                //cout << i<<'\t' <<H <<'\t'<< g<<'\t' << lb<<'\t'  << ub <<endl;
                 qp->getPrimalSolution(xOpt);
                 k = Map<commandVec_t>(xOpt);
-                //cout << k << endl<<'-'<<endl;
-                if((k == lowerCommandBounds) | (k == upperCommandBounds))
+                K = -QuuInv*Qux;
+                for(unsigned int i_cmd=0;i_cmd<commandNb;i_cmd++)
                 {
-                    K.setZero();
-                    cout << iter << " : "<< i << " -> " <<"bounded" << endl;
+                    if((k[i_cmd] == lowerCommandBounds[i_cmd]) | (k[i_cmd] == upperCommandBounds[i_cmd]))
+                    {
+                        K.row(i_cmd).setZero();
+                    }
                 }
-                else
-                {
-                    K = -QuuInv*Qux; // to be modified
-                }
+                cout << K << endl<<endl;
             }
             else
             {
