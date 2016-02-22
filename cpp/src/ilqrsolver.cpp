@@ -7,12 +7,28 @@ using namespace std;
 
 using namespace Eigen;
 
-ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction)
+ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction,bool QPBox)
 {
     dynamicModel = &myDynamicModel;
     costFunction = &myCostFunction;
     stateNb = myDynamicModel.getStateNb();
     commandNb = myDynamicModel.getCommandNb();
+    enableQPBox = QPBox;
+    if(QPBox)
+    {
+        qp = new QProblemB(commandNb);
+        Options myOptions;
+        myOptions.printLevel = PL_LOW;
+        myOptions.enableRegularisation = BT_TRUE;
+        myOptions.initialStatusBounds = ST_INACTIVE;
+        myOptions.numRefinementSteps = 1;
+        myOptions.enableCholeskyRefactorisation = 1;
+        qp->setOptions(myOptions);
+
+        xOpt = new real_t[commandNb];
+        lowerCommandBounds = myDynamicModel.getLowerCommandBounds();
+        upperCommandBounds = myDynamicModel.getUpperCommandBounds();
+    }
 }
 
 void ILQRSolver::FirstInitSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned int& myT,
@@ -58,7 +74,9 @@ void ILQRSolver::solveTrajectory()
         backwardLoop();
         forwardLoop();
         if(changeAmount<stopCrit)
+        {
             break;
+        }
         tmpxPtr = xList;
         tmpuPtr = uList;
         xList = updatedxList;
@@ -111,6 +129,7 @@ void ILQRSolver::backwardLoop()
             Qux += dynamicModel->computeTensorContux(nextVx);
             Quu += dynamicModel->computeTensorContuu(nextVx);
 
+            QuuInv = Quu.inverse();
 
             if(!isQuudefinitePositive(Quu))
             {
@@ -123,12 +142,39 @@ void ILQRSolver::backwardLoop()
                 break;
             }
 
-            QuuInv = Quu.inverse();
-            k = -QuuInv*Qu;
-            K = -QuuInv*Qux;
+            if(enableQPBox)
+            {
+                nWSR = 10;
+                H = Quu;
+                g = Qu;
+                lb = lowerCommandBounds - u;
+                ub = upperCommandBounds - u;
+                qp->init(H.data(),g.data(),lb.data(),ub.data(),nWSR);
+                //cout << i<<'\t' <<H <<'\t'<< g<<'\t' << lb<<'\t'  << ub <<endl;
+                qp->getPrimalSolution(xOpt);
+                k = Map<commandVec_t>(xOpt);
+                //cout << k << endl<<'-'<<endl;
+                if((k == lowerCommandBounds) | (k == upperCommandBounds))
+                {
+                    K.setZero();
+                    cout << iter << " : "<< i << " -> " <<"bounded" << endl;
+                }
+                else
+                {
+                    K = -QuuInv*Qux; // to be modified
+                }
+            }
+            else
+            {
+                k = -QuuInv*Qu;
+                K = -QuuInv*Qux;
+            }   
 
-            nextVx = Qx - K.transpose()*Quu*k;
-            nextVxx = Qxx - K.transpose()*Quu*K;
+            /*nextVx = Qx - K.transpose()*Quu*k;
+            nextVxx = Qxx - K.transpose()*Quu*K;*/
+            nextVx = Qx + K.transpose()*Quu*k + K.transpose()*Qu + Qux.transpose()*k;
+            nextVxx = Qxx + K.transpose()*Quu*K+ K.transpose()*Qux + Qux.transpose()*K;
+            nextVxx = 0.5*(nextVxx + nextVxx.transpose());
 
             kList[i] = k;
             KList[i] = K;
@@ -155,6 +201,10 @@ void ILQRSolver::forwardLoop()
 
 ILQRSolver::traj ILQRSolver::getLastSolvedTrajectory()
 {
+    /* Debug */
+    //int k;
+    //for(k=0;k<T;k++) cout << updateduList[k] << '\t';
+    /**/
     lastTraj.xList = updatedxList;
     for(int i=0;i<T+1;i++)lastTraj.xList[i] += xDes;
     lastTraj.uList = updateduList;

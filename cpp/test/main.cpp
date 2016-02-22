@@ -21,13 +21,13 @@ int main()
     double texec=0.0;
     stateVec_t xinit,xDes;
 
-    xinit << -1.0,0.0,0.0,0.0;
-    xDes << 2.0,0.0,0.0,0.0;
+    xinit << -3.0,0.0,0.0,0.0;
+    xDes << 0.0,0.0,0.0,0.0;
 
-    unsigned int T = 300;
+    unsigned int T = 50;
     double dt=1e-4;
     unsigned int iterMax = 20;
-    double stopCrit = 1e-3;
+    double stopCrit = 1e-5;
     stateVec_t* xList;
     commandVec_t* uList;
     ILQRSolver::traj lastTraj;
@@ -35,7 +35,7 @@ int main()
     RomeoSimpleActuator romeoActuatorModel(dt);
     RomeoLinearActuator romeoLinearModel(dt);
     CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
+    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,0);
     testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
 

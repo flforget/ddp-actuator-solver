@@ -3,8 +3,18 @@
 
 #define pi M_PI
 
+const double RomeoSimpleActuator::k=1000.0;
+const double RomeoSimpleActuator::R=200.0;
+const double RomeoSimpleActuator::Jm=138*1e-7;
+const double RomeoSimpleActuator::Jl=0.1;
+const double RomeoSimpleActuator::fvm=0.01;
+const double RomeoSimpleActuator::Cf0=0.1;
+const double RomeoSimpleActuator::a=10.0;
+
 RomeoSimpleActuator::RomeoSimpleActuator(double& mydt)
 {
+    stateNb=4;
+    commandNb=1;
     dt = mydt;
     Id.setIdentity();
 
@@ -50,6 +60,9 @@ RomeoSimpleActuator::RomeoSimpleActuator(double& mydt)
     QxxCont.setZero();
     QuuCont.setZero();
     QuxCont.setZero();
+
+    lowerCommandBounds << -50.0;
+    upperCommandBounds << 50.0;
 }
 
 
@@ -86,45 +99,4 @@ commandMat_t RomeoSimpleActuator::computeTensorContuu(const stateVec_t& nextVx)
 commandR_stateC_t RomeoSimpleActuator::computeTensorContux(const stateVec_t& nextVx)
 {
     return QuxCont;
-}
-
-/// accessors ///
-unsigned int RomeoSimpleActuator::getStateNb()
-{
-    return stateNb;
-}
-
-unsigned int RomeoSimpleActuator::getCommandNb()
-{
-    return commandNb;
-}
-
-stateMat_t& RomeoSimpleActuator::getfx()
-{
-    return fx;
-}
-
-stateTens_t& RomeoSimpleActuator::getfxx()
-{
-    return fxx;
-}
-
-stateR_commandC_t& RomeoSimpleActuator::getfu()
-{
-    return fu;
-}
-
-stateR_commandC_commandD_t& RomeoSimpleActuator::getfuu()
-{
-    return fuu;
-}
-
-stateR_stateC_commandD_t& RomeoSimpleActuator::getfxu()
-{
-    return fxu;
-}
-
-stateR_commandC_stateD_t& RomeoSimpleActuator::getfux()
-{
-    return fux;
 }
