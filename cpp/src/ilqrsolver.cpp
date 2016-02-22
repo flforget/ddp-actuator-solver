@@ -41,14 +41,25 @@ void ILQRSolver::FirstInitSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsign
     iterMax = myiterMax;
     stopCrit = mystopCrit;
 
-    xList = new stateVec_t[myT+1];
+    xList.resize(myT+1);
+    uList.resize(myT);
+    updatedxList.resize(myT+1);
+    updateduList.resize(myT);
+    tmpxPtr.resize(myT+1);
+    tmpuPtr.resize(myT);
+    k.setZero();
+    K.setZero();
+    kList.resize(myT);
+    KList.resize(myT);
+
+    /*xList = new stateVec_t[myT+1];
     uList = new commandVec_t[myT];
     updatedxList = new stateVec_t[myT+1];
     updateduList = new commandVec_t[myT];
     k.setZero();
     K.setZero();
     kList = new commandVec_t[myT];
-    KList = new commandR_stateC_t[myT];
+    KList = new commandR_stateC_t[myT];*/
 
     alphaList[0] = 1.0;
     alphaList[1] = 0.8;
@@ -66,8 +77,6 @@ void ILQRSolver::initSolver(stateVec_t& myxInit, stateVec_t& myxDes)
 
 void ILQRSolver::solveTrajectory()
 {
-    stateVec_t* tmpxPtr;
-    commandVec_t* tmpuPtr;
     initTrajectory();
     for(iter=0;iter<iterMax;iter++)
     {
@@ -160,7 +169,6 @@ void ILQRSolver::backwardLoop()
                         K.row(i_cmd).setZero();
                     }
                 }
-                cout << K << endl<<endl;
             }
             else
             {
@@ -199,10 +207,6 @@ void ILQRSolver::forwardLoop()
 
 ILQRSolver::traj ILQRSolver::getLastSolvedTrajectory()
 {
-    /* Debug */
-    //int k;
-    //for(k=0;k<T;k++) cout << updateduList[k] << '\t';
-    /**/
     lastTraj.xList = updatedxList;
     for(int i=0;i<T+1;i++)lastTraj.xList[i] += xDes;
     lastTraj.uList = updateduList;

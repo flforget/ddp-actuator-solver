@@ -34,8 +34,8 @@ int main()
     double dt=1e-4;
     unsigned int iterMax = 50;
     double stopCrit = 1e-5;
-    stateVec_t* xList;
-    commandVec_t* uList;
+    stateVecTab_t xList;
+    commandVecTab_t uList;
     ILQRSolver::traj lastTraj;
 
     RomeoSimpleActuator romeoActuatorModel(dt);

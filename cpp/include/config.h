@@ -2,6 +2,10 @@
 #define CONFIG_H
 
 #include <Eigen/Dense>
+#include <Eigen/StdVector>
+
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::MatrixXd)
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::VectorXd)
 
 #define stateSize 4
 #define commandSize 1
@@ -30,5 +34,8 @@ typedef Eigen::Matrix<double,commandSize,stateSize> commandR_stateC_commandD_t[c
 typedef Eigen::Matrix<double,stateSize,stateSize> stateR_stateC_commandD_t[commandSize];    // stateSize x stateSize x commandSize
 typedef Eigen::Matrix<double,commandSize,commandSize> commandR_commandC_stateD_t[stateSize];    // commandSize x commandSize x stateSize
 
+typedef std::vector<stateVec_t> stateVecTab_t;
+typedef std::vector<commandVec_t> commandVecTab_t;
+typedef std::vector<commandR_stateC_t> commandR_stateC_tab_t;
 
 #endif // CONFIG_H

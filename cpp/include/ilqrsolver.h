@@ -6,6 +6,7 @@
 #include "dynamicmodel.h"
 #include "costfunction.h"
 #include <Eigen/Dense>
+#include <Eigen/StdVector>
 #include <qpOASES.hpp>
 #include <qpOASES/QProblemB.hpp>
 
@@ -20,8 +21,8 @@ class ILQRSolver
 public:
     struct traj
     {
-        stateVec_t* xList;
-        commandVec_t* uList;
+        stateVecTab_t xList;
+        commandVecTab_t uList;
         unsigned int iter;
     };
 
@@ -47,10 +48,12 @@ private:
     double stopCrit;
     double changeAmount;
 
-    stateVec_t* xList;
-    commandVec_t* uList;
-    stateVec_t* updatedxList;
-    commandVec_t* updateduList;
+    stateVecTab_t xList;
+    commandVecTab_t uList;
+    stateVecTab_t updatedxList;
+    commandVecTab_t updateduList;
+    stateVecTab_t tmpxPtr;
+    commandVecTab_t tmpuPtr;
     struct traj lastTraj;
 
     stateVec_t nextVx;
@@ -63,8 +66,8 @@ private:
     commandR_stateC_t Qux;
     commandVec_t k;
     commandR_stateC_t K;
-    commandVec_t* kList;
-    commandR_stateC_t* KList;
+    commandVecTab_t kList;
+    commandR_stateC_tab_t KList;
     double alphaList[5];
     double alpha;
 
