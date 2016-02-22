@@ -51,7 +51,7 @@ int main()
         cout << x << endl<<"-"<<endl;
     }*/
 
-    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,1);
+    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,ENABLE_QPBOX);
     testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
 

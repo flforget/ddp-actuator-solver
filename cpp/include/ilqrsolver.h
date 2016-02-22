@@ -9,6 +9,9 @@
 #include <qpOASES.hpp>
 #include <qpOASES/QProblemB.hpp>
 
+#define ENABLE_QPBOX 1
+#define DISABLE_QPBOX 0
+
 using namespace Eigen;
 USING_NAMESPACE_QPOASES
 
