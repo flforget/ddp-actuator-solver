@@ -1,14 +1,12 @@
 #ifndef ROMEOSIMPLEACTUATOR_H
 #define ROMEOSIMPLEACTUATOR_H
 
-#include "config.h"
-
 #include "dynamicmodel.h"
 #include <Eigen/Dense>
 
 using namespace Eigen;
 
-class RomeoSimpleActuator : public DynamicModel
+class RomeoSimpleActuator : public DynamicModel<double,4,1>
 {
 public:
     RomeoSimpleActuator(double& mydt);
@@ -19,8 +17,6 @@ protected:
 public:
 private:
     double dt;
-    //static const unsigned int stateNb=4;
-    //static const unsigned int commandNb=1;
 public:
     static const double k;
     static const double R;
@@ -29,8 +25,6 @@ public:
     static const double fvm;
     static const double Cf0;
     static const double a;
-    //commandVec_t lowerCommandBounds;
-    //commandVec_t upperCommandBounds;
 private:
     stateVec_t Xreal;
     stateMat_t Id;

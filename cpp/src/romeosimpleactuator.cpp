@@ -66,7 +66,7 @@ RomeoSimpleActuator::RomeoSimpleActuator(double& mydt)
 }
 
 
-stateVec_t RomeoSimpleActuator::computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
+RomeoSimpleActuator::stateVec_t RomeoSimpleActuator::computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
 {
     stateVec_t result = Ad*X + Bd*U;
     result(1,0)+=A13atan*atan(a*(X(3,0)+Xdes(3,0)));
@@ -85,18 +85,18 @@ void RomeoSimpleActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,c
     fxx[3](3,3) = +((2*dt*Cf0)/(pi*Jl))*((2*a*a*a*Xreal(3,0))/((1+(a*a*Xreal(3,0)*Xreal(3,0)))*(1+(a*a*Xreal(3,0)*Xreal(3,0)))));
 }
 
-stateMat_t RomeoSimpleActuator::computeTensorContxx(const stateVec_t& nextVx)
+RomeoSimpleActuator::stateMat_t RomeoSimpleActuator::computeTensorContxx(const stateVec_t& nextVx)
 {
     QxxCont = nextVx[3]*fxx[3];
     return QxxCont;
 }
 
-commandMat_t RomeoSimpleActuator::computeTensorContuu(const stateVec_t& nextVx)
+RomeoSimpleActuator::commandMat_t RomeoSimpleActuator::computeTensorContuu(const stateVec_t& nextVx)
 {
     return QuuCont;
 }
 
-commandR_stateC_t RomeoSimpleActuator::computeTensorContux(const stateVec_t& nextVx)
+RomeoSimpleActuator::commandR_stateC_t RomeoSimpleActuator::computeTensorContux(const stateVec_t& nextVx)
 {
     return QuxCont;
 }

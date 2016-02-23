@@ -1,4 +1,4 @@
-#ifndef CONFIG_H
+/*#ifndef CONFIG_H
 #define CONFIG_H
 
 #include <Eigen/Dense>
@@ -38,4 +38,4 @@ typedef std::vector<stateVec_t> stateVecTab_t;
 typedef std::vector<commandVec_t> commandVecTab_t;
 typedef std::vector<commandR_stateC_t> commandR_stateC_tab_t;
 
-#endif // CONFIG_H
+#endif // CONFIG_H*/

@@ -20,13 +20,13 @@ int main()
 {
     struct timeval tbegin,tend;
     double texec=0.0;
-    stateVec_t xinit,xDes,x;
-    commandVec_t u;
+    ILQRSolver<double,4,1>::stateVec_t xinit,xDes,x;
+    ILQRSolver<double,4,1>::commandVec_t u;
 
     u << 1.0;
 
     xinit << -3.0,0.0,0.0,0.0;
-    xDes << 0.0,0.0,0.0,0.0;
+    xDes << 1.0,0.0,0.0,0.0;
 
     x = xinit;
 
@@ -34,28 +34,20 @@ int main()
     double dt=1e-4;
     unsigned int iterMax = 50;
     double stopCrit = 1e-5;
-    stateVecTab_t xList;
-    commandVecTab_t uList;
-    ILQRSolver::traj lastTraj;
+    ILQRSolver<double,4,1>::stateVecTab_t xList;
+    ILQRSolver<double,4,1>::commandVecTab_t uList;
+    ILQRSolver<double,4,1>::traj lastTraj;
 
     RomeoSimpleActuator romeoActuatorModel(dt);
     RomeoActuatorPos romeoActuator(dt);
     RomeoLinearActuator romeoLinearModel(dt);
     CostFunctionRomeoActuator costRomeoActuator;
 
-    /*cout << romeoActuatorModel.getCommandNb() << endl;
-
-    for(unsigned int i=0;i<100;i++)
-    {
-        x = romeoActuator.computeNextState(dt,x,xDes,u);
-        cout << x << endl<<"-"<<endl;
-    }*/
-
-    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,ENABLE_QPBOX);
+    ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,ENABLE_QPBOX);
     testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
 
-    int N = 1;
+    int N = 100;
     gettimeofday(&tbegin,NULL);
     for(int i=0;i<N;i++) testSolverRomeoActuator.solveTrajectory();
     gettimeofday(&tend,NULL);

@@ -44,7 +44,7 @@ RomeoLinearActuator::RomeoLinearActuator(double& mydt)
     upperCommandBounds << 50.0;
 }
 
-stateVec_t RomeoLinearActuator::computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
+RomeoLinearActuator::stateVec_t RomeoLinearActuator::computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
 {
     stateVec_t result = fx*X + fu*U;
     return result;
@@ -55,21 +55,21 @@ void RomeoLinearActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,c
 
 }
 
-stateMat_t RomeoLinearActuator::computeTensorContxx(const stateVec_t& nextVx)
+RomeoLinearActuator::stateMat_t RomeoLinearActuator::computeTensorContxx(const stateVec_t& nextVx)
 {
     stateMat_t QxxCont;
     QxxCont.setZero();
     return QxxCont;
 }
 
-commandMat_t RomeoLinearActuator::computeTensorContuu(const stateVec_t& nextVx)
+RomeoLinearActuator::commandMat_t RomeoLinearActuator::computeTensorContuu(const stateVec_t& nextVx)
 {
     commandMat_t QuuCont;
     QuuCont.setZero();
     return QuuCont;
 }
 
-commandR_stateC_t RomeoLinearActuator::computeTensorContux(const stateVec_t& nextVx)
+RomeoLinearActuator::commandR_stateC_t RomeoLinearActuator::computeTensorContux(const stateVec_t& nextVx)
 {
     commandR_stateC_t QuxCont;
     QuxCont.setZero();

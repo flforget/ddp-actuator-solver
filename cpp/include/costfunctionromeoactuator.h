@@ -1,7 +1,7 @@
 #ifndef COSTFUNCTIONROMEOACTUATOR_H
 #define COSTFUNCTIONROMEOACTUATOR_H
 
-#include "config.h"
+#include "types.h"
 
 #include "costfunction.h"
 
@@ -9,7 +9,7 @@
 
 using namespace Eigen;
 
-class CostFunctionRomeoActuator : public CostFunction
+class CostFunctionRomeoActuator : public CostFunction<double,4,1>
 {
 public:
     CostFunctionRomeoActuator();

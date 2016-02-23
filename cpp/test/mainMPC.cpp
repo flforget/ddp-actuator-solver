@@ -20,7 +20,7 @@ int main()
     cout << endl;
     struct timeval tbegin,tend;
     double texec=0.0;
-    stateVec_t xinit,xDes;
+    ILQRSolver<double,4,1>::stateVec_t xinit,xDes;
 
     xinit << 0.0,0.0,0.0,0.0;
     xDes << 1.0,0.0,0.0,0.0;
@@ -30,14 +30,14 @@ int main()
     double dt=1e-4;
     unsigned int iterMax = 20;
     double stopCrit = 1e-3;
-    stateVecTab_t xList;
-    commandVecTab_t uList;
-    ILQRSolver::traj lastTraj;
+    ILQRSolver<double,4,1>::stateVecTab_t xList;
+    ILQRSolver<double,4,1>::commandVecTab_t uList;
+    ILQRSolver<double,4,1>::traj lastTraj;
 
     RomeoSimpleActuator romeoActuatorModel(dt);
     RomeoLinearActuator romeoLinearModel(dt);
     CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
+    ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
 
 
 
@@ -76,7 +76,7 @@ int main()
     cout << "temps d'execution par pas de MPC ";
     cout << texec/(T*1000000) << endl;
 
-//    fichier.close();
+    fichier.close();
 
 
 

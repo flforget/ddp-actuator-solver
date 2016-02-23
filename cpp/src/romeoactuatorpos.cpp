@@ -55,7 +55,7 @@ RomeoActuatorPos::RomeoActuatorPos(double& mydt)
 }
 
 
-stateVec_t RomeoActuatorPos::computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
+RomeoActuatorPos::stateVec_t RomeoActuatorPos::computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
 {
     stateVec_t result = Ad*X + Bd*U;
 
@@ -67,17 +67,17 @@ void RomeoActuatorPos::computeAllModelDeriv(double& dt, const stateVec_t& X,cons
 
 }
 
-stateMat_t RomeoActuatorPos::computeTensorContxx(const stateVec_t& nextVx)
+RomeoActuatorPos::stateMat_t RomeoActuatorPos::computeTensorContxx(const stateVec_t& nextVx)
 {
     return QxxCont;
 }
 
-commandMat_t RomeoActuatorPos::computeTensorContuu(const stateVec_t& nextVx)
+RomeoActuatorPos::commandMat_t RomeoActuatorPos::computeTensorContuu(const stateVec_t& nextVx)
 {
     return QuuCont;
 }
 
-commandR_stateC_t RomeoActuatorPos::computeTensorContux(const stateVec_t& nextVx)
+RomeoActuatorPos::commandR_stateC_t RomeoActuatorPos::computeTensorContux(const stateVec_t& nextVx)
 {
     return QuxCont;
 }

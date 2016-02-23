@@ -19,7 +19,7 @@ int main()
 {
     struct timeval tbegin,tend;
     double texec=0.0;
-    stateVec_t xinit,xDes;
+    ILQRSolver<double,4,1>::stateVec_t xinit,xDes;
 
     xinit << -3.0,0.0,0.0,0.0;
     xDes << 0.0,0.0,0.0,0.0;
@@ -28,14 +28,14 @@ int main()
     double dt=1e-4;
     unsigned int iterMax = 20;
     double stopCrit = 1e-5;
-    stateVecTab_t xList;
-    commandVecTab_t uList;
-    ILQRSolver::traj lastTraj;
+    ILQRSolver<double,4,1>::stateVecTab_t xList;
+    ILQRSolver<double,4,1>::commandVecTab_t uList;
+    ILQRSolver<double,4,1>::traj lastTraj;
 
     RomeoSimpleActuator romeoActuatorModel(dt);
     RomeoLinearActuator romeoLinearModel(dt);
     CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,0);
+    ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,0);
     testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
 

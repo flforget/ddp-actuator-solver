@@ -1,14 +1,12 @@
 #ifndef ROMEOACTUATORPOS_H
 #define ROMEOACTUATORPOS_H
 
-#include "config.h"
-
 #include "dynamicmodel.h"
 #include <Eigen/Dense>
 
 using namespace Eigen;
 
-class RomeoActuatorPos : public DynamicModel
+class RomeoActuatorPos : public DynamicModel<double,4,1>
 {
 public:
     RomeoActuatorPos(double& mydt);
