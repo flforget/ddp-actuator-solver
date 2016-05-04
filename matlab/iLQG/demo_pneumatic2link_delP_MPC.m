@@ -12,7 +12,7 @@ fprintf(['\nA demonstration of the iLQG algorithm '...
 full_DDP = false;
 
 dt = 5e-3; % dt for dynamics
-ToT = 10;       %(in seconds)
+ToT = 5;       %(in seconds)
 N_tot = ToT/dt;
 %T_horizon = 0.5;  %(in seconds)
 T       = 10; %T_horizon/dt;
@@ -32,27 +32,30 @@ xGoal = zeros(8,1);
 %% MPC
 for k=1:N_tot
     % Trajectory for Joint 1
-    freq1 = 0.2;
-    freq2 = 0.2;
+    freq1 = 0.1;
+    freq2 = 0.1;
     f1 = 2*pi*freq1;
     f2 = 2*pi*freq2;
     a1 = 0.5;
     a2 = 0.7;
-    xGoal(1,1) = a1*sin(f1*k*dt); 
-    xGoal(3,1) = f1*a1*cos(f1*k*dt); %slope_pos1;
+    prw =9;
+    xGoal(1,1) = a1*sin(f1*(k+prw)*dt); 
+    xGoal(3,1) = f1*a1*cos(f1*(k+prw)*dt); %slope_pos1;
     xGoal(5,1) = 0;  %slope_pres1*k*dt;
     xGoal(7,1) = 0;  %slope_pres1;
-    testgoal1(k) = a1*sin(f1*k*dt);
+    
      % Trajectory for Joint 2
-    xGoal(2,1) = a2*sin(f2*k*dt); 
-    xGoal(4,1) = f2*a2*cos(f2*k*dt);  %slope_pos2;
+    xGoal(2,1) = a2*sin(f2*(k+prw)*dt); 
+    xGoal(4,1) = f2*a2*cos(f2*(k+prw)*dt);  %slope_pos2;
     xGoal(6,1) = 0;  %slope_pres2*k*dt;
     xGoal(8,1) = 0;  %slope_pres2;
+
+    testgoal1(k) = a1*sin(f1*k*dt);
     testgoal2(k) = a2*sin(f2*k*dt); 
-    xGoal(9,1) =  -f1*f1*a1*sin(f1*k*dt); %0;
-    xGoal(10,1) =  -f2*f2*a2*sin(f2*k*dt);%0;
-    xGoal(11,1) = -f1*f1*f1*a1*cos(f1*k*dt);
-    xGoal(12,1) = -f2*f2*f2*a2*cos(f2*k*dt);
+    xGoal(9,1) =  -f1*f1*a1*sin(f1*(k)*dt); %0;
+    xGoal(10,1) =  -f2*f2*a2*sin(f2*(k)*dt);%0;
+    xGoal(11,1) = -f1*f1*f1*a1*cos(f1*(k)*dt);
+    xGoal(12,1) = -f2*f2*f2*a2*cos(f2*(k)*dt);
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP, xGoal);
 Op.lims  = [-3.0e5 3.0e5; -4.0e5 4.0e5];
@@ -131,14 +134,14 @@ n_joint = 2; % number of joints in the manipulator;
 % q_dot = x(3:4,1);
 %state_deriv = zeros(8,1);
 %Link 1 parameters
-% link1_lc = 125.4e-3;
-% link1_l = 351.1e-3;
-% m1 = 2.7;
-% link1_I = 0.02;
-link1_lc = 178e-3;
-link1_l = 307e-3;
-m1 = 2.578;
-link1_I = 0.0144;
+link1_lc = 125.4e-3;
+link1_l = 351.1e-3;
+m1 = 2.7;
+link1_I = 0.02;
+% link1_lc = 178e-3;
+% link1_l = 307e-3;
+% m1 = 2.578;
+% link1_I = 0.0144;
 % %Link 2 parameters
 link2_lc = 178e-3;
 link2_l = 307e-3;
@@ -289,7 +292,7 @@ goal(1:8,1) = xGoal(1:8,1); %[0.5;0;1e5;0];
 final = isnan(u(1,:));
 u(:,final)  = 0;
 
-cu  = 1*1e-4*[0.01 .01];         % control cost coefficients
+cu  = 1*1e-4*[0.01 .001];         % control cost coefficients
 
 cf  = 1e1*[0e4 0e4 0 0 2 2 2 2];    % final cost coefficients
 %pf  = [.01 .01.01 0 1 0]';    % smoothness scales for final cost
@@ -305,7 +308,7 @@ lu    = cu*u.^2;
 % final cost
 if any(final)
    %llf      = cf*(x(:,final) - goal); %cf*sabs(x(:,final),pf);
-   llf      = cf* (bsxfun(@minus, x(:,final), goal)).^2;
+   llf      = cf* (bsxfun(@minus, x(:,final), goal(:,1))).^2;
    lf       = real(final);
    lf(final)= llf;
 else
@@ -313,8 +316,11 @@ else
 end
 lf;
 %  running cost
-for r=1:1:8
-curcos(r,:) = cx(r).*(mm(x(r,:),goal(r,1))).^2;
+[row,col] = size(x);
+for r=1:row
+    for c=1:col
+        curcos(r,:) = cx(r).*(mm(x(r,col),goal(r,1))).^2;
+    end
 end
 curcos;
 lx = sum(curcos);
@@ -337,7 +343,7 @@ lx = sum(curcos);
 %lx = lx1 + lx2 + lx3 + lx4; % +lx5 + lx6;
 %lf = cf*x(:,end);
 % total const
-c = lu + lx + lf;
+c = lu + lx+ lf;
 
 function y = sabs(x,p)
 % smooth absolute-value function (a.k.a pseudo-Huber)
@@ -489,10 +495,10 @@ Fmat = [F_biceps; F_triceps];
 Torqe_pneumatics = (F_biceps -F_triceps ).*R;
 
 function [PxMat,PxMat_dot] = Pxmat(x)
-accl1 = x(9,1);
-accl2 = x(10,1);
-jerk1 = x(11,1);
-jerk2 = x(12,1);
+accl1 = x(9,:);
+accl2 = x(10,:);
+jerk1 = x(11,:);
+jerk2 = x(12,:);
 %% Parameters
 %Link 1 parameters
 link1_lc = 125.4e-3;

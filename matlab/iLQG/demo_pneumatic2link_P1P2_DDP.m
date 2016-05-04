@@ -1,4 +1,4 @@
-function [xtrajout, uhat, Tnet, s] = demo_pneumatic2link_P1P2_DDP
+function [xtrajout, uhat, Tnet, s, end_vel] = demo_pneumatic2link_P1P2_DDP
 % A demo of iLQG/DDP with pneumatic 2link manipulator-dynamics
 
 fprintf(['\nA demonstration of the iLQG algorithm '...
@@ -12,7 +12,7 @@ fprintf(['\nA demonstration of the iLQG algorithm '...
 full_DDP = false;
 
 dt = 5e-3; % dt for dynamics
-ToT = 1.0;       %(in seconds)
+ToT = 2.0;       %(in seconds)
 N_tot = ToT/dt;
 %T_horizon = 0.5;  %(in seconds)
 T       = N_tot; %10; %T_horizon/dt;
@@ -20,12 +20,12 @@ T       = N_tot; %10; %T_horizon/dt;
 
 
 x0      = zeros(12,1); %[0.0;0;0.0e5;0e5];   % initial state
-x0(6) = 3;
-x0(10) = 4.0;
+% x0(6) = 3;
+% x0(10) = 4.0;
 % x0(1:2,1) = [0.5;0.8];
 % x0(5:6,1) = [1.23;1.57] ;
 % x0(9:10,1) = [1.5;1.5] ;
-u0      = 0.1*randn(4,T);
+u0      = 0.01*randn(4,T);
 xtot = zeros(8,ToT/dt);
 final_goal = [0.5 1 0 0 0*1.238e5 0*1.578e5 0 0]';
 
@@ -33,13 +33,13 @@ xGoal = zeros(12,1);
 xGoal = [0.5 1 0 0 1.238 1.578  0 0 1.762 1.722 0 0]';
 %% MPC
 for k=1:1
-    xGoal(1,1) = 0.0; %a1*sin(f1*k*dt); 
+    xGoal(1,1) = 0.2; %a1*sin(f1*k*dt); 
     xGoal(3,1) = 0; %f1*a1*cos(f1*k*dt); %slope_pos1;
     xGoal(5,1) = 0;  %slope_pres1*k*dt;
     xGoal(7,1) = 0;  %slope_pres1;
     %testgoal1(k) = a1*sin(f1*k*dt);
      % Trajectory for Joint 2
-    xGoal(2,1) = 0.0; %a2*sin(f2*k*dt); 
+    xGoal(2,1) = 1.7; %a2*sin(f2*k*dt); 
     xGoal(4,1) = 0; %f2*a2*cos(f2*k*dt);  %slope_pos2;
     xGoal(6,1) = 0;  %slope_pres2*k*dt;
     xGoal(8,1) = 0;  %slope_pres2;
@@ -55,7 +55,7 @@ for k=1:1
     
 % optimization problem
 DYNCST  = @(x,u,i) pneumatic_dyn_cst(x,u,full_DDP, xGoal);
-Op.lims  = [0.0e5 3.0; 0.0e5 3.0; 0.0e5 3.5; 0.0e5 3.5];
+Op.lims  = [0.0 4.0; 0.0 4.0; 0.0e5 5; 0.0e5 5];
 Op.maxIter = 250;
 % run the optimization
 Op.plot = 0;    
@@ -76,6 +76,20 @@ xtemp(1:12,i) = xhat0;
 xtemp(1:2,i) = xhat0(1:2,1)-dx; 
 f1(1:2,i) = Net_Torue(xtemp,uhat0);
 s= -(f2 -f1)./(2*dx(1));
+
+%% End effector velocity
+link1_l = 351.1e-3;
+link2_l = 307e-3;
+l1 = link1_l;
+l2 = link2_l ;
+ s1 = sin(xhat(1,i)); c1 = cos(xhat(1,i));
+ s12 = sin( xhat(1,i) + xhat(2,i));
+ c12 = cos( xhat(1,i) + xhat(2,i));
+ theta1dot =  xhat(3,i);
+ theta2dot =  xhat(4,i);
+ vx = -l1.*s1.*theta1dot - l2.*s12.*(theta1dot +theta2dot);
+ vy = l1.*c1.*theta1dot + l2.*c12.*(theta1dot +theta2dot);
+ end_vel(i) = sqrt((vx.^2 + vy.^2));
 end
 %st = finite_difference(fun,xu,h);
 
@@ -87,6 +101,8 @@ end
 %print('END OF LOOP')
 
 xtrajout = xhat(1:12,1:N_tot);
+xhat(1:2, end)
+end_vel(end)
 %% PLOT
 
 %figure(4)
@@ -98,44 +114,47 @@ xtrajout = xhat(1:12,1:N_tot);
 % subplot(223), plot(x(3,:));
 % subplot(224), plot(x(4,:));
 figure(1)
-subplot(211), plot((1:N_tot)*dt, (180/pi)*xhat(1,1:N_tot), 'b', 'Linewidth', 2.0);
+subplot(311), plot((1:N_tot)*dt, (180/pi)*xhat(1,1:N_tot), 'b', 'Linewidth', 4.0);
 hold on;
 grid on;
-subplot(211), plot((1:N_tot)*dt, (180/pi)*xGoal(1), 'r', 'Linewidth', 2.0);
-% subplot(211), plot((1:N_tot)*dt, (180/pi)*testgoal1(1,:),'r', 'Linewidth', 2.0);
-subplot(211), plot((1:N_tot)*dt, (180/pi)*xhat(2,1:N_tot), 'k', 'Linewidth', 2.0);
-subplot(211), plot((1:N_tot)*dt, (180/pi)*xGoal(2), 'cy','Linewidth', 2.0);
+%subplot(311), plot((1:N_tot)*dt, (180/pi)*xGoal(1), 'r', 'Linewidth', 2.0);
+% subplo(211), plot((1:N_tot)*dt, (180/pi)*testgoal1(1,:),'r', 'Linewidth', 2.0);
+subplot(311), plot((1:N_tot)*dt, (180/pi)*xhat(2,1:N_tot), 'k', 'Linewidth', 4.0);
+%subplot(311), plot((1:N_tot)*dt, (180/pi)*xGoal(2), 'cy','Linewidth', 2.0);
 % subplot(211), plot((1:N_tot)*dt, (180/pi)*testgoal2(1,:),'m', 'Linewidth', 2.0);
-ylabel('Position (Degrees)')
+ylabel('Position (Degrees)', 'FontSize',30)
 legend('Joint 1 ', 'Joint 2');
 title('DDP optimal weight lifting', 'FontSize',30)
 
-subplot(212), plot((1:N_tot)*dt, uhat(1,1:N_tot), 'Linewidth', 2.0);
+subplot(312), plot((1:N_tot)*dt, uhat(1,1:N_tot), 'Linewidth', 4.0);
 hold on;
-subplot(212), plot((1:N_tot)*dt, uhat(3,1:N_tot), 'c','Linewidth', 2.0);
+subplot(312), plot((1:N_tot)*dt, uhat(3,1:N_tot), 'c','Linewidth', 4.0);
 
-subplot(212), plot((1:N_tot)*dt, uhat(2,1:N_tot), 'b--','Linewidth', 2.0);
+subplot(312), plot((1:N_tot)*dt, uhat(2,1:N_tot), 'b--','Linewidth', 4.0);
 
-subplot(212), plot((1:N_tot)*dt, uhat(4,1:N_tot), 'c--','Linewidth', 2.0);
-ylabel('Control Input (Bar)');
-xlabel('Time (s)');
-legend('Input 1 ', 'Input 2');
+subplot(312), plot((1:N_tot)*dt, uhat(4,1:N_tot), 'c--','Linewidth', 4.0);
+ylabel('Control Input (Bar)', 'FontSize',30 );
+
+legend('Input 1 ', 'Input 2', 'Input 3 ', 'Input 4');
+subplot(313), plot((1:N_tot)*dt, end_vel(1,1:N_tot), 'Linewidth', 4.0);
+ylabel('Velocity (m/s)', 'FontSize',30);
+xlabel('Time (s)','FontSize',24);
 
 %% PLOT of stiffness
 figure(2)
-subplot(211), plot((1:N_tot)*dt, Tnet(1,1:N_tot),  'Linewidth', 2.0);
+subplot(211), plot((1:N_tot)*dt, Tnet(1,1:N_tot),  'Linewidth', 4.0);
 hold on;
 grid on;
-subplot(211), plot((1:N_tot)*dt, Tnet(2,1:N_tot), 'r', 'Linewidth', 2.0);
+subplot(211), plot((1:N_tot)*dt, Tnet(2,1:N_tot), 'r', 'Linewidth', 4.0);
 ylabel('Net Torque (Degrees)')
 legend('Joint 1 ', 'Joint 2');
 title('Net Joint Torues: 0ptimal weight lifting', 'FontSize',30)
 
-subplot(212), plot((1:N_tot)*dt, s(1,1:N_tot), 'Linewidth', 2.0);
+subplot(212), plot((1:N_tot)*dt, s(1,1:N_tot), 'Linewidth', 4.0);
 hold on;
-subplot(212), plot((1:N_tot)*dt, s(2,1:N_tot), 'r','Linewidth', 2.0);
-ylabel('Stifness');
-xlabel('Time (s)');
+subplot(212), plot((1:N_tot)*dt, s(2,1:N_tot), 'r','Linewidth', 4.0);
+ylabel('Stifness', 'FontSize',30);
+xlabel('Time (s)', 'FontSize',24);
 legend('Joint 1 ', 'Joint 2');
 
 
@@ -179,7 +198,7 @@ m2 = 2.578;
 link2_I = 0.0144;
 
 %External load parametrs
-mb = 0.5;
+mb = 0.01;
 
 dt = 0.005;
 %jointstate_deriv = zeros(6,1);
@@ -318,7 +337,7 @@ ho(3,1) = 0; %-f1*f1*f1*a1*cos(f1*k*dt);
 ho(4,1) = 0; %-f2*f2*f2*a2*cos(f2*k*dt);
 %h = [dx1 dx1 dx1 dx1 dx2 dx2 dx2 dx2 dx1 dx1]';
 % href = h(5:6,1); %Pxmat(h)
-[Pref,Pref_dot] = Pxmat(xGoaltemp,ho);
+%[Pref,Pref_dot] = Pxmat(xGoaltemp,ho);
 % xGoaltemp = xGoal + [h;0;0]
 % Pref2 = Pxmat(xGoaltemp)
 % xGoaltemp = xGoal - [h;0;0]
@@ -331,14 +350,29 @@ ho(4,1) = 0; %-f2*f2*f2*a2*cos(f2*k*dt);
 % xGoal(6,1) = Pref(2,1);
 % xGoal(7,1) = Pref_dot(1,1);
 % xGoal(8,1) = Pref_dot(2,1);
+%%  State Constraint violation Cost 
+xM1 = 2.0;
+xm1 = -0.02;
+xM2 = 2.0;
+xm2 = -0.03;
+
+lamda = 5e1;
+up1 = 1 - lamda*abs(mm(xM1, x(1,:))); 
+low1 = 1 -lamda*abs(mm(x(1,:), xm1));
+lxc1 = exp(lamda*(up1)) + exp(lamda*(low1));
+
+up2 = 1 - lamda*abs(mm(xM2, x(2,:))); 
+low2 = 1 - lamda*abs(mm(x(2,:), xm2));
+lxc2 = exp(lamda*(up2)) + exp(lamda*(low2));
+
 goal(1:12,1) = xGoal(1:12,1); %[0.5;0;1e5;0];
 final = isnan(u(1,:));
 u(:,final)  = 0;
 
-cu  = 1*1e-1*[0.001 .001 0.001 .001];         % control cost coefficients
+cu  = 1*1e-5*[1 1 1 1];         % control cost coefficients
 
-cf  = 0e-1*[1 1 0 0 0 0 0 0 0 0 0 0];    % final cost coefficients
-cf2 = 1e-1;
+cf  = 1e5*[1 1 0 0 0 0 0 0 0 0 0 0];    % final cost coefficients
+cf2 = 1e3;
 %pf  = [.01 .01.01 0 1 0]';    % smoothness scales for final cost
 
 cx  = 8e-2*[1 1 0 0 0 0 0 0 0 0 0 0];          % running cost coefficients
@@ -350,16 +384,59 @@ lu    = cu*u.^2;
 %l     = E.cx(1)*(x(1,:)-goal(1,1)).^2 +E.cx(2)*(x(2,:)-goal(2,1)).^2 +E.cx(3)*(x(3,:)-goal(3,1)).^2 +E.cx(4)*(x(4,:)-goal(4,1)).^2 +E.cx(5)*(x(5,:)-goal(5,1)).^2 +E.cx(6)*(x(6,:)-goal(6,1)).^2);
 
 % final cost
+
+link1_l = 351.1e-3;
+link2_l = 307e-3;
+l1 = link1_l;
+l2 = link2_l ;
+
+%% final cost for end effector speed
 if any(final)
    %llf      = cf*(x(:,final) - goal); %cf*sabs(x(:,final),pf);
-   llf1      = cf* (bsxfun(@minus, x(:,final), goal)).^2;
-   llf2      = -cf2* x(4,final).^2;
-   lf       = real(final);
-   lf(final)= llf2;
+   llf1      = 1*cf* (bsxfun(@minus, x(:,final), goal)).^2;
+   %llf      = -cf2* x(4,final).^2;
+   s1 = sin(x(1,final)); c1 = cos(x(1,final));
+   s12 = sin( x(1,final) + x(2,final));
+   c12 = cos( x(1,final) + x(2,final));
+   theta1dot =  x(3,final);
+   theta2dot =  x(4,final);
+   vx = l1.*c1.*theta1dot + l2.*c12.*(theta1dot +theta2dot);
+   vy = l1.*s1.*theta1dot + l2.*s12.*(theta1dot +theta2dot);
+   llf = llf1 -cf2*sqrt(vx.^2 + vy.^2);
+   lf  = real(final);
+   lf(final)= llf;
+   
 else
-   lf    = 0;
+   lf    = 0; 
+   FLAG = 1;
 end
-lf;
+
+
+%% final cost for Distance 
+% y0 = -1.50;
+% g = 9.81;
+% 
+% if any(final)
+%    s1 = sin(x(1,final)); c1 = cos(x(1,final));
+%    s12 = sin( x(1,final) + x(2,final));
+%    c12 = cos( x(1,final) + x(2,final));
+%    xm = l1*s1 + l2*s12;
+%    ym = -l1*c1 - l2*c12;
+%    theta1dot =  x(3,final);
+%    theta2dot =  x(4,final);
+%    xm_dot = l1.*c1.*theta1dot + l2.*c12.*(theta1dot +theta2dot);
+%    ym_dot = l1.*s1.*theta1dot + l2.*s12.*(theta1dot +theta2dot);
+%    Tm = (1/g).*(ym_dot + sqrt(ym_dot.^2 + 2*g.*mm(ym, y0)));
+%    d = xm+ xm_dot.*Tm;
+%    llf = -d;  %llf1 -cf2*(vx.^2 + vy.^2);
+%    lf  = real(final);
+%    lf(final)= llf;
+%    final
+%    
+% else
+%    lf    = 0; 
+%    FLAG = 1;
+% end
 %  running cost
 for r=1:1:12
 curcos(r,:) = cx(r).*(mm(x(r,:),goal(r,1))).^2;
@@ -377,7 +454,7 @@ lp = cs*(mm(sum_pres,sum_goal)).^2;
 %lf = cf*x(:,end);
 % total const
 %c = lu + lx + lf ; %+ lp;
-c = lf;
+c = lxc1 + lxc2 + lu + lf;
 function y = sabs(x,p)
 % smooth absolute-value function (a.k.a pseudo-Huber)
 y = pp( sqrt(pp(x.^2,p.^2)), -p);
@@ -549,7 +626,7 @@ m2 = 2.578;
 link2_I = 0.0144;
 
 %External load parametrs
-mb = 0.5;
+mb = 0.01;
 
 dt = 0.005;
 %% Parameters for the muscles at Joint 1
@@ -748,7 +825,7 @@ m2 = 2.578;
 link2_I = 0.0144;
 
 %External load parametrs
-mb = 0.5;
+mb = 0.01;
 
 dt = 0.005;
 %jointstate_deriv = zeros(6,1);
