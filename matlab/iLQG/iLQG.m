@@ -1,4 +1,4 @@
-function [x, u, L, Vx, Vxx, cost, trace, stop, timing] = iLQG(DYNCST, x0, u0, Op)
+function [x, u, L, Vx, Vxx, cost, trace, stop, timing,fx,fu] = iLQG(DYNCST, x0, u0, Op)
 % iLQG - solve the deterministic finite-horizon optimal control problem.
 %
 %        minimize sum_i CST(x(:,i),u(:,i)) + CST(x(:,end))
@@ -363,6 +363,8 @@ if ~isempty(iter)
     graphics(Op.plot,x,u,cost,L,Vx,Vxx,fx,fxx,fu,fuu,trace,2); % draw legend
 else
     error('Failure: no iterations completed, something is wrong.')
+    
+    %fxt = fx(1); fut = fu(1);
 end
 
 
