@@ -4,7 +4,7 @@
 #define pi M_PI
 
 const double RomeoSimpleActuator::k=1000.0;
-const double RomeoSimpleActuator::R=200.0;
+const double RomeoSimpleActuator::R=100.0;
 const double RomeoSimpleActuator::Jm=138*1e-7;
 const double RomeoSimpleActuator::Jl=0.1;
 const double RomeoSimpleActuator::fvm=0.01;
@@ -61,8 +61,8 @@ RomeoSimpleActuator::RomeoSimpleActuator(double& mydt)
     QuuCont.setZero();
     QuxCont.setZero();
 
-    lowerCommandBounds << -50.0;
-    upperCommandBounds << 50.0;
+    lowerCommandBounds << -10.0;
+    upperCommandBounds << 10.0;
 }
 
 

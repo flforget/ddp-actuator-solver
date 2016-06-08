@@ -25,47 +25,41 @@ int main()
 
     u << 1.0;
 
-    xinit << -3.0,0.0,0.0,0.0;
+    xinit << 0.0,0.0,0.0,0.0;
     xDes << 1.0,0.0,0.0,0.0;
 
     x = xinit;
 
-    unsigned int T = 50;
-    double dt=1e-4;
-    unsigned int iterMax = 50;
-    double stopCrit = 1e-5;
+    double dt=1e-3;
+    unsigned int N=2000;
     ILQRSolver<double,4,1>::stateVecTab_t xList;
     ILQRSolver<double,4,1>::commandVecTab_t uList;
-    ILQRSolver<double,4,1>::traj lastTraj;
+
+    xList .resize(N);
+    uList.resize(N);
 
     RomeoSimpleActuator romeoActuatorModel(dt);
     RomeoActuatorPos romeoActuator(dt);
     RomeoLinearActuator romeoLinearModel(dt);
-    CostFunctionRomeoActuator costRomeoActuator;
 
-    ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,ENABLE_QPBOX);
-    testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+    double last_err=0.0;
+    double err = 0.0;
+    double int_err = 0.0;
+    double Kp = 1.0;
+    double Ki = 0.01;
+    for(int i=0;i<N;i++)
+    {
+        last_err = err;
+        err = x[0] - xDes[0];
+        int_err += err;
+        if(int_err>300)int_err=300;
+        if(int_err<-300)int_err=-300;
+        u << Kp*err + Ki*int_err;
+        xList[i] = x;
+        uList[i] = u;
+        x = romeoActuatorModel.computeNextState(dt,x,xDes,u);
+    }
 
-
-    int N = 100;
-    gettimeofday(&tbegin,NULL);
-    for(int i=0;i<N;i++) testSolverRomeoActuator.solveTrajectory();
-    gettimeofday(&tend,NULL);
-
-    lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
-    xList = lastTraj.xList;
-    uList = lastTraj.uList;
-    unsigned int iter = lastTraj.iter;
-
-    texec=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
-    texec /= N;
-
-    cout << endl;
-    cout << "temps d'execution total du solveur ";
-    cout << texec << endl;
-    cout << "temps d'execution par pas de temps ";
-    cout << texec/T << endl;
-    cout << "Nombre d'itérations : " << iter << endl;
 
 
 
@@ -75,8 +69,7 @@ int main()
     if(fichier)
     {
         fichier << "tau,tauDot,q,qDot,u" << endl;
-        for(int i=0;i<T;i++) fichier << xList[i](0,0) << "," << xList[i](1,0) << "," << xList[i](2,0) << "," << xList[i](3,0) << "," << uList[i](0,0) << endl;
-        fichier << xList[T](0,0) << "," << xList[T](1,0) << "," << xList[T](2,0) << "," << xList[T](3,0) << "," << 0.0 << endl;
+        for(int i=0;i<N;i++) fichier << xList[i](0,0) << "," << xList[i](1,0) << "," << xList[i](2,0) << "," << xList[i](3,0) << "," << uList[i](0,0) << endl;
         fichier.close();
     }
     else

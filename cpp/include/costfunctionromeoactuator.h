@@ -1,7 +1,7 @@
 #ifndef COSTFUNCTIONROMEOACTUATOR_H
 #define COSTFUNCTIONROMEOACTUATOR_H
 
-#include "types.h"
+//#include "types.h"
 
 #include "costfunction.h"
 
