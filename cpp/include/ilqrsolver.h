@@ -12,6 +12,8 @@
 
 #define ENABLE_QPBOX 1
 #define DISABLE_QPBOX 0
+#define ENABLE_FULLDDP 1
+#define DISABLE_FULLDDP 0
 
 using namespace Eigen;
 USING_NAMESPACE_QPOASES
@@ -114,6 +116,7 @@ private:
     /* QP variables */
     QProblemB* qp;
     bool enableQPBox;
+    bool enableFullDDP;
     commandMat_t H;
     commandVec_t g;
     commandVec_t lowerCommandBounds;
@@ -125,13 +128,14 @@ private:
 protected:
     // methods //
 public:
-    ILQRSolver(DynamicModel_t& myDynamicModel, CostFunction_t& myCostFunction,bool QPBox=0)
+    ILQRSolver(DynamicModel_t& myDynamicModel, CostFunction_t& myCostFunction,bool fullDDP=0,bool QPBox=0)
     {
         dynamicModel = &myDynamicModel;
         costFunction = &myCostFunction;
         stateNb = myDynamicModel.getStateNb();
         commandNb = myDynamicModel.getCommandNb();
         enableQPBox = QPBox;
+        enableFullDDP = fullDDP;
         if(QPBox)
         {
             qp = new QProblemB(commandNb);
@@ -252,9 +256,13 @@ public:
                 Quu = costFunction->getluu() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfu();
                 Qux = costFunction->getlux() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfx();
 
-                Qxx += dynamicModel->computeTensorContxx(nextVx);
-                Qux += dynamicModel->computeTensorContux(nextVx);
-                Quu += dynamicModel->computeTensorContuu(nextVx);
+
+                if(enableFullDDP)
+                {
+                    Qxx += dynamicModel->computeTensorContxx(nextVx);
+                    Qux += dynamicModel->computeTensorContux(nextVx);
+                    Quu += dynamicModel->computeTensorContuu(nextVx);
+                }
 
                 QuuInv = Quu.inverse();
 
