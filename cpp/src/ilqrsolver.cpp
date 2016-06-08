@@ -7,13 +7,14 @@ using namespace std;
 
 using namespace Eigen;
 
-ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction,bool QPBox)
+ILQRSolver::ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction,bool fullDDP,bool QPBox)
 {
     dynamicModel = &myDynamicModel;
     costFunction = &myCostFunction;
     stateNb = myDynamicModel.getStateNb();
     commandNb = myDynamicModel.getCommandNb();
     enableQPBox = QPBox;
+    enableFullDDP = fullDDP;
     if(QPBox)
     {
         qp = new QProblemB(commandNb);
@@ -134,9 +135,12 @@ void ILQRSolver::backwardLoop()
             Quu = costFunction->getluu() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfu();
             Qux = costFunction->getlux() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfx();
 
-            Qxx += dynamicModel->computeTensorContxx(nextVx);
-            Qux += dynamicModel->computeTensorContux(nextVx);
-            Quu += dynamicModel->computeTensorContuu(nextVx);
+            if(enableFullDDP)
+            {
+                Qxx += dynamicModel->computeTensorContxx(nextVx);
+                Qux += dynamicModel->computeTensorContux(nextVx);
+                Quu += dynamicModel->computeTensorContuu(nextVx);
+            }
 
             QuuInv = Quu.inverse();
 

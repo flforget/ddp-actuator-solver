@@ -12,6 +12,8 @@
 
 #define ENABLE_QPBOX 1
 #define DISABLE_QPBOX 0
+#define ENABLE_FULLDDP 1
+#define DISABLE_FULLDDP 0
 
 using namespace Eigen;
 USING_NAMESPACE_QPOASES
@@ -27,7 +29,7 @@ public:
     };
 
 public:
-    ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction,bool QPBox=0);
+    ILQRSolver(DynamicModel& myDynamicModel, CostFunction& myCostFunction,bool fullDDP=0,bool QPBox=0);
 private:
 protected:
     // attributes //
@@ -80,6 +82,7 @@ private:
     /* QP variables */
     QProblemB* qp;
     bool enableQPBox;
+    bool enableFullDDP;
     commandMat_t H;
     commandVec_t g;
     commandVec_t lowerCommandBounds;

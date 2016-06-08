@@ -37,7 +37,7 @@ int main()
     RomeoSimpleActuator romeoActuatorModel(dt);
     RomeoLinearActuator romeoLinearModel(dt);
     CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator);
+    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,ENABLE_FULLDDP,DISABLE_QPBOX);
 
 
 
