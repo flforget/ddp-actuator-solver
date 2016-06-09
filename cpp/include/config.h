@@ -7,8 +7,8 @@
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::MatrixXd)
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::VectorXd)
 
-#define stateSize 4
-#define commandSize 1
+#define stateSize 8
+#define commandSize 2
 
 // typedef for stateSize types
 typedef Eigen::Matrix<double,stateSize,1> stateVec_t;                       // stateSize x 1

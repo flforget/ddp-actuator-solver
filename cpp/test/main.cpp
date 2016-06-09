@@ -4,9 +4,8 @@
 #include "config.h"
 
 #include "ilqrsolver.h"
-#include "romeosimpleactuator.h"
-#include "romeolinearactuator.h"
-#include "costfunctionromeoactuator.h"
+#include "pneumaticarm_2linkmodel.hh"
+#include "costfunctionpneumaticarmelbow.h"
 
 #include <time.h>
 #include <sys/time.h>
@@ -21,30 +20,31 @@ int main()
     double texec=0.0;
     stateVec_t xinit,xDes;
 
-    xinit << -3.0,0.0,0.0,0.0;
-    xDes << 0.0,0.0,0.0,0.0;
+    xinit << 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0;
+    xDes << 0.5,1.0,0.0,0.0,0.0,0.0,0.0,0.0;
 
     unsigned int T = 50;
-    double dt=1e-4;
-    unsigned int iterMax = 20;
+    double dt=5e-3;
+    unsigned int iterMax = 100;
     double stopCrit = 1e-5;
     stateVecTab_t xList;
     commandVecTab_t uList;
     ILQRSolver::traj lastTraj;
 
-    RomeoSimpleActuator romeoActuatorModel(dt);
-    RomeoLinearActuator romeoLinearModel(dt);
-    CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,ENABLE_FULLDDP,ENABLE_QPBOX);
-    testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+    PneumaticarmNonlinearModel model(dt);
+    CostFunctionPneumaticarmElbow cost;
 
 
-    int N = 100;
+    ILQRSolver solver(model,cost,DISABLE_FULLDDP,DISABLE_QPBOX);
+    solver.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+
+
+    int N = 10;
     gettimeofday(&tbegin,NULL);
-    for(int i=0;i<N;i++) testSolverRomeoActuator.solveTrajectory();
+    for(int i=0;i<N;i++) solver.solveTrajectory();
     gettimeofday(&tend,NULL);
 
-    lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
+    lastTraj = solver.getLastSolvedTrajectory();
     xList = lastTraj.xList;
     uList = lastTraj.uList;
     unsigned int iter = lastTraj.iter;
