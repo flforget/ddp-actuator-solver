@@ -271,19 +271,20 @@ void PneumaticarmNonlinearModel::computeAllModelDeriv(double& dt, const stateVec
     //fx = fxBase;
   
     Xreal = Xe + Xdes;
-    double dh = 5e-3;
+    stateVec_t X = Xe + Xdes;
+    double dh = 1e-5;
     stateVec_t tempX, derivplus, derivminus;
     commandVec_t tempU;
-    tempX = Xe;
+    tempX = X;
     for(unsigned int i = 0; i<8; i++)
     {
         for(unsigned int j=0; j<8;j++)
         {
-            tempX = Xe;
-            tempX(j) = Xe(j) + dh;
+            tempX = X;
+            tempX(j) = X(j) + dh;
             derivplus = computejointderiv(dt, tempX,Xdes, U); //cout<< "deriv:" <<derivplus(0)<< '\n' << endl;
-            tempX = Xe;
-            tempX(j) = Xe(j) - dh;
+            tempX = X;
+            tempX(j) = X(j) - dh;
             derivminus = computejointderiv(dt, tempX,Xdes, U);
             fx(i,j) = (derivplus(i) - derivminus(i))/(2*dh);
         }
