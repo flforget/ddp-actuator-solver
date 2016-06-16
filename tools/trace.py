@@ -6,8 +6,7 @@ tauList = []
 tauDotList = []
 qList = []
 qDotList = []
-u0List = []
-u1List = []
+uList = []
 
 ''' position '''
 path = '../_build/cpp/results.csv'
@@ -21,8 +20,7 @@ with open(path,'r') as dataFile:
             tauDotList.append(float(row[1]))
             qList.append(float(row[2]))
             qDotList.append(float(row[3]))
-            u0List.append((float(row[4])))
-            u1List.append((float(row[5])))
+            uList.append((float(row[4])))
         if i==0:
             i = 1
 
@@ -45,13 +43,9 @@ dx1 = fig1.add_subplot(224)
 dx1.plot(qDotList)
 dx1.grid()
 
-ax2 = fig2.add_subplot(211)
-ax2.plot(u0List)
+ax2 = fig2.add_subplot(111)
+ax2.plot(uList)
 ax2.grid()
-
-bx2 = fig2.add_subplot(212)
-bx2.plot(u1List)
-bx2.grid()
 
 pl.show()
 

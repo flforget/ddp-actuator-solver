@@ -1,5 +1,5 @@
-#ifndef ROMEOSIMPLEACTUATOR_H
-#define ROMEOSIMPLEACTUATOR_H
+#ifndef ROMEOACTUATORPOS_H
+#define ROMEOACTUATORPOS_H
 
 #include "config.h"
 
@@ -8,10 +8,10 @@
 
 using namespace Eigen;
 
-class RomeoSimpleActuator : public DynamicModel
+class RomeoActuatorPos : public DynamicModel
 {
 public:
-    RomeoSimpleActuator(double& mydt);
+    RomeoActuatorPos(double& mydt);
 private:
 protected:
 
@@ -29,8 +29,7 @@ public:
     static const double fvm;
     static const double Cf0;
     static const double a;
-    //commandVec_t lowerCommandBounds;
-    //commandVec_t upperCommandBounds;
+
 private:
     stateVec_t Xreal;
     stateMat_t Id;

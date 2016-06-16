@@ -3,52 +3,54 @@
 
 #define pi M_PI
 
+const double RomeoLinearActuator::k=1000.0;
+const double RomeoLinearActuator::R=200.0;
+const double RomeoLinearActuator::Jm=138*1e-7;
+const double RomeoLinearActuator::Jl=0.1;
+const double RomeoLinearActuator::Cf0=0.1;
+const double RomeoLinearActuator::a=10.0;
+
 RomeoLinearActuator::RomeoLinearActuator(double& mydt)
 {
+    stateNb=4;
+    commandNb=1;
     dt = mydt;
     Id.setIdentity();
 
     A.setZero();
-    A(0,1) = 1.0;
-    A(2,2) = 1.0;
-    A(1,0) = -(k/Jl)+(k/(Jm*R*R));
-    A(3,0) =1.0/Jl;
-    Ad = (A*dt+Id);
+    A <<    0.0, 1.0, 0.0, 0.0;
+            -(k/Jl)-(k/(Jm*R*R)), 0.0, 0.0, 0.0;
+            0.0, 0.0, 0.0, 1.0;
+            1.0/Jl, 0.0, 0.0, 0.0;
+    fx = (A*dt+Id);
 
     B <<  0.0,
-                k/(R*Jm),
-                0.0,
-                0.0;
-    Bd = dt*B;
+            k/(R*Jm),
+            0.0,
+            0.0;
+    fu = dt*B;
 
-    fxBase << 1.0,      1.0,      0.0,      0.0,
-                    -(k/Jl)-(k/(Jm*R*R)),      0.0,      0.0,      0.0,
-                    0.0,      0.0,      1.0,      1.0,
-                    1.0/Jl,      0.0,      0.0,      0.0;
-    fx = (A*dt+Id);
+
     fxx[0].setZero();
     fxx[1].setZero();
     fxx[2].setZero();
     fxx[3].setZero();
 
-
-    fuBase <<   0.0,
-                k/(R*Jm),
-                0.0,
-                0.0;
-    fu = dt*fuBase;
     fuu[0].setZero();
     fux[0].setZero();
     fxu[0].setZero();
+
+    lowerCommandBounds << -50.0;
+    upperCommandBounds << 50.0;
 }
 
-stateVec_t RomeoLinearActuator::computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)
+stateVec_t RomeoLinearActuator::computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
 {
-    stateVec_t result = Ad*X + Bd*U;
+    stateVec_t result = fx*X + fu*U;
     return result;
 }
 
-void RomeoLinearActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
+void RomeoLinearActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
 {
 
 }
@@ -72,45 +74,4 @@ commandR_stateC_t RomeoLinearActuator::computeTensorContux(const stateVec_t& nex
     commandR_stateC_t QuxCont;
     QuxCont.setZero();
     return QuxCont;
-}
-
-/// accessors ///
-unsigned int RomeoLinearActuator::getStateNb()
-{
-    return stateNb;
-}
-
-unsigned int RomeoLinearActuator::getCommandNb()
-{
-    return commandNb;
-}
-
-stateMat_t& RomeoLinearActuator::getfx()
-{
-    return fx;
-}
-
-stateTens_t& RomeoLinearActuator::getfxx()
-{
-    return fxx;
-}
-
-stateR_commandC_t& RomeoLinearActuator::getfu()
-{
-    return fu;
-}
-
-stateR_commandC_commandD_t& RomeoLinearActuator::getfuu()
-{
-    return fuu;
-}
-
-stateR_stateC_commandD_t& RomeoLinearActuator::getfxu()
-{
-    return fxu;
-}
-
-stateR_commandC_stateD_t& RomeoLinearActuator::getfux()
-{
-    return fux;
 }

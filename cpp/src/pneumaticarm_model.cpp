@@ -20,7 +20,7 @@
 
 #include "pneumaticarm_model.h"
 
-double pi =3.14;
+double pi1 =3.14;
 PneumaticarmModel::PneumaticarmModel()
 {
     state_vector_.resize(4);
@@ -91,9 +91,9 @@ void PneumaticarmModel::computeStateDerivative(double time)
     epsb = (1-(lb/lo));
     lt = lo*(1-emax) + R*state_vector_[0];
     epst = (1-(lt/lo));
-    F1 =  pi*pow(ro,2)*P1*(a*pow((1-k*epsb),2) - b);
-    F2 =  pi*pow(ro,2)*P2*(a*pow((1-k*epst),2) - b);
-    //F2max = 1*pi*ro^2*4*1e5*(a*(1-k*emax)^2 - b);
+    F1 =  pi1*pow(ro,2)*P1*(a*pow((1-k*epsb),2) - b);
+    F2 =  pi1*pow(ro,2)*P2*(a*pow((1-k*epst),2) - b);
+    //F2max = 1*pi1*ro^2*4*1e5*(a*(1-k*emax)^2 - b);
     Torque_ = (F1 -F2 )*R;
     state_derivative_[0] = state_vector_[1];
     state_derivative_[1] =  ((F1 -F2 )*R  - fv*state_vector_[1] - m*g*0.5*link_l*sin(state_vector_[0]))/I;
@@ -104,7 +104,7 @@ void PneumaticarmModel::computeStateDerivative(double time)
     ///////////////////////////////////////////////////////////////////////////
 /* Parameters for the muscles
 lo = 0.185;
-alphao = 23.0*pi/180;
+alphao = 23.0*pi1/180;
 %epsilono = 0.15;
 %emax = 0.2983;
 k = 1.25;
@@ -128,9 +128,9 @@ I = m*(link_l^2)/3;
 fv = 0.25;
 
 
-F1 =  pi*ro^2*P1*1e5*(a*(1-k*epsb)^2 - b);
-F2 =  pi*ro^2*P2*1e5*(a*(1-k*epst)^2 - b);
-F2max = 1*pi*ro^2*4*1e5*(a*(1-k*emax)^2 - b);
+F1 =  pi1*ro^2*P1*1e5*(a*(1-k*epsb)^2 - b);
+F2 =  pi1*ro^2*P2*1e5*(a*(1-k*epst)^2 - b);
+F2max = 1*pi1*ro^2*4*1e5*(a*(1-k*emax)^2 - b);
 T = (F1 -F2 )*R;
 F = [F1 F2 T];
 jointstate_deriv(1) = theta_dot; %joint_state(2);
@@ -216,7 +216,7 @@ double  PneumaticarmModel::InverseModel (vector<double>& reference)
     double theta, theta_dot, theta_dot2;
     double a, b, t1, t2, Pmax, tor1, tor2, P_meanDes, Fmax, emax;
     theta = reference[0];//%(t-1)*5*pi/180;         %ref_traj(1);
-    theta_dot = reference[1];//%5*pi/180;     %ref_traj(2);
+    theta_dot = reference[1];//%5*pi1/180;     %ref_traj(2);
     theta_dot2 = reference[2];
     //theta_dot3 = reference[3];
     //theta_dot4 = reference[4];
@@ -225,7 +225,7 @@ double  PneumaticarmModel::InverseModel (vector<double>& reference)
     a = 3/pow(tan(alphao), 2);
     b = 1/pow(sin(alphao), 2);
     emax = (1/k)*(1 - sqrt(b/a));
-    Fmax = (pi*pow(ro,2))*(a-b)*Pmax;
+    Fmax = (pi1*pow(ro,2))*(a-b)*Pmax;
     t1 = R*theta/(lreal*emax);
     t2 = (I*theta_dot2 + fv*theta_dot + m*g*link_l*0.5*sin(theta))/(R*Fmax);
    

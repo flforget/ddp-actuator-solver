@@ -3,8 +3,18 @@
 
 #define pi M_PI
 
+const double RomeoSimpleActuator::k=1000.0;
+const double RomeoSimpleActuator::R=200.0;
+const double RomeoSimpleActuator::Jm=138*1e-7;
+const double RomeoSimpleActuator::Jl=0.1;
+const double RomeoSimpleActuator::fvm=0.01;
+const double RomeoSimpleActuator::Cf0=0.1;
+const double RomeoSimpleActuator::a=10.0;
+
 RomeoSimpleActuator::RomeoSimpleActuator(double& mydt)
 {
+    stateNb=4;
+    commandNb=1;
     dt = mydt;
     Id.setIdentity();
 
@@ -50,25 +60,28 @@ RomeoSimpleActuator::RomeoSimpleActuator(double& mydt)
     QxxCont.setZero();
     QuuCont.setZero();
     QuxCont.setZero();
+
+    lowerCommandBounds << -50.0;
+    upperCommandBounds << 50.0;
 }
 
 
-stateVec_t RomeoSimpleActuator::computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)
+stateVec_t RomeoSimpleActuator::computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
 {
     stateVec_t result = Ad*X + Bd*U;
-    result(1,0)+=A13atan*atan(a*X(3,0));
-    result(3,0)+=A33atan*atan(a*X(3,0));
-
+    result(1,0)+=A13atan*atan(a*(X(3,0)+Xdes(3,0)));
+    result(3,0)+=A33atan*atan(a*(X(3,0)+Xdes(3,0)));
     return result;
 }
 
-void RomeoSimpleActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
+void RomeoSimpleActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const stateVec_t& Xdes,const commandVec_t& U)
 {
+    Xreal = X + Xdes;
     fx = fxBase;
-    fx(1,3) += A13atan*(a/(1+a*a*X(3,0)*X(3,0)));
-    fx(3,3) -= A33atan*(a/(1+(a*a*X(3,0)*X(3,0))));
-    fxx[3](1,3) = -((2*dt*Jm*R)/(pi*Jl))*Cf0*((2*a*a*a*X(3,0))/((1+(a*a*X(3,0)*X(3,0)))*(1+(a*a*X(3,0)*X(3,0)))));
-    fxx[3](3,3) = +((2*dt*Cf0)/(pi*Jl))*((2*a*a*a*X(3,0))/((1+(a*a*X(3,0)*X(3,0)))*(1+(a*a*X(3,0)*X(3,0)))));
+    fx(1,3) += A13atan*(a/(1+a*a*Xreal(3,0)*Xreal(3,0)));
+    fx(3,3) -= A33atan*(a/(1+(a*a*Xreal(3,0)*Xreal(3,0))));
+    fxx[3](1,3) = -((2*dt*Jm*R)/(pi*Jl))*Cf0*((2*a*a*a*Xreal(3,0))/((1+(a*a*Xreal(3,0)*Xreal(3,0)))*(1+(a*a*Xreal(3,0)*Xreal(3,0)))));
+    fxx[3](3,3) = +((2*dt*Cf0)/(pi*Jl))*((2*a*a*a*Xreal(3,0))/((1+(a*a*Xreal(3,0)*Xreal(3,0)))*(1+(a*a*Xreal(3,0)*Xreal(3,0)))));
 }
 
 stateMat_t RomeoSimpleActuator::computeTensorContxx(const stateVec_t& nextVx)
@@ -85,45 +98,4 @@ commandMat_t RomeoSimpleActuator::computeTensorContuu(const stateVec_t& nextVx)
 commandR_stateC_t RomeoSimpleActuator::computeTensorContux(const stateVec_t& nextVx)
 {
     return QuxCont;
-}
-
-/// accessors ///
-unsigned int RomeoSimpleActuator::getStateNb()
-{
-    return stateNb;
-}
-
-unsigned int RomeoSimpleActuator::getCommandNb()
-{
-    return commandNb;
-}
-
-stateMat_t& RomeoSimpleActuator::getfx()
-{
-    return fx;
-}
-
-stateTens_t& RomeoSimpleActuator::getfxx()
-{
-    return fxx;
-}
-
-stateR_commandC_t& RomeoSimpleActuator::getfu()
-{
-    return fu;
-}
-
-stateR_commandC_commandD_t& RomeoSimpleActuator::getfuu()
-{
-    return fuu;
-}
-
-stateR_stateC_commandD_t& RomeoSimpleActuator::getfxu()
-{
-    return fxu;
-}
-
-stateR_commandC_stateD_t& RomeoSimpleActuator::getfux()
-{
-    return fux;
 }

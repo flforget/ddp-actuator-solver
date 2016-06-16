@@ -4,13 +4,8 @@
 #include "config.h"
 
 #include "ilqrsolver.h"
-/*#include "romeosimpleactuator.h"
-#include "romeolinearactuator.h"
-#include "costfunctionromeoactuator.h"*/
+#include "pneumaticarm_2linkmodel.hh"
 #include "costfunctionpneumaticarmelbow.h"
-//#include "pneumaticarmelbowlinear.h"
-#include "pneumaticarmnonlinearmodel.h"
-//#include "pneumaticarm_model.h"
 
 #include <time.h>
 #include <sys/time.h>
@@ -25,38 +20,34 @@ int main()
     double texec=0.0;
     stateVec_t xinit,xDes;
 
-    xinit << -1.0,0.0,-2.0e5,2.0e5;
-    xDes << 1.0,0.0,0.0,0.0;
+    xinit << 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0;
+    xDes << 0.5,1.0,0.0,0.0,0.0,0.0,0.0,0.0;
 
-    unsigned int T = 20;
-    double dt=1e-4;
-    unsigned int iterMax = 20;
-    double stopCrit = 1e-3;
-    stateVec_t* xList;
-    commandVec_t* uList;
+    unsigned int T = 100;
+    double dt=5e-3;
+    unsigned int iterMax = 100;
+    double stopCrit = 1e-5;
+    stateVecTab_t xList1;
+    commandVecTab_t uList1;
     ILQRSolver::traj lastTraj;
 
-   /* RomeoSimpleActuator romeoActuatorModel(dt);
-    RomeoLinearActuator romeoLinearModel(dt);
-    CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver testSolverRomeoActuator(romeoLinearModel,costRomeoActuator);*/
+    PneumaticarmNonlinearModel model(dt);
+    CostFunctionPneumaticarmElbow cost;
 
-    PneumaticarmNonlinearModel pneumaticarmModel(dt);
-    //PneumaticarmElbowPieceLinear pneumaticPieceLinearModel(dt);
-    //CostFunctionRomeoActuator costRomeoActuator;
-    CostFunctionPneumaticarmElbow costPneumatic;
-    ILQRSolver testSolver(pneumaticarmModel,costPneumatic);
-    testSolver.FirstInitSolver(xinit,T,dt,iterMax,stopCrit);
+
+    ILQRSolver solver(model,cost,ENABLE_FULLDDP,DISABLE_QPBOX);
+    solver.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+    
 
 
     int N = 1;
     gettimeofday(&tbegin,NULL);
-    for(int i=0;i<N;i++) testSolver.solveTrajectory();
+    for(int i=0;i<N;i++) solver.solveTrajectory();
     gettimeofday(&tend,NULL);
 
-    lastTraj = testSolver.getLastSolvedTrajectory();
-    xList = lastTraj.xList;
-    uList = lastTraj.uList;
+    lastTraj = solver.getLastSolvedTrajectory();
+    xList1 = lastTraj.xList;
+    uList1 = lastTraj.uList;
     unsigned int iter = lastTraj.iter;
 
     texec=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
@@ -76,9 +67,9 @@ int main()
     ofstream fichier("results.csv",ios::out | ios::trunc);
     if(fichier)
     {
-        fichier << "Theta,ThetaDot,P1,P2,u1.u2" << endl;
-        for(int i=0;i<T;i++) fichier << xList[i](0,0) << "," << xList[i](1,0) << "," << xList[i](2,0) << "," << xList[i](3,0) << "," << uList[i](0,0) << "," << uList[i](1,0) << endl;
-        fichier << xList[T](0,0) << "," << xList[T](1,0) << "," << xList[T](2,0) << "," << xList[T](3,0) << "," << 0.0 << "," << 0.0 << endl;
+        fichier << "pos1,pos2,vel1,vel2,u1,u2" << endl;
+        for(int i=0;i<T;i++) fichier << xList1[i](0,0) << "," << xList1[i](1,0) << "," << xList1[i](2,0) << "," << xList1[i](3,0) << "," << uList1[i](0,0) << "," << uList1[i](1,0) << endl;
+        fichier << xList1[T](0,0) << "," << xList1[T](1,0) << "," << xList1[T](2,0) << "," << xList1[T](3,0) << "," << 0.0 << endl;
         fichier.close();
     }
     else
