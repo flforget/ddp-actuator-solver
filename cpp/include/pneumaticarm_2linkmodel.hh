@@ -31,17 +31,8 @@ private:
    
    
     std::vector<double> x1;
-   
-    /*stateMat_t Id;
-    stateMat_t A;
-    stateMat_t Ad;
-    stateR_commandC_t B;
-    stateR_commandC_t Bd;
-    double A13atan,A10;
-    double A33atan;*/
+
     stateVec_t Xreal;
-    stateMat_t fx,fxBase;
-    stateR_commandC_t fu,fuBase;
     stateMat_t QxxCont;
     commandMat_t QuuCont;
     commandR_stateC_t QuxCont;

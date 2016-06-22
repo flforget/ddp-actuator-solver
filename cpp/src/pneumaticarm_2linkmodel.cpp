@@ -1,5 +1,5 @@
 // Authors: Ganesh Kumar
-/* ******** It is a trial program for modelling a Pneumatic muscle and 
+/* ******** It is a trial program for modelling a Pneumatic muscle and
    ******** controlling it in closeloop under xenomai realtime kernel ********/
 
 
@@ -54,7 +54,6 @@ double epsb = (1-(lb/lo));
 double lt = lo*(1-emax_triceps) + R*theta;
 double epst = (1-(lt/lo));
 
-
 double P1 = x(i+4);
 double P2 = pmax-x(i+4);
 //P = [P1;P2];
@@ -72,14 +71,14 @@ stateVec_t computejointderiv(double& dt, const stateVec_t& Xe,const stateVec_t& 
     //    result(1,0)-=A10*sin(X(0));
     //result(3,0)+=A33atan*atan(a*X(3,0));
     stateVec_t X;
-    X = Xe + Xdes;
+    X = Xe;// + Xdes;
     stateVec_t jointstate_deriv;
     double m = -0.0023;
     double c = 0.0136;
     double p1 = -0.009338;   //%(-0.01208, -0.006597)
     double p2 = 0.01444;
 
-    j2R1 = p1*X(0) + p2; 
+    j2R1 = p1*X(0) + p2;
     //P1_ = X(4);
     //P2_ = X(5);
     double wnb1 = 9;
@@ -93,23 +92,23 @@ stateVec_t computejointderiv(double& dt, const stateVec_t& Xe,const stateVec_t& 
     jointstate_deriv(5) = X(7);
     jointstate_deriv(6) = -pow(wnb1,2)*X(4) - 2*wnb1*X(6) + pow(wnb1,2)*Pdes1;
     jointstate_deriv(7) = -pow(wnb2,2)*X(5) - 2*wnb2*X(7) + pow(wnb2,2)*Pdes2;
-    
+
     //%% Force calculation
     double T1 = Torque_net(X,j2lo1,j2alphao1,j2k1,j2ro1,j2R1,0,j2Pmax1);
     double T2 = Torque_net(X,j4lo,j4alphao,j4k,j4ro,j4R,1,j4Pmax);
-    
-    //%% Mass Inertia Matrix 
-    double m11_const = j2link1_I + j2m1*pow(j2link1_lc,2) + j4link2_I + j4m2*(pow(j2link1_l,2) + 
+
+    //%% Mass Inertia Matrix
+    double m11_const = j2link1_I + j2m1*pow(j2link1_lc,2) + j4link2_I + j4m2*(pow(j2link1_l,2) +
                                 pow(j4link2_lc,2)) + mb*(pow(j2link1_l,2) + pow(j4link2_l,2));
 
-    double m11_var = j4m2*2*j2link1_l*j4link2_lc*cos(X(1)) + 
+    double m11_var = j4m2*2*j2link1_l*j4link2_lc*cos(X(1)) +
                                 mb*2*j2link1_l*j4link2_l*cos(X(1));
 
     double m11 = (m11_var + m11_const);
     double m12_const = j4link2_I + j4m2*pow(j4link2_lc,2) + mb*pow(j4link2_l,2);
-    double m12_var = j4m2*j2link1_l*j4link2_lc*cos(X(1)) + 
+    double m12_var = j4m2*j2link1_l*j4link2_lc*cos(X(1)) +
                                 mb*j2link1_l*j4link2_l*cos(X(1));
-    
+
     double m12 = (m12_var + m12_const);
     double m22 = j4link2_I + j4m2*pow(j4link2_lc,2) + mb*pow(j4link2_l,2);
     double det = m11*m22 - m12*m12;
@@ -126,17 +125,17 @@ stateVec_t computejointderiv(double& dt, const stateVec_t& Xe,const stateVec_t& 
     double c2_var1 = sin(X(1));
     double c2_var2 = pow(X(2),2);
     double c2 = c2_const*(c2_var1*c2_var2);
- 
+
     //%% Gravity Matrix
     double g1 = (j2m1*j2link1_lc + j4m2*j2link1_l + mb*j2link1_l)*sin(X(0)) + (
                         j4m2*j4link2_lc + mb*j4link2_l)*sin(X(0) + X(1));
-    
+
     double g2 = 9.8*(j4m2*j4link2_lc + mb*j4link2_l)*sin(X(0) + X(1));
 
     //%% viscous friction matrix
     double tf1 = -j2fv1*X(2);
     double tf2 = -j4fv2*X(3);
-    
+
     double Mat1 = inv_m11*(T1 + tf1 - c1 - 9.8*g1) + inv_m12*(T2+tf2 -c2 -g2);
     double Mat2 = inv_m21*(T1 + tf1 - c1 - 9.8*g1) + inv_m22*(T2+tf2 -c2 -g2);
 
@@ -144,8 +143,8 @@ stateVec_t computejointderiv(double& dt, const stateVec_t& Xe,const stateVec_t& 
     jointstate_deriv(1) = X(3); //%joint_state(2);
     jointstate_deriv(2) = Mat1;
     jointstate_deriv(3) = Mat2;
-    stateVec_t result = X + dt*jointstate_deriv; 
-   
+    stateVec_t result = X + dt*jointstate_deriv;
+
     //fx = jointstate_deriv;
 
     return result;
@@ -170,7 +169,7 @@ PneumaticarmNonlinearModel::PneumaticarmNonlinearModel(double& mydt)
 
     fxu[0].setZero();
     fxu[1].setZero();
-  
+
     fuBase = B;
     fu = dt* fuBase;
     fuu[0].setZero();
@@ -182,19 +181,19 @@ PneumaticarmNonlinearModel::PneumaticarmNonlinearModel(double& mydt)
     QuxCont.setZero();*/
 }
 
-stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateVec_t& Xe,const stateVec_t& Xdes,const commandVec_t& U)
+stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateVec_t& Xe,const stateVec_t& xDes,const commandVec_t& U)
 {
     //    result(1,0)-=A10*sin(X(0));
     //result(3,0)+=A33atan*atan(a*X(3,0));
     stateVec_t jointstate_deriv;
-    stateVec_t X = Xe + Xdes;
+    stateVec_t X = Xe + xDes;
     double m = -0.0023;
     double c = 0.0136;
     double p1 = -0.009338;   //%(-0.01208, -0.006597)
     double p2 = 0.01444;
 
-    j2R1 = p1*X(0) + p2; 
-     
+    j2R1 = p1*X(0) + p2;
+
     //double P1_ = X(4);
     //double P2_ = X(5);
     double wnb1 = 9;
@@ -208,24 +207,24 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
     jointstate_deriv(5) = X(7);
     jointstate_deriv(6) = -pow(wnb1,2)*X(4) - 2*wnb1*X(6) + pow(wnb1,2)*Pdes1;
     jointstate_deriv(7) = -pow(wnb2,2)*X(5) - 2*wnb2*X(7) + pow(wnb2,2)*Pdes2;
-    
+
     //%% Force calculation
     double T1 = Torque_net(X,j2lo1,j2alphao1,j2k1,j2ro1,j2R1,0,j2Pmax1);
     double T2 = Torque_net(X,j4lo,j4alphao,j4k,j4ro,j4R,1,j4Pmax);
-    
-    //%% Mass Inertia Matrix 
-    double m11_const = j2link1_I + j2m1*pow(j2link1_lc,2) + j4link2_I + j4m2*(pow(j2link1_l,2) + 
+
+    //%% Mass Inertia Matrix
+    double m11_const = j2link1_I + j2m1*pow(j2link1_lc,2) + j4link2_I + j4m2*(pow(j2link1_l,2) +
                                 pow(j4link2_lc,2)) + mb*(pow(j2link1_l,2) + pow(j4link2_l,2));
 
-    double m11_var = j4m2*2*j2link1_l*j4link2_lc*cos(X(1)) + 
+    double m11_var = j4m2*2*j2link1_l*j4link2_lc*cos(X(1)) +
                                 mb*2*j2link1_l*j4link2_l*cos(X(1));
 
     double m11 = (m11_var + m11_const);
 
     double m12_const = j4link2_I + j4m2*pow(j4link2_lc,2) + mb*pow(j4link2_l,2);
-    double m12_var = j4m2*j2link1_l*j4link2_lc*cos(X(1)) + 
+    double m12_var = j4m2*j2link1_l*j4link2_lc*cos(X(1)) +
                                 mb*j2link1_l*j4link2_l*cos(X(1));
-    
+
     double m12 = (m12_var + m12_const);
     double m22 = j4link2_I + j4m2*pow(j4link2_lc,2) + mb*pow(j4link2_l,2);
     double det = m11*m22 - m12*m12;
@@ -242,17 +241,17 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
     double c2_var1 = sin(X(1));
     double c2_var2 = pow(X(2),2);
     double c2 = c2_const*(c2_var1*c2_var2);
- 
+
     //%% Gravity Matrix
     double g1 = (j2m1*j2link1_lc + j4m2*j2link1_l + mb*j2link1_l)*sin(X(0)) + (
                         j4m2*j4link2_lc + mb*j4link2_l)*sin(X(0) + X(1));
-    
+
     double g2 = 9.8*(j4m2*j4link2_lc + mb*j4link2_l)*sin(X(0) + X(1));
 
     //%% viscous friction matrix
     double tf1 = -j2fv1*X(2);
     double tf2 = -j4fv2*X(3);
-    
+
     double Mat1 = inv_m11*(T1 + tf1 - c1 - 9.8*g1) + inv_m12*(T2+tf2 -c2 -g2);
     double Mat2 = inv_m21*(T1 + tf1 - c1 - 9.8*g1) + inv_m22*(T2+tf2 -c2 -g2);
 
@@ -260,7 +259,7 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
     jointstate_deriv(1) = X(3); //%joint_state(2);
     jointstate_deriv(2) = Mat1;
     jointstate_deriv(3) = Mat2;
-    stateVec_t result = X + dt*jointstate_deriv; 
+    stateVec_t result = X + dt*jointstate_deriv ;
     x1[0] = X(0); x1[1] = X(1);
     //fx = jointstate_deriv;
     return result;
@@ -269,13 +268,13 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
 void PneumaticarmNonlinearModel::computeAllModelDeriv(double& dt, const stateVec_t& Xe,const stateVec_t& Xdes,const commandVec_t& U)
 {
     //fx = fxBase;
-  
+
     Xreal = Xe + Xdes;
     stateVec_t X = Xe + Xdes;
     double dh = 1e-5;
     stateVec_t tempX, derivplus, derivminus;
     commandVec_t tempU;
-    tempX = X;
+
     for(unsigned int i = 0; i<8; i++)
     {
         for(unsigned int j=0; j<8;j++)
@@ -296,10 +295,10 @@ void PneumaticarmNonlinearModel::computeAllModelDeriv(double& dt, const stateVec
         {
             tempU = U;
             tempU(j) = U(j) + dh;
-            derivplus = computejointderiv(dt, Xe,Xdes, tempU);
+            derivplus = computejointderiv(dt, X,Xdes, tempU);
             tempU = U;
-            tempU(j) = U(j)-dh;
-            derivminus = computejointderiv(dt, Xe,Xdes, tempU);
+            tempU(j) = U(j) - dh;
+            derivminus = computejointderiv(dt, X,Xdes, tempU);
             fu(i,j) = (derivplus(i) - derivminus(i))/(2*dh);
         }
     }
@@ -327,7 +326,7 @@ commandR_stateC_t PneumaticarmNonlinearModel::computeTensorContux(const stateVec
 {
     return fx;
 }
-   
+
 stateR_commandC_t& PneumaticarmNonlinearModel::getfu()
 {
     return fu;

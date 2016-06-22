@@ -8,6 +8,9 @@
 #include "romeolinearactuator.h"
 #include "costfunctionromeoactuator.h"
 
+#include "pneumaticarm_2linkmodel.hh"
+#include "costfunctionpneumaticarmelbow.h"
+
 #include <time.h>
 #include <sys/time.h>
 
@@ -22,22 +25,25 @@ int main()
     double texec=0.0;
     stateVec_t xinit,xDes;
 
-    xinit << 0.0,0.0,0.0,0.0;
-    xDes << 1.0,0.0,0.0,0.0;
+    xinit << 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0;
+    xDes << 0.5,1.0,0.0,0.0,0.0,0.0,0.0,0.0;
 
-    unsigned int T = 300;
-    unsigned int M = 30;
-    double dt=1e-4;
-    unsigned int iterMax = 20;
-    double stopCrit = 1e-3;
+    //x = xinit;
+
+
+    unsigned int T = 40;
+    unsigned int M = 100;
+    double dt=5e-3;
+    unsigned int iterMax = 30;
+    double stopCrit = 1e-2;
     stateVecTab_t xList;
     commandVecTab_t uList;
     ILQRSolver::traj lastTraj;
+    
+    PneumaticarmNonlinearModel model(dt);
+    CostFunctionPneumaticarmElbow cost;
 
-    RomeoSimpleActuator romeoActuatorModel(dt);
-    RomeoLinearActuator romeoLinearModel(dt);
-    CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,ENABLE_FULLDDP,DISABLE_QPBOX);
+    ILQRSolver testSolverRomeoActuator(model,cost,DISABLE_FULLDDP,DISABLE_QPBOX);
 
 
 
@@ -48,7 +54,7 @@ int main()
         return 1;
     }
     fichier << T << "," << M << endl;
-    fichier << "tau,tauDot,q,qDot,u" << endl;
+    fichier << "pos1,pos2,vel1,vel2,u1,u2" << endl;
 
 
     testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
@@ -62,8 +68,8 @@ int main()
         xList = lastTraj.xList;
         uList = lastTraj.uList;
         xinit = xList[1];
-        for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0) << "," << xList[j](3,0) << "," << uList[j](0,0) << endl;
-        fichier << xList[T](0,0) << "," << xList[T](1,0) << "," << xList[T](2,0) << "," << xList[T](3,0) << "," << 0.0 << endl;
+        for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0) << "," << xList[j](3,0) << "," << uList[j](0,0) << "," << uList[j](1,0) << endl;
+        fichier << xList[T](0,0) << "," << xList[T](1,0) << "," << xList[T](2,0) << "," << xList[T](3,0) << "," << 0.0 << "," << 0.0 << endl;
     }
     gettimeofday(&tend,NULL);
 

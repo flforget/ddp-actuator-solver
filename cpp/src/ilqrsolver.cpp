@@ -72,7 +72,7 @@ void ILQRSolver::FirstInitSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsign
 
 void ILQRSolver::initSolver(stateVec_t& myxInit, stateVec_t& myxDes)
 {
-    xInit = myxInit-myxDes;
+    xInit = myxInit - myxDes;
     xDes = myxDes;
 }
 
@@ -85,7 +85,7 @@ void ILQRSolver::solveTrajectory()
         forwardLoop();
         if(changeAmount<stopCrit)
         {
-            break;
+          break;
         }
         tmpxPtr = xList;
         tmpuPtr = uList;
@@ -100,11 +100,14 @@ void ILQRSolver::initTrajectory()
 {
     xList[0] = xInit;
     commandVec_t zeroCommand;
+    stateVec_t Xe;
+    Xe = xInit;
     zeroCommand.setZero();
     for(unsigned int i=0;i<T;i++)
     {
         uList[i] = zeroCommand;
-        xList[i+1] = dynamicModel->computeNextState(dt,xList[i],xDes,zeroCommand);
+        xList[i+1] = dynamicModel->computeNextState(dt,xList[i] ,xDes,zeroCommand) - xDes;
+        //Xe = xList[i] - xDes;
     }
 }
 
@@ -178,7 +181,7 @@ void ILQRSolver::backwardLoop()
             {
                 k = -QuuInv*Qu;
                 K = -QuuInv*Qux;
-            }   
+            }
 
             /*nextVx = Qx - K.transpose()*Quu*k;
             nextVxx = Qxx - K.transpose()*Quu*K;*/
@@ -200,8 +203,8 @@ void ILQRSolver::forwardLoop()
     alpha = 1.0;
     for(unsigned int i=0;i<T;i++)
     {
-        updateduList[i] = uList[i] + alpha*kList[i] + KList[i]*(updatedxList[i]-xList[i]);
-        updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],xDes,updateduList[i]);
+        updateduList[i] = uList[i] + alpha*kList[i] + KList[i]*(updatedxList[i] - xList[i]);
+        updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],xDes,updateduList[i]) - xDes;
         for(unsigned int j=0;j<commandNb;j++)
         {
             changeAmount += abs(uList[i](j,0) - updateduList[i](j,0));
