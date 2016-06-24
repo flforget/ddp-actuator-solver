@@ -65,11 +65,13 @@ int main()
     tusec = (long double)(tend.tv_usec - tbegin.tv_usec);
     if (tusec < 0.0)tsec -=1;
     texec = 1e-6*(tsec*1e6 + abs(tusec));
+    
     cout << "Time of execution of solver for the entire trrajectory ";
     cout << texec<< endl;
     cout << "Time of execution of each step of MPC ";
     cout << texec/(T) << endl;
     cout << "Number of itérations : " << iter << endl;
+    
     ofstream fichier("results.csv",ios::out | ios::trunc);
     if(fichier)
     {
