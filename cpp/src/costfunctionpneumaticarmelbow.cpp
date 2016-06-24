@@ -6,8 +6,8 @@ using namespace std;
 CostFunctionPneumaticarmElbow::CostFunctionPneumaticarmElbow()
 
 {
-    Q <<1e4*1, 0.0, 0.0, 0.0, 0,0,0,0,
-        0.0,1e4*1, 0.0, 0.0, 0,0,0,0,
+    Q <<1e-2*1, 0.0, 0.0, 0.0, 0,0,0,0,
+        0.0,1e-2*1, 0.0, 0.0, 0,0,0,0,
         2.0e-2*0.0, 0.0, 1e-5*0.0, 0.0, 0,0,0,0,
          0.0, 0.0, 0.0, 1e-5*0.0, 0,0,0,0,
          0,0,0,0, 0,0,0,0,
@@ -26,9 +26,9 @@ CostFunctionPneumaticarmElbow::CostFunctionPneumaticarmElbow()
          0,0,0,0, 0,0,0,0,
          0,0,0,0, 0,0,0,0,
          0,0,0,0, 0,0,0,0;*/
-    Qf = Q; //Qf(0,0) = 0; Qf(1,1) = 0;
-    R << 1e-5,0,
-            0, 1e-5;
+    Qf = Q; Qf(0,0) = 0; Qf(1,1) = 0;
+    R << 1e-6,0,
+            0, 1e-6;
     lxx = Q;
     luu = R;
     //lux << 0.0,0.0;
