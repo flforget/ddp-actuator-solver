@@ -86,8 +86,8 @@ stateVec_t computejointderiv(double& dt, const stateVec_t& Xe,const stateVec_t& 
     //%% Delta P Pressure Dynamics
     ////%%%%%%% 2nd order  %%%%%%%%%%%%%%
     ////%wnb2 = wnb1;a
-    double Pdes1 = U(0);
-    double Pdes2 = U(1);
+    double Pdes1 = U(0)+1.5;
+    double Pdes2 = U(1)+2.0;
     jointstate_deriv(4) = X(6);
     jointstate_deriv(5) = X(7);
     jointstate_deriv(6) = -pow(wnb1,2)*X(4) - 2*wnb1*X(6) + pow(wnb1,2)*Pdes1;
@@ -179,6 +179,10 @@ PneumaticarmNonlinearModel::PneumaticarmNonlinearModel(double& mydt)
     QxxCont.setZero();
     QuuCont.setZero();
     QuxCont.setZero();*/
+
+    lowerCommandBounds << -1.5,-2.0;
+    upperCommandBounds << 1.5,2.0;
+    commandOffset << 1.5,2.0;
 }
 
 stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateVec_t& Xe,const stateVec_t& xDes,const commandVec_t& U)
@@ -201,8 +205,8 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
     //%% Delta P Pressure Dynamics
     ////%%%%%%% 2nd order  %%%%%%%%%%%%%%
     ////%wnb2 = wnb1;a
-    double Pdes1 = U(0);
-    double Pdes2 = U(1);
+    double Pdes1 = U(0)+commandOffset(0);
+    double Pdes2 = U(1)+commandOffset(1);
     jointstate_deriv(4) = X(6);
     jointstate_deriv(5) = X(7);
     jointstate_deriv(6) = -pow(wnb1,2)*X(4) - 2*wnb1*X(6) + pow(wnb1,2)*Pdes1;
@@ -268,7 +272,9 @@ stateVec_t PneumaticarmNonlinearModel::computeNextState(double& dt, const stateV
 void PneumaticarmNonlinearModel::computeAllModelDeriv(double& dt, const stateVec_t& Xe,const stateVec_t& Xdes,const commandVec_t& U)
 {
     //fx = fxBase;
-
+    commandVec_t Ureal;
+    Ureal(0) = U(0) +commandOffset(0);
+    Ureal(1) = U(1) +commandOffset(1);
     Xreal = Xe + Xdes;
     stateVec_t X = Xe + Xdes;
     double dh = 1e-5;
@@ -281,10 +287,10 @@ void PneumaticarmNonlinearModel::computeAllModelDeriv(double& dt, const stateVec
         {
             tempX = X;
             tempX(j) = X(j) + dh;
-            derivplus = computejointderiv(dt, tempX,Xdes, U); //cout<< "deriv:" <<derivplus(0)<< '\n' << endl;
+            derivplus = computejointderiv(dt, tempX,Xdes, Ureal); //cout<< "deriv:" <<derivplus(0)<< '\n' << endl;
             tempX = X;
             tempX(j) = X(j) - dh;
-            derivminus = computejointderiv(dt, tempX,Xdes, U);
+            derivminus = computejointderiv(dt, tempX,Xdes, Ureal);
             fx(i,j) = (derivplus(i) - derivminus(i))/(2*dh);
         }
     }
@@ -293,11 +299,11 @@ void PneumaticarmNonlinearModel::computeAllModelDeriv(double& dt, const stateVec
     {
         for(unsigned int j=0; j<2;j++)
         {
-            tempU = U;
-            tempU(j) = U(j) + dh;
+            tempU = Ureal;
+            tempU(j) = Ureal(j) + dh;
             derivplus = computejointderiv(dt, X,Xdes, tempU);
-            tempU = U;
-            tempU(j) = U(j) - dh;
+            tempU = Ureal;
+            tempU(j) = Ureal(j) - dh;
             derivminus = computejointderiv(dt, X,Xdes, tempU);
             fu(i,j) = (derivplus(i) - derivminus(i))/(2*dh);
         }

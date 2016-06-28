@@ -7,29 +7,60 @@ fprintf(['A demonstration of the iLQG/DDP algorithm\n'...
 '\"Control-Limited Differential Dynamic Programming\"\n'])
 
 % make stable linear dynamics
-h = .01;        % time step
-n = 10;         % state dimension
-m = 2;          % control dimension
-A = randn(n,n);
-A = A-A';       % skew-symmetric = pure imaginary eigenvalues
-A = expm(h*A);  % discrete time
-B = h*randn(n,m);
+h = .0001;        % time step
+n = 4;         % state dimension
+m = 1;          % control dimension
+A =         [1   0.0001        0        0;
+            -1.18116 0.927536        0 -72.4638;
+             0        0        1   0.0001;
+            0.001        0        0        1];
+
+
+B =     [ 0;
+            36.2319;
+            0;
+            0];
+
 
 % quadratic costs
-Q = h*eye(n);
-R = .1*h*eye(m);
+Q = [100,0,0,0;
+    0,0,0,0;
+    0,0,0,0;
+    0,0,0,0;];
+R = .1*eye(m);
 
 % control limits
-Op.lims = ones(m,1)*[-1 1]*.6;
+%Op.lims = ones(m,1)*[-1 1]*.6;
 
 % optimization problem
 DYNCST  = @(x,u,i) lin_dyn_cst(x,u,A,B,Q,R);
-T       = 1000;              % horizon
-x0      = randn(n,1);       % initial state
+T       = 150;              % horizon
+x0      = [-3.0;0.0;0.0;0.0];       % initial state
 u0      = .1*randn(m,T);    % initial controls
 
 % run the optimization
-iLQG(DYNCST, x0, u0, Op);
+[x,u] = iLQG(DYNCST, x0, u0);
+
+figure
+subplot(221)
+plot(x(1,:,:))
+grid on
+subplot(222)
+plot(x(2,:,:))
+grid on
+subplot(223)
+plot(x(3,:,:))
+grid on
+subplot(224)
+plot(x(4,:,:))
+grid on
+
+figure
+plot(u)
+grid on
+
+
+
 
 
 function [f,c,fx,fu,fxx,fxu,fuu,cx,cu,cxx,cxu,cuu] = lin_dyn_cst(x,u,A,B,Q,R)

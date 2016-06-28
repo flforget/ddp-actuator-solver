@@ -17,6 +17,7 @@ using namespace Eigen;
 int main()
 {
     struct timeval tbegin,tend;
+    commandVec_t commandOffset;
     double texec=0.0;
     double tsec = 0.0; long double tusec = 0.0;
     stateVec_t xinit,xDes;
@@ -24,7 +25,9 @@ int main()
     xinit << 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0;
     xDes << 0.5,1.0,0.0,0.0,0.0,0.0,0.0,0.0;
 
-    unsigned int T = 400;
+    commandOffset << 1.5,2.0;
+
+    unsigned int T = 800;
     double dt=10e-3;
     unsigned int iterMax = 100;
     double stopCrit = 1e-5;
@@ -36,7 +39,7 @@ int main()
     CostFunctionPneumaticarmElbow cost;
 
 
-    ILQRSolver solver(model,cost,DISABLE_FULLDDP,DISABLE_QPBOX);
+    ILQRSolver solver(model,cost,DISABLE_FULLDDP,ENABLE_QPBOX);
     solver.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
     
 
@@ -50,6 +53,11 @@ int main()
     xList1 = lastTraj.xList;
     uList1 = lastTraj.uList;
     unsigned int iter = lastTraj.iter;
+
+    /*for(int i=0;i<N;i++)
+    {
+        uList1[i] += commandOffset;
+    }*/
 
     /*texec=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
     texec /= N;
@@ -77,7 +85,7 @@ int main()
     {
         fichier << "pos1,pos2,vel1,vel2,u1,u2" << endl;
         for(int i=0;i<T;i++) fichier << xList1[i](0,0) << "," << xList1[i](1,0) << "," << xList1[i](2,0) << "," << xList1[i](3,0) << "," << uList1[i](0,0) << "," << uList1[i](1,0) << endl;
-        fichier << xList1[T](0,0) << "," << xList1[T](1,0) << "," << xList1[T](2,0) << "," << xList1[T](3,0) << "," << 0.0 << "," << 0.0 << endl;
+        fichier << xList1[T](0,0) << "," << xList1[T](1,0) << "," << xList1[T](2,0) << "," << xList1[T](3,0) << "," << uList1[T-1](0,0) << "," << uList1[T-1](1,0) << endl;
         fichier.close();
     }
     else

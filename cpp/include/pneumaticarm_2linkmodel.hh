@@ -22,6 +22,7 @@ protected:
 
     // attributes //
 public:
+
 private:
     double dt;
    // Muscle parameters

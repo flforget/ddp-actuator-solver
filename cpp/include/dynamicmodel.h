@@ -15,6 +15,7 @@ public:
 
 // attributes //
 public:
+    commandVec_t commandOffset;
 protected:
     unsigned int stateNb;
     unsigned int commandNb;

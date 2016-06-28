@@ -16,7 +16,7 @@ dt = 5e-3; % dt for dynamics
 ToT = 4;       %(in seconds)
 N_tot = ToT/dt;
 %T_horizon = 0.5;  %(in seconds)
-T = 40; %N_tot; %10; %T_horizon/dt;
+T = 400; %N_tot; %10; %T_horizon/dt;
 %N_DT = ToT/T_horizon;
 
 

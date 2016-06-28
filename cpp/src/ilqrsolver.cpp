@@ -217,6 +217,7 @@ ILQRSolver::traj ILQRSolver::getLastSolvedTrajectory()
     lastTraj.xList = updatedxList;
     for(int i=0;i<T+1;i++)lastTraj.xList[i] += xDes;
     lastTraj.uList = updateduList;
+    for(int i=0;i<T;i++) lastTraj.uList[i] += dynamicModel->commandOffset;
     lastTraj.iter = iter;
     return lastTraj;
 }
