@@ -1,12 +1,12 @@
-#ifndef COSTFUNCTIONROMEOACTUATOR_H
-#define COSTFUNCTIONROMEOACTUATOR_H
+#ifndef COSTCEA_H
+#define COSTCEA_H
 
 #include "costfunction.h"
 
-class CostFunctionRomeoActuator : public CostFunction<double,4,1>
+class CostCea : public CostFunction<double,4,2>
 {
 public:
-    CostFunctionRomeoActuator();
+    CostCea();
 private:
     stateMat_t Q;
     commandMat_t R;

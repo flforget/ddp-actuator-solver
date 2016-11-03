@@ -3,8 +3,6 @@
 
 #include <Eigen/Core>
 
-using namespace Eigen;
-
 template<typename precision,int stateSize,int commandSize>
 class DynamicModel
 {

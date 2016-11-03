@@ -5,7 +5,7 @@
 
 #include "ilqrsolver.h"
 #include "romeosimpleactuator.h"
-#include "romeolinearactuator.h"
+#include "ceaactuator.h"
 #include "costfunctionromeoactuator.h"
 
 #include <time.h>
@@ -25,9 +25,9 @@ int main()
     xinit << 0.0,0.0,0.0,0.0;
     xDes << 1.0,0.0,0.0,0.0;
 
-    unsigned int T = 300;
-    unsigned int M = 30;
-    double dt=1e-4;
+    unsigned int T = 3000;
+    unsigned int M = 200;
+    double dt=1e-3;
     unsigned int iterMax = 20;
     double stopCrit = 1e-3;
     ILQRSolver<double,4,1>::stateVecTab_t xList;
@@ -35,9 +35,8 @@ int main()
     ILQRSolver<double,4,1>::traj lastTraj;
 
     RomeoSimpleActuator romeoActuatorModel(dt);
-    RomeoLinearActuator romeoLinearModel(dt);
     CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,ENABLE_FULLDDP,ENABLE_QPBOX);
+    ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,DISABLE_FULLDDP,DISABLE_QPBOX);
 
 
 

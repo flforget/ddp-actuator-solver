@@ -2,9 +2,6 @@
 #define ROMEOSIMPLEACTUATOR_H
 
 #include "dynamicmodel.h"
-#include <Eigen/Dense>
-
-using namespace Eigen;
 
 class RomeoSimpleActuator : public DynamicModel<double,4,1>
 {
@@ -18,11 +15,22 @@ public:
 private:
     double dt;
 public:
+    /*static const double k;
+    static const double R;
+    static const double Jm;
+    static const double Jl;
+    static const double fvm;
+    static const double Cf0;
+    static const double a;*/
+
     static const double k;
     static const double R;
     static const double Jm;
     static const double Jl;
     static const double fvm;
+    static const double fvl;
+    static const double Kt;
+    static const double mu;
     static const double Cf0;
     static const double a;
 private:

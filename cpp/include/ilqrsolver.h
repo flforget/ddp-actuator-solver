@@ -4,7 +4,6 @@
 #include "dynamicmodel.h"
 #include "costfunction.h"
 
-
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 #include <qpOASES.hpp>
@@ -15,11 +14,10 @@
 #define ENABLE_FULLDDP 1
 #define DISABLE_FULLDDP 0
 
-using namespace Eigen;
 USING_NAMESPACE_QPOASES
 
-EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(MatrixXd)
-EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(VectorXd)
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::MatrixXd)
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::VectorXd)
 
 template<typename precision,int stateSize,int commandSize>
 class ILQRSolver
@@ -286,7 +284,7 @@ public:
                     ub = upperCommandBounds - u;
                     qp->init(H.data(),g.data(),lb.data(),ub.data(),nWSR);
                     qp->getPrimalSolution(xOpt);
-                    k = Map<commandVec_t>(xOpt);
+                    k = Eigen::Map<commandVec_t>(xOpt);
                     K = -QuuInv*Qux;
                     for(unsigned int i_cmd=0;i_cmd<commandNb;i_cmd++)
                     {

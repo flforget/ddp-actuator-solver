@@ -1,15 +1,12 @@
-#ifndef ROMEOACTUATORPOS_H
-#define ROMEOACTUATORPOS_H
+#ifndef CEAACTUATOR_H
+#define CEAACTUATOR_H
 
 #include "dynamicmodel.h"
-#include <Eigen/Dense>
 
-using namespace Eigen;
-
-class RomeoActuatorPos : public DynamicModel<double,4,1>
+class CeaActuator : public DynamicModel<double,4,2>
 {
 public:
-    RomeoActuatorPos(double& mydt);
+    CeaActuator(double& mydt);
 private:
 protected:
 
@@ -25,8 +22,7 @@ public:
     static const double Jm;
     static const double Jl;
     static const double fvm;
-    static const double Cf0;
-    static const double a;
+    static const double fvl;
 
 private:
     stateVec_t Xreal;

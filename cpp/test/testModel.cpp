@@ -5,8 +5,6 @@
 
 #include "ilqrsolver.h"
 #include "romeosimpleactuator.h"
-#include "romeolinearactuator.h"
-#include "romeoactuatorpos.h"
 #include "costfunctionromeoactuator.h"
 
 #include <time.h>
@@ -31,7 +29,7 @@ int main()
     x = xinit;
 
     double dt=1e-3;
-    unsigned int N=2000;
+    unsigned int N=3000;
     ILQRSolver<double,4,1>::stateVecTab_t xList;
     ILQRSolver<double,4,1>::commandVecTab_t uList;
 
@@ -39,8 +37,6 @@ int main()
     uList.resize(N);
 
     RomeoSimpleActuator romeoActuatorModel(dt);
-    RomeoActuatorPos romeoActuator(dt);
-    RomeoLinearActuator romeoLinearModel(dt);
 
     double last_err=0.0;
     double err = 0.0;
@@ -49,12 +45,14 @@ int main()
     double Ki = 0.01;
     for(int i=0;i<N;i++)
     {
-        last_err = err;
+        /*last_err = err;
         err = x[0] - xDes[0];
         int_err += err;
         if(int_err>300)int_err=300;
         if(int_err<-300)int_err=-300;
-        u << Kp*err + Ki*int_err;
+        u << Kp*err + Ki*int_err;*/
+        //u << 1.0*(1.0-x[0]);
+        //if(u[0]>10.0)u<<10.0;
         xList[i] = x;
         uList[i] = u;
         x = romeoActuatorModel.computeNextState(dt,x,xDes,u);
