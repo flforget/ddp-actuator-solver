@@ -5,7 +5,6 @@
 
 #include "ilqrsolver.h"
 #include "romeosimpleactuator.h"
-#include "ceaactuator.h"
 #include "costfunctionromeoactuator.h"
 
 #include <time.h>
@@ -25,16 +24,19 @@ int main()
     xinit << 0.0,0.0,0.0,0.0;
     xDes << 1.0,0.0,0.0,0.0;
 
-    unsigned int T = 3000;
-    unsigned int M = 200;
+    unsigned int T = 100;
+    unsigned int M = 3000;
     double dt=1e-3;
-    unsigned int iterMax = 20;
+    unsigned int iterMax = 100;
     double stopCrit = 1e-3;
     ILQRSolver<double,4,1>::stateVecTab_t xList;
     ILQRSolver<double,4,1>::commandVecTab_t uList;
     ILQRSolver<double,4,1>::traj lastTraj;
 
+    srand(time(NULL));
+
     RomeoSimpleActuator romeoActuatorModel(dt);
+    RomeoSimpleActuator romeoNoisyModel(dt,1);
     CostFunctionRomeoActuator costRomeoActuator;
     ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,DISABLE_FULLDDP,DISABLE_QPBOX);
 
@@ -60,7 +62,9 @@ int main()
         lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
         xList = lastTraj.xList;
         uList = lastTraj.uList;
-        xinit = xList[1];
+        xinit = xinit;
+        xinit = romeoNoisyModel.computeNextState(dt,xinit,uList[0]);
+
         for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0) << "," << xList[j](3,0) << "," << uList[j](0,0) << endl;
         fichier << xList[T](0,0) << "," << xList[T](1,0) << "," << xList[T](2,0) << "," << xList[T](3,0) << "," << 0.0 << endl;
     }

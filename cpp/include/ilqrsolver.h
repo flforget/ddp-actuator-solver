@@ -154,7 +154,7 @@ public:
     void FirstInitSolver(stateVec_t& myxInit, stateVec_t& myxDes, unsigned int& myT,
                            double& mydt, unsigned int& myiterMax,double& mystopCrit)
     {
-        xInit = myxInit-myxDes;
+        xInit = myxInit;
         xDes = myxDes;
         T = myT;
         dt = mydt;
@@ -191,7 +191,7 @@ public:
 
     void initSolver(stateVec_t& myxInit, stateVec_t& myxDes)
     {
-        xInit = myxInit-myxDes;
+        xInit = myxInit;
         xDes = myxDes;
     }
 
@@ -223,13 +223,13 @@ public:
         for(unsigned int i=0;i<T;i++)
         {
             uList[i] = zeroCommand;
-            xList[i+1] = dynamicModel->computeNextState(dt,xList[i],xDes,zeroCommand);
+            xList[i+1] = dynamicModel->computeNextState(dt,xList[i],zeroCommand);
         }
     }
 
     void backwardLoop()
     {
-        costFunction->computeFinalCostDeriv(xList[T]);
+        costFunction->computeFinalCostDeriv(xList[T],xDes);
         nextVx = costFunction->getlx();
         nextVxx = costFunction->getlxx();
 
@@ -245,8 +245,8 @@ public:
                 x = xList[i];
                 u = uList[i];
 
-                dynamicModel->computeAllModelDeriv(dt,x,xDes,u);
-                costFunction->computeAllCostDeriv(x,u);
+                dynamicModel->computeAllModelDeriv(dt,x,u);
+                costFunction->computeAllCostDeriv(x,xDes,u);
 
                 Qx = costFunction->getlx() + dynamicModel->getfx().transpose() * nextVx;
                 Qu = costFunction->getlu() + dynamicModel->getfu().transpose() * nextVx;
@@ -321,7 +321,7 @@ public:
         for(unsigned int i=0;i<T;i++)
         {
             updateduList[i] = uList[i] + alpha*kList[i] + KList[i]*(updatedxList[i]-xList[i]);
-            updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],xDes,updateduList[i]);
+            updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],updateduList[i]);
             for(unsigned int j=0;j<commandNb;j++)
             {
                 changeAmount += abs(uList[i](j,0) - updateduList[i](j,0));
@@ -332,7 +332,6 @@ public:
     ILQRSolver::traj getLastSolvedTrajectory()
     {
         lastTraj.xList = updatedxList;
-        for(int i=0;i<T+1;i++)lastTraj.xList[i] += xDes;
         lastTraj.uList = updateduList;
         lastTraj.iter = iter;
         return lastTraj;

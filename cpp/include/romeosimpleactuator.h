@@ -6,7 +6,7 @@
 class RomeoSimpleActuator : public DynamicModel<double,4,1>
 {
 public:
-    RomeoSimpleActuator(double& mydt);
+    RomeoSimpleActuator(double& mydt,bool noiseOnParameters=0);
 private:
 protected:
 
@@ -14,25 +14,17 @@ protected:
 public:
 private:
     double dt;
-public:
-    /*static const double k;
-    static const double R;
-    static const double Jm;
-    static const double Jl;
-    static const double fvm;
-    static const double Cf0;
-    static const double a;*/
-
-    static const double k;
-    static const double R;
-    static const double Jm;
-    static const double Jl;
-    static const double fvm;
-    static const double fvl;
-    static const double Kt;
-    static const double mu;
-    static const double Cf0;
-    static const double a;
+private:
+    double k;
+    double R;
+    double Jm;
+    double Jl;
+    double fvm;
+    double fvl;
+    double Kt;
+    double mu;
+    double Cf0;
+    double a;
 private:
     stateVec_t Xreal;
     stateMat_t Id;
@@ -52,8 +44,8 @@ private:
 protected:
     // methods //
 public:
-    stateVec_t computeNextState(double& dt, const stateVec_t& X,const stateVec_t& Xdes, const commandVec_t &U);
-    void computeAllModelDeriv(double& dt, const stateVec_t& X,const stateVec_t& Xdes, const commandVec_t &U);
+    stateVec_t computeNextState(double& dt, const stateVec_t& X, const commandVec_t &U);
+    void computeAllModelDeriv(double& dt, const stateVec_t& X, const commandVec_t &U);
     stateMat_t computeTensorContxx(const stateVec_t& nextVx);
     commandMat_t computeTensorContuu(const stateVec_t& nextVx);
     commandR_stateC_t computeTensorContux(const stateVec_t& nextVx);

@@ -83,19 +83,19 @@ cx1 = fig1.add_subplot(223)
 dx1 = fig1.add_subplot(224)
 ax2 = fig2.add_subplot(111)
 
-for i in range(N):
+for i in range(0,N,20):
 	ax1.plot(range(i,i+T+1,1),tauListList[i])
 	bx1.plot(range(i,i+T+1,1),tauDotListList[i])
 	cx1.plot(range(i,i+T+1,1),qListList[i])
 	dx1.plot(range(i,i+T+1,1),qDotListList[i])
 	ax2.plot(range(i,i+T+1,1),uListList[i])
 	
-ax1.plot(finaltauList,'g')
-bx1.plot(finaltauDotList,'g')
-cx1.plot(finalqList,'g')
-dx1.plot(finalqDotList,'g')
-ax2.plot(finaluList,'g')
-	
+ax1.plot(finaltauList,'g+')
+bx1.plot(finaltauDotList,'g+')
+cx1.plot(finalqList,'g+')
+dx1.plot(finalqDotList,'g+')
+ax2.plot(finaluList,'g+')
+
 ax1.grid()
 bx1.grid()
 cx1.grid()

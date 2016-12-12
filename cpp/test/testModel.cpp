@@ -23,7 +23,7 @@ int main()
 
     u << 1.0;
 
-    xinit << 0.0,0.0,0.0,0.0;
+    xinit << -1.0,0.0,-100.0,0.0;
     xDes << 1.0,0.0,0.0,0.0;
 
     x = xinit;
@@ -55,7 +55,7 @@ int main()
         //if(u[0]>10.0)u<<10.0;
         xList[i] = x;
         uList[i] = u;
-        x = romeoActuatorModel.computeNextState(dt,x,xDes,u);
+        x = romeoActuatorModel.computeNextState(dt,x,u);
     }
 
 

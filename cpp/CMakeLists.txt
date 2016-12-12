@@ -14,16 +14,12 @@ FILE(
 
 ADD_EXECUTABLE(main test/main.cpp ${source_files})
 ADD_EXECUTABLE(mainTorque test/mainTorque.cpp ${source_files})
-ADD_EXECUTABLE(mainCEA test/mainCEA.cpp ${source_files})
-ADD_EXECUTABLE(mainCEA2 test/mainCEA2.cpp ${source_files})
 ADD_EXECUTABLE(mainMPC test/mainMPC.cpp ${source_files})
 ADD_EXECUTABLE(testModel test/testModel.cpp ${source_files})
 ADD_EXECUTABLE(benchControl test/benchControl.cpp ${source_files})
 
 TARGET_LINK_LIBRARIES(main ${qpOASES_LIBRARIES})
 TARGET_LINK_LIBRARIES(mainTorque ${qpOASES_LIBRARIES})
-TARGET_LINK_LIBRARIES(mainCEA ${qpOASES_LIBRARIES})
-TARGET_LINK_LIBRARIES(mainCEA2 ${qpOASES_LIBRARIES})
 TARGET_LINK_LIBRARIES(mainMPC ${qpOASES_LIBRARIES})
 TARGET_LINK_LIBRARIES(testModel ${qpOASES_LIBRARIES})
 TARGET_LINK_LIBRARIES(benchControl ${qpOASES_LIBRARIES})
