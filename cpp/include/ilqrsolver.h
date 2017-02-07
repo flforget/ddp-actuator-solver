@@ -81,6 +81,7 @@ private:
     unsigned int iterMax;
     double stopCrit;
     double changeAmount;
+    commandVec_t zeroCommand;
 
     stateVecTab_t xList;
     commandVecTab_t uList;
@@ -96,6 +97,7 @@ private:
     stateMat_t Qxx;
     commandVec_t Qu;
     commandMat_t Quu;
+    Eigen::LLT<commandMat_t> lltofQuu;
     commandMat_t QuuInv;
     commandR_stateC_t Qux;
     commandVec_t k;
@@ -134,6 +136,7 @@ public:
         commandNb = myDynamicModel.getCommandNb();
         enableQPBox = QPBox;
         enableFullDDP = fullDDP;
+        zeroCommand.setZero();
         if(QPBox)
         {
             qp = new QProblemB(commandNb);
@@ -172,15 +175,6 @@ public:
         kList.resize(myT);
         KList.resize(myT);
 
-        /*xList = new stateVec_t[myT+1];
-        uList = new commandVec_t[myT];
-        updatedxList = new stateVec_t[myT+1];
-        updateduList = new commandVec_t[myT];
-        k.setZero();
-        K.setZero();
-        kList = new commandVec_t[myT];
-        KList = new commandR_stateC_t[myT];*/
-
         alphaList[0] = 1.0;
         alphaList[1] = 0.8;
         alphaList[2] = 0.6;
@@ -198,7 +192,7 @@ public:
     void solveTrajectory()
     {
         initTrajectory();
-        for(iter=0;iter<iterMax;iter++)
+        for(iter=1;iter<iterMax;iter++)
         {
             backwardLoop();
             forwardLoop();
@@ -218,8 +212,6 @@ public:
     void initTrajectory()
     {
         xList[0] = xInit;
-        commandVec_t zeroCommand;
-        zeroCommand.setZero();
         for(unsigned int i=0;i<T;i++)
         {
             uList[i] = zeroCommand;
@@ -239,7 +231,7 @@ public:
         while(!completeBackwardFlag)
         {
             completeBackwardFlag = 1;
-            muEye = mu*stateMat_t::Zero();
+            muEye = stateMat_t::Constant(mu);
             for(int i=T-1;i>=0;i--)
             {
                 x = xList[i];
@@ -254,7 +246,6 @@ public:
                 Quu = costFunction->getluu() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfu();
                 Qux = costFunction->getlux() + dynamicModel->getfu().transpose() * (nextVxx+muEye) * dynamicModel->getfx();
 
-
                 if(enableFullDDP)
                 {
                     Qxx += dynamicModel->computeTensorContxx(nextVx);
@@ -262,18 +253,17 @@ public:
                     Quu += dynamicModel->computeTensorContuu(nextVx);
                 }
 
-                QuuInv = Quu.inverse();
-
                 if(!isQuudefinitePositive(Quu))
                 {
-                    /*
-                      To be Implemented : Regularization (is Quu definite positive ?)
-                    */
+
+                    std::cout << "regularization" << std::endl; // to remove
                     if(mu==0.0) mu += 1e-4;
                     else mu *= 10;
                     completeBackwardFlag = 0;
                     break;
                 }
+
+                QuuInv = Quu.inverse();
 
                 if(enableQPBox)
                 {
@@ -339,19 +329,11 @@ public:
 
     bool isQuudefinitePositive(const commandMat_t & Quu)
     {
-        /*
-          Todo : check if Quu is definite positive
-        */
-        //Eigen::JacobiSVD<commandMat_t> svd_Quu (Quu, ComputeThinU | ComputeThinV);
-        Eigen::VectorXcd singular_values = Quu.eigenvalues();
-
-        for(long i = 0; i < Quu.cols(); ++i)
+        lltofQuu.compute(Quu);
+        if(lltofQuu.info() == Eigen::NumericalIssue)
         {
-            if (singular_values[i].real() < 0.)
-            {
-                std::cout << "not sdp" << std::endl;
-                return false;
-            }
+            std::cout << "not sdp"<< std::endl;
+            return false;
         }
         return true;
     }
