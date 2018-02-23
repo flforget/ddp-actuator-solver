@@ -5,7 +5,7 @@ from costFunction import *
 from dynamicModel import *
 import time
 
-class ILQRSolverImproved:
+class DDPSolver:
     def __init__(self,model,costFunction):
         self.model = model
         self.costfunction = costFunction

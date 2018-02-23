@@ -1,7 +1,7 @@
 __author__ = 'fforget'
 
 import numpy as np
-from iLQRSolver import *
+from DDPSolver import *
 from costFunction import *
 from dynamicModel import *
 import matplotlib.pyplot as pl
@@ -38,7 +38,7 @@ trajList = [Xdes,-2*Xdes,-0.5*Xdes,-4*Xdes,2*Xdes]
 model = MCCmodel()
 costFunction = CostFunctionMCC3States()
 
-solver = ILQRSolver(model,costFunction)
+solver = DDPSolver(model,costFunction)
 for i in range(M):
     Xdes = trajList[i]
     initTime = time.time()

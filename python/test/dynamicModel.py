@@ -2,7 +2,7 @@ import numpy as np
 from random import uniform
 import time
 
-class SimpleRomeoActuatorDynamicModelImproved:
+class SimpleRomeoActuatorDynamicModel:
     """ discrete dynamic model definition class
             _ return derivatives
             _ return nextState from currentState

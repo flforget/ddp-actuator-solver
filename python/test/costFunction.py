@@ -1,7 +1,6 @@
 import numpy as np
-from tools import nRoot
 
-class CostFunctionSimpleRomeoActuatorImproved:
+class CostFunctionSimpleRomeoActuator:
     def __init__(self):
         self.Q = np.matrix([[100.0,0.0,0.0,0.0],
                         [0.0,0.0,0.0,0.0],

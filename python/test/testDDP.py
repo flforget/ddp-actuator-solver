@@ -1,9 +1,9 @@
 __author__ = 'fforget'
 
 import numpy as np
-from iLQRSolverImproved import *
-from costFunctionImproved import *
-from dynamicModelImproved import *
+from DDPSolver import *
+from costFunction import *
+from dynamicModel import *
 import matplotlib.pyplot as pl
 from random import uniform
 import time
@@ -40,10 +40,10 @@ trajList = list([Xdes,-2*Xdes,-0.5*Xdes,Xdes,2*Xdes])
 dt = 1e-4
 
 
-model = SimpleRomeoActuatorDynamicModelImproved()
-costFunction = CostFunctionSimpleRomeoActuatorImproved()
+model = SimpleRomeoActuatorDynamicModel()
+costFunction = CostFunctionSimpleRomeoActuator()
 
-solver = ILQRSolverImproved(model,costFunction)
+solver = DDPSolver(model,costFunction)
 for i in range(M):
     Xdes = trajList[i]
     initTime = time.time()
