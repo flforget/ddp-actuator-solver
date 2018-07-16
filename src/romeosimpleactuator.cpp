@@ -1,8 +1,8 @@
-#include "romeosimpleactuator.h"
 #include <math.h>
 #include <eigen3/unsupported/Eigen/MatrixFunctions>
 #include <sys/time.h>
 
+#include <ddp-actuator-solver/romeosimpleactuator.h>
 #define pi M_PI
 
 /*

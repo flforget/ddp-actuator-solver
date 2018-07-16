@@ -1,4 +1,4 @@
-#include "costtemp.h"
+#include <ddp-actuator-solver/costtemp.h>
 
 CostTemp::CostTemp()
 {

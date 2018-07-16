@@ -1,4 +1,4 @@
-#include "costfunctionromeoactuator.h"
+#include <ddp-actuator-solver/costfunctionromeoactuator.h>
 
 CostFunctionRomeoActuator::CostFunctionRomeoActuator()
 {

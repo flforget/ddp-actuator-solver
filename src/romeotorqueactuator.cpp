@@ -1,6 +1,6 @@
-#include "romeotorqueactuator.h"
 #include <math.h>
 
+#include <ddp-actuator-solver/romeotorqueactuator.h>
 #define pi M_PI
 
 const double RomeoTorqueActuator::k=588.0;

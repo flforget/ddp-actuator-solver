@@ -1,4 +1,3 @@
-#include "dctemp.h"
 #include <math.h>
 #include <eigen3/unsupported/Eigen/MatrixFunctions>
 #include <sys/time.h>
@@ -14,6 +13,8 @@
  * x3 -> external torque
  * x4 -> ambiant temperature
  */
+
+#include <ddp-actuator-solver/dctemp.h>
 
 DCTemp::DCTemp(double& mydt,bool noiseOnParameters)
 {
