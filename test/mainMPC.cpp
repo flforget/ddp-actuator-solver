@@ -1,14 +1,14 @@
 #include <iostream>
 #include <fstream>
 
-#include "config.h"
-
-#include "ilqrsolver.h"
-#include "romeosimpleactuator.h"
-#include "costfunctionromeoactuator.h"
-
 #include <time.h>
 #include <sys/time.h>
+
+#include <ddp-actuator-solver/config.h>
+
+#include <ddp-actuator-solver/ilqrsolver.h>
+#include <ddp-actuator-solver/romeosimpleactuator.h>
+#include <ddp-actuator-solver/costfunctionromeoactuator.h>
 
 
 using namespace std;
