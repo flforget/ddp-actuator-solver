@@ -10,6 +10,8 @@ SET(PROJECT_NAME ddp-actuator-solver)
 SET(PROJECT_DESCRIPTION "DDP/iLQR solver for robotics actuators command")
 SET(PROJECT_URL "https://github.com/stack-of-tasks/ddp-actuator-solver")
 
+SETUP_PROJECT()
+
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
 ADD_REQUIRED_DEPENDENCY("qpOASES")
 
@@ -18,4 +20,4 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(test)
 
-SETUP_PROJECT()
+SETUP_PROJECT_FINALIZE()
