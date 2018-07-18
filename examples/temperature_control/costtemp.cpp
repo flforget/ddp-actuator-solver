@@ -1,4 +1,4 @@
-#include <ddp-actuator-solver/costtemp.h>
+#include "costtemp.hh"
 
 CostTemp::CostTemp()
 {
@@ -27,4 +27,3 @@ void CostTemp::computeFinalCostDeriv(const stateVec_t& X,const stateVec_t& Xdes)
     lx = 1.0*Q*(X-Xdes);
     lxx = 1.0*Q;
 }
-

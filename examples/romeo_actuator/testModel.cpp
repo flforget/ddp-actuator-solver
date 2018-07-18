@@ -4,11 +4,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <ddp-actuator-solver/config.h>
-
-#include <ddp-actuator-solver/ilqrsolver.h>
-#include <ddp-actuator-solver/romeosimpleactuator.h>
-#include <ddp-actuator-solver/costfunctionromeoactuator.h>
+#include <ddp-actuator-solver/ddpsolver.hh>
+#include "romeosimpleactuator.hh"
+#include "costfunctionromeoactuator.hh"
 
 using namespace std;
 using namespace Eigen;
@@ -17,8 +15,8 @@ int main()
 {
     struct timeval tbegin,tend;
     double texec=0.0;
-    ILQRSolver<double,4,1>::stateVec_t xinit,xDes,x;
-    ILQRSolver<double,4,1>::commandVec_t u;
+    DDPSolver<double,4,1>::stateVec_t xinit,xDes,x;
+    DDPSolver<double,4,1>::commandVec_t u;
 
     u << 1.0;
 
@@ -29,8 +27,8 @@ int main()
 
     double dt=1e-3;
     unsigned int N=3000;
-    ILQRSolver<double,4,1>::stateVecTab_t xList;
-    ILQRSolver<double,4,1>::commandVecTab_t uList;
+    DDPSolver<double,4,1>::stateVecTab_t xList;
+    DDPSolver<double,4,1>::commandVecTab_t uList;
 
     xList .resize(N);
     uList.resize(N);

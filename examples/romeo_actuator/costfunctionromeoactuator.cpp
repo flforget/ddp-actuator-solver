@@ -1,4 +1,4 @@
-#include <ddp-actuator-solver/costfunctionromeoactuator.h>
+#include "costfunctionromeoactuator.hh"
 
 CostFunctionRomeoActuator::CostFunctionRomeoActuator()
 {
@@ -26,4 +26,3 @@ void CostFunctionRomeoActuator::computeFinalCostDeriv(const stateVec_t& X,const 
     lx = 1.0*Q*(X-Xdes);
     lxx = 1.0*Q;
 }
-

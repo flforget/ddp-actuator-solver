@@ -5,11 +5,9 @@
 
 #include <math.h>
 
-#include "config.h"
-
-#include "ilqrsolver.h"
-#include "romeosimpleactuator.h"
-#include "costfunctionromeoactuator.h"
+#include "ddpsolver.hh"
+#include "romeosimpleactuator.hh"
+#include "costfunctionromeoactuator.hh"
 
 #include <fcntl.h>
 #include <termios.h>
@@ -83,9 +81,9 @@ uint8_t crc8(uint8_t crc, uint8_t crc_data)
 }
 
 
-ILQRSolver<double,4,1>::stateVec_t getStateFromSerial(int& ser)
+DDPSolver<double,4,1>::stateVec_t getStateFromSerial(int& ser)
 {
-    ILQRSolver<double,4,1>::stateVec_t x;
+    DDPSolver<double,4,1>::stateVec_t x;
 
     crc = 0;
     send = 0x47;
@@ -166,9 +164,9 @@ ILQRSolver<double,4,1>::stateVec_t getStateFromSerial(int& ser)
 }
 
 
-ILQRSolver<double,4,1>::stateVec_t sendCurrentCommand(int& ser, ILQRSolver<double,4,1>::commandVec_t u)
+DDPSolver<double,4,1>::stateVec_t sendCurrentCommand(int& ser, DDPSolver<double,4,1>::commandVec_t u)
 {
-    ILQRSolver<double,4,1>::stateVec_t x;
+    DDPSolver<double,4,1>::stateVec_t x;
     uint16_t currentDes;
     currentDes = (uint16_t) ((u[0])*((4096*20*0.005)/3.0) + 2048);
 
@@ -288,8 +286,8 @@ int main()
 
     ofstream fichier("resultsBench.csv",ios::out | ios::trunc);
     fichier << "tau,tauDot,q,qDot,u" << endl;
-    ILQRSolver<double,4,1>::stateVec_t x,x_offset,xinit,xDes;
-    ILQRSolver<double,4,1>::commandVec_t u;
+    DDPSolver<double,4,1>::stateVec_t x,x_offset,xinit,xDes;
+    DDPSolver<double,4,1>::commandVec_t u;
 
 
     cout << "begin" << endl;
@@ -315,13 +313,13 @@ int main()
     double dt=1e-3;
     unsigned int iterMax = 100;
     double stopCrit = 1e-5;
-    ILQRSolver<double,4,1>::stateVecTab_t xList;
-    ILQRSolver<double,4,1>::commandVecTab_t uList;
-    ILQRSolver<double,4,1>::traj lastTraj;
+    DDPSolver<double,4,1>::stateVecTab_t xList;
+    DDPSolver<double,4,1>::commandVecTab_t uList;
+    DDPSolver<double,4,1>::traj lastTraj;
 
     RomeoSimpleActuator romeoActuatorModel(dt);
     CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,DISABLE_FULLDDP,ENABLE_QPBOX);
+    DDPSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,DISABLE_FULLDDP,ENABLE_QPBOX);
     testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
     while(1)
     {

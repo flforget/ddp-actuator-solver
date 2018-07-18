@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#define pi M_PI
+#include "dctemp.hh"
 
 /*
  * x0 -> actuator position
@@ -13,8 +13,6 @@
  * x3 -> external torque
  * x4 -> ambiant temperature
  */
-
-#include <ddp-actuator-solver/dctemp.h>
 
 DCTemp::DCTemp(double& mydt,bool noiseOnParameters)
 {

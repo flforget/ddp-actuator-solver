@@ -4,11 +4,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <ddp-actuator-solver/config.h>
-
-#include <ddp-actuator-solver/ilqrsolver.h>
-#include <ddp-actuator-solver/romeosimpleactuator.h>
-#include <ddp-actuator-solver/costfunctionromeoactuator.h>
+#include <ddp-actuator-solver/ddpsolver.hh>
+#include "romeosimpleactuator.hh"
+#include "costfunctionromeoactuator.hh"
 
 
 using namespace std;
@@ -19,7 +17,7 @@ int main()
     cout << endl;
     struct timeval tbegin,tend;
     double texec=0.0;
-    ILQRSolver<double,4,1>::stateVec_t xinit,xDes;
+    DDPSolver<double,4,1>::stateVec_t xinit,xDes;
 
     xinit << 0.0,0.0,0.0,0.0;
     xDes << 1.0,0.0,0.0,0.0;
@@ -29,16 +27,16 @@ int main()
     double dt=1e-3;
     unsigned int iterMax = 100;
     double stopCrit = 1e-3;
-    ILQRSolver<double,4,1>::stateVecTab_t xList;
-    ILQRSolver<double,4,1>::commandVecTab_t uList;
-    ILQRSolver<double,4,1>::traj lastTraj;
+    DDPSolver<double,4,1>::stateVecTab_t xList;
+    DDPSolver<double,4,1>::commandVecTab_t uList;
+    DDPSolver<double,4,1>::traj lastTraj;
 
     srand(time(NULL));
 
     RomeoSimpleActuator romeoActuatorModel(dt);
     RomeoSimpleActuator romeoNoisyModel(dt,1);
     CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,DISABLE_FULLDDP,DISABLE_QPBOX);
+    DDPSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,DISABLE_FULLDDP,DISABLE_QPBOX);
 
 
 
@@ -92,4 +90,3 @@ int main()
     return 0;
 
 }
-

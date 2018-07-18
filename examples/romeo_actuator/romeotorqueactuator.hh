@@ -1,12 +1,12 @@
-#ifndef ROMEOSIMPLEACTUATOR_H
-#define ROMEOSIMPLEACTUATOR_H
+#ifndef ROMEOTORQUEACTUATOR_H
+#define ROMEOTORQUEACTUATOR_H
 
-#include "dynamicmodel.h"
+#include <ddp-actuator-solver/dynamicmodel.hh>
 
-class RomeoSimpleActuator : public DynamicModel<double,4,1>
+class RomeoTorqueActuator : public DynamicModel<double,4,1>
 {
 public:
-    RomeoSimpleActuator(double& mydt,bool noiseOnParameters=0);
+    RomeoTorqueActuator(double& mydt);
 private:
 protected:
 
@@ -14,17 +14,25 @@ protected:
 public:
 private:
     double dt;
-private:
-    double k;
-    double R;
-    double Jm;
-    double Jl;
-    double fvm;
-    double fvl;
-    double Kt;
-    double mu;
-    double Cf0;
-    double a;
+public:
+    /*static const double k;
+    static const double R;
+    static const double Jm;
+    static const double Jl;
+    static const double fvm;
+    static const double Cf0;
+    static const double a;*/
+
+    static const double k;
+    static const double R;
+    static const double Jm;
+    static const double Jl;
+    static const double fvm;
+    static const double fvl;
+    static const double Kt;
+    static const double mu;
+    static const double Cf0;
+    static const double a;
 private:
     stateVec_t Xreal;
     stateMat_t Id;

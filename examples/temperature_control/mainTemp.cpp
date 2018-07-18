@@ -1,14 +1,12 @@
 #include <iostream>
 #include <fstream>
+
+#include <ddp-actuator-solver/ddpsolver.hh>
+#include "dctemp.hh"
+#include "costtemp.hh"
+
 #include <time.h>
 #include <sys/time.h>
-
-#include <ddp-actuator-solver/config.h>
-
-#include <ddp-actuator-solver/ilqrsolver.h>
-#include <ddp-actuator-solver/romeosimpleactuator.h>
-#include <ddp-actuator-solver/costfunctionromeoactuator.h>
-
 
 
 using namespace std;
@@ -18,33 +16,33 @@ int main()
 {
     struct timeval tbegin,tend;
     double texec=0.0;
-    ILQRSolver<double,4,1>::stateVec_t xinit,xDes,x;
-    ILQRSolver<double,4,1>::commandVec_t u;
+    DDPSolver<double,5,1>::stateVec_t xinit,xDes,x;
+    DDPSolver<double,5,1>::commandVec_t u;
 
-    xinit << -1.0,0.0,-100.0,0.0;
-    xDes << 0.5,0.0,0.0,0.0;
+    xinit << -1.0,0.0,-100.0,0.0,0.0;
+    xDes << 0.5,0.0,0.0,0.0,0.0;
 
     int i;
     unsigned int T = 3000;
     double dt=1e-3;
     unsigned int iterMax = 100;
     double stopCrit = 1e-5;
-    ILQRSolver<double,4,1>::stateVecTab_t xList;
-    ILQRSolver<double,4,1>::commandVecTab_t uList;
-    ILQRSolver<double,4,1>::traj lastTraj;
+    DDPSolver<double,5,1>::stateVecTab_t xList;
+    DDPSolver<double,5,1>::commandVecTab_t uList;
+    DDPSolver<double,5,1>::traj lastTraj;
 
-    RomeoSimpleActuator romeoActuatorModel(dt);
-    RomeoSimpleActuator* romeoNoisyModel=NULL;
-    CostFunctionRomeoActuator costRomeoActuator;
-    ILQRSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,DISABLE_FULLDDP,DISABLE_QPBOX);
-    testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
+    DCTemp model(dt);
+    DCTemp* noisyModel=NULL;
+    CostTemp cost;
+    DDPSolver<double,5,1> solver(model,cost,DISABLE_FULLDDP,DISABLE_QPBOX);
+    solver.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
     int N = 100;
     gettimeofday(&tbegin,NULL);
-    testSolverRomeoActuator.solveTrajectory();
+    solver.solveTrajectory();
     gettimeofday(&tend,NULL);
 
-    lastTraj = testSolverRomeoActuator.getLastSolvedTrajectory();
+    lastTraj = solver.getLastSolvedTrajectory();
     xList = lastTraj.xList;
     uList = lastTraj.uList;
     unsigned int iter = lastTraj.iter;
@@ -70,7 +68,7 @@ int main()
                  << x(3, 0) << "," << uList[0] << endl;
         for (i = 1; i < T; i++)
         {
-            x = romeoActuatorModel.computeNextState(dt, x, uList[i - 1]);
+            x = model.computeNextState(dt, x, uList[i - 1]);
             fichier1 << x(0, 0) << "," << x(1, 0) << "," << x(2, 0) << ","
                      << x(3, 0) << "," << uList[i - 1] << endl;
         }
@@ -88,19 +86,19 @@ int main()
         fichier2 << T << ',' << 0 << endl;
         for(int j=0;j<0;j++)
         {
-            romeoNoisyModel = new RomeoSimpleActuator(dt,1);
+            noisyModel = new DCTemp(dt,1);
             fichier2 << xList[i](0, 0) << "," << xList[i](1, 0) << "," << xList[i](2, 0) << "," << xList[i](3, 0) << ","
                      << uList[i](0, 0) << endl;
             x = xinit;
             for (i = 1; i < T; i++)
             {
-                x = romeoNoisyModel->computeNextState(dt, x, uList[i - 1]);
+                x = noisyModel->computeNextState(dt, x, uList[i - 1]);
                 fichier2 << x(0, 0) << "," << x(1, 0) << "," << x(2, 0) << ","
                          << x(3, 0) << "," << uList[i - 1] << endl;
             }
             fichier2 << xList[T](0, 0) << "," << xList[T](1, 0) << "," << xList[T](2, 0) << "," << xList[T](3, 0) << ","
                      << uList[T - 1](0, 0) << endl;
-            delete romeoNoisyModel;
+            delete noisyModel;
         }
         fichier2.close();
     }
