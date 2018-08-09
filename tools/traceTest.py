@@ -1,43 +1,33 @@
 from matplotlib.pyplot import *
+import numpy as np
 import csv
 
-
-tau1List = []
-tauDot1List = []
-q1List = []
-qDot1List = []
-u1List = []
-tau2List = []
-tauDot2List = []
-q2List = []
-qDot2List = []
-u2List = []
-
-tau2ListList = []
-tauDot2ListList = []
-q2ListList = []
-qDot2ListList = []
-u2ListList = []
-
 ''' position '''
-path1 = '../_build/cpp/results1.csv'
-path2 = '../_build/cpp/results2.csv'
+path1 = '../_build/examples/temperature_control/results1.csv'
+path2 = '../_build/examples/temperature_control/results2.csv'
+
+names = []
+data = []
 
 with open(path1,'r') as dataFile1:
     reader = csv.reader(dataFile1)
     i = 0
-    j = 0
     for row in reader:
-        if i ==1:
-            tau1List.append(float(row[0]))
-            tauDot1List.append(float(row[1]))
-            q1List.append(float(row[2]))
-            qDot1List.append(float(row[3]))
-            u1List.append((float(row[4])))
+        if i ==2:
+            for j in range(len(names)):
+                data[j].append(float(row[j]))
+        if i==1:
+            T = int(row[0])
+            S_NB = int(row[1])
+            C_NB = int(row[2])
+            for j in range(len(names)):
+                data.append([])
+            i = 2
         if i==0:
+            for name in row:
+                names.append(name)
             i = 1
-
-with open(path2,'r') as dataFile2:
+'''with open(path2,'r') as dataFile2:
     reader = csv.reader(dataFile2)
     i = 0
     j = -1
@@ -67,51 +57,22 @@ with open(path2,'r') as dataFile2:
             N = int(row[1]) - 1
             i = 2
         if i==0:
-            i = 1
+            i = 1'''
 
 fig1 = figure()
-
-subplot(221)
-hold(1)
-plot(tau1List)
-for i in range(N):
-    plot(tau2ListList[i])
-title('joint position',fontsize=32)
-grid()
-
-subplot(222)
-hold(1)
-plot(tauDot1List)
-for i in range(N):
-    plot(tauDot2ListList[i])
-title('joint speed',fontsize=32)
-grid()
-
-subplot(223)
-hold(1)
-plot(q1List)
-for i in range(N):
-    plot(q2ListList[i])
-title('motor position',fontsize=32)
-grid()
-
-subplot(224)
-hold(1)
-plot(u1List)
-for i in range(N):
-    plot(u2ListList[i])
-title('motor current',fontsize=32)
-grid()
+for i in range(S_NB):
+    subplot(int(S_NB/2)+1,2,int(i+1))
+    plot(data[i])
+    title(names[i])
+    grid()
 
 
-figure()
-hold(1)
-plot(tau1List)
-for i in range(N):
-    plot(tau2ListList[i])
-title('joint position',fontsize=32)
-grid()
+fig2 = figure()
+for i in range(C_NB):
+    subplot(int(C_NB/2)+1,2,int(i+1))
+    plot(data[i+S_NB])
+    title(names[i+S_NB])
+    grid()
 
 
 show()
-
