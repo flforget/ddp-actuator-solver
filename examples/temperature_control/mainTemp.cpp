@@ -22,7 +22,6 @@ int main()
     xinit << -1.0,0.0,-100.0,0.0,0.0;
     xDes << 0.5,0.0,0.0,0.0,0.0;
 
-    int i;
     unsigned int T = 3000;
     double dt=1e-3;
     unsigned int iterMax = 100;
@@ -66,7 +65,7 @@ int main()
         x = xinit;
         fichier1 << x(0, 0) << "," << x(1, 0) << "," << x(2, 0) << ","
                  << x(3, 0) << "," << uList[0] << endl;
-        for (i = 1; i < T; i++)
+        for (unsigned int i = 1; i < T; i++)
         {
             x = model.computeNextState(dt, x, uList[i - 1]);
             fichier1 << x(0, 0) << "," << x(1, 0) << "," << x(2, 0) << ","
@@ -87,10 +86,8 @@ int main()
         for(int j=0;j<0;j++)
         {
             noisyModel = new DCTemp(dt,1);
-            fichier2 << xList[i](0, 0) << "," << xList[i](1, 0) << "," << xList[i](2, 0) << "," << xList[i](3, 0) << ","
-                     << uList[i](0, 0) << endl;
             x = xinit;
-            for (i = 1; i < T; i++)
+            for (unsigned int i = 1; i < T; i++)
             {
                 x = noisyModel->computeNextState(dt, x, uList[i - 1]);
                 fichier2 << x(0, 0) << "," << x(1, 0) << "," << x(2, 0) << ","

@@ -19,7 +19,6 @@ DCTemp::DCTemp(double& mydt,bool noiseOnParameters)
     stateNb=5;
     commandNb=1;
     dt = mydt;
-    struct timeval tv;
 
     if(!noiseOnParameters)
     {
@@ -65,7 +64,7 @@ DCTemp::DCTemp(double& mydt,bool noiseOnParameters)
     upperCommandBounds << 1.0;
 }
 
-DCTemp::stateVec_t DCTemp::computeDeriv(double& dt, const stateVec_t& X, const commandVec_t &U)
+DCTemp::stateVec_t DCTemp::computeDeriv(double& , const stateVec_t& X, const commandVec_t &U)
 {
     dX[0] = X[1];
     dX[1] = (K_M/J)*U[0] - (f_VL/J)*X[1] - (1.0/J)*X[3];
@@ -92,7 +91,7 @@ void DCTemp::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandV
     stateVec_t Xp,Xm;
     Xp = X;
     Xm = X;
-    for(int i=0;i<stateNb;i++)
+    for(unsigned int i=0;i<stateNb;i++)
     {
         Xp[i] += dh/2;
         Xm[i] -= dh/2;
@@ -102,17 +101,17 @@ void DCTemp::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandV
     }
 }
 
-DCTemp::stateMat_t DCTemp::computeTensorContxx(const stateVec_t& nextVx)
+DCTemp::stateMat_t DCTemp::computeTensorContxx(const stateVec_t& )
 {
     return QxxCont;
 }
 
-DCTemp::commandMat_t DCTemp::computeTensorContuu(const stateVec_t& nextVx)
+DCTemp::commandMat_t DCTemp::computeTensorContuu(const stateVec_t& )
 {
     return QuuCont;
 }
 
-DCTemp::commandR_stateC_t DCTemp::computeTensorContux(const stateVec_t& nextVx)
+DCTemp::commandR_stateC_t DCTemp::computeTensorContux(const stateVec_t& )
 {
     return QuxCont;
 }

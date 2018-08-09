@@ -34,7 +34,7 @@ RomeoSimpleActuator::RomeoSimpleActuator(double& mydt,bool noiseOnParameters)
     else
     {
         gettimeofday(&tv,NULL);
-        srand(tv.tv_usec);
+        srand((unsigned int)tv.tv_usec);
         k = 588.0 + 0.0*588.0*0.1*(2.0*(rand()/(double)RAND_MAX)-1.0);
         R = 96.1 + 96.1*0.1*(2.0*(rand()/(double)RAND_MAX)-1.0);
         Jm = 183*1e-7 + 183*1e-7*0.1*(2.0*(rand()/(double)RAND_MAX)-1.0);
@@ -83,7 +83,7 @@ RomeoSimpleActuator::RomeoSimpleActuator(double& mydt,bool noiseOnParameters)
 }
 
 
-RomeoSimpleActuator::stateVec_t RomeoSimpleActuator::computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)
+RomeoSimpleActuator::stateVec_t RomeoSimpleActuator::computeNextState(double& , const stateVec_t& X,const commandVec_t& U)
 {
     stateVec_t x_next;//,k1,k2,k3,k4;
     /*k1 = A*X + B*U;
@@ -112,17 +112,17 @@ void RomeoSimpleActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,c
     }
 }
 
-RomeoSimpleActuator::stateMat_t RomeoSimpleActuator::computeTensorContxx(const stateVec_t& nextVx)
+RomeoSimpleActuator::stateMat_t RomeoSimpleActuator::computeTensorContxx(const stateVec_t& )
 {
     return QxxCont;
 }
 
-RomeoSimpleActuator::commandMat_t RomeoSimpleActuator::computeTensorContuu(const stateVec_t& nextVx)
+RomeoSimpleActuator::commandMat_t RomeoSimpleActuator::computeTensorContuu(const stateVec_t& )
 {
     return QuuCont;
 }
 
-RomeoSimpleActuator::commandR_stateC_t RomeoSimpleActuator::computeTensorContux(const stateVec_t& nextVx)
+RomeoSimpleActuator::commandR_stateC_t RomeoSimpleActuator::computeTensorContux(const stateVec_t& )
 {
     return QuxCont;
 }

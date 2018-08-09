@@ -31,7 +31,7 @@ int main()
     DDPSolver<double,4,1>::commandVecTab_t uList;
     DDPSolver<double,4,1>::traj lastTraj;
 
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
 
     RomeoSimpleActuator romeoActuatorModel(dt);
     RomeoSimpleActuator romeoNoisyModel(dt,1);
@@ -53,7 +53,7 @@ int main()
     testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
     gettimeofday(&tbegin,NULL);
-    for(int i=0;i<M;i++)
+    for(unsigned int i=0;i<M;i++)
     {
         testSolverRomeoActuator.initSolver(xinit,xDes);
         testSolverRomeoActuator.solveTrajectory();
@@ -63,8 +63,12 @@ int main()
         xinit = xinit;
         xinit = romeoNoisyModel.computeNextState(dt,xinit,uList[0]);
 
-        for(int j=0;j<T;j++) fichier << xList[j](0,0) << "," << xList[j](1,0) << "," << xList[j](2,0) << "," << xList[j](3,0) << "," << uList[j](0,0) << endl;
-        fichier << xList[T](0,0) << "," << xList[T](1,0) << "," << xList[T](2,0) << "," << xList[T](3,0) << "," << 0.0 << endl;
+        for(unsigned int j=0;j<T;j++)
+	  fichier << xList[j](0,0) << "," << xList[j](1,0)
+		  << "," << xList[j](2,0) << "," << xList[j](3,0)
+		  << "," << uList[j](0,0) << endl;
+        fichier << xList[T](0,0) << "," << xList[T](1,0) << ","
+		<< xList[T](2,0) << "," << xList[T](3,0) << "," << 0.0 << endl;
     }
     gettimeofday(&tend,NULL);
 

@@ -88,17 +88,17 @@ void RomeoTorqueActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,c
     }
 }
 
-RomeoTorqueActuator::stateMat_t RomeoTorqueActuator::computeTensorContxx(const stateVec_t& nextVx)
+RomeoTorqueActuator::stateMat_t RomeoTorqueActuator::computeTensorContxx(const stateVec_t& )
 {
     return QxxCont;
 }
 
-RomeoTorqueActuator::commandMat_t RomeoTorqueActuator::computeTensorContuu(const stateVec_t& nextVx)
+RomeoTorqueActuator::commandMat_t RomeoTorqueActuator::computeTensorContuu(const stateVec_t& )
 {
     return QuuCont;
 }
 
-RomeoTorqueActuator::commandR_stateC_t RomeoTorqueActuator::computeTensorContux(const stateVec_t& nextVx)
+RomeoTorqueActuator::commandR_stateC_t RomeoTorqueActuator::computeTensorContux(const stateVec_t& )
 {
     return QuxCont;
 }
