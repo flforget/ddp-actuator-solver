@@ -2,8 +2,7 @@
 #include <eigen3/unsupported/Eigen/MatrixFunctions>
 #include <sys/time.h>
 
-#include <ddp-actuator-solver/romeosimpleactuator.h>
-#define pi M_PI
+#include "romeosimpleactuator.hh"
 
 /*
  * x0 -> actuator position

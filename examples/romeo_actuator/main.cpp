@@ -1,14 +1,11 @@
 #include <iostream>
 #include <fstream>
-
-#include "config.h"
-
-#include "ilqrsolver.h"
-#include "dctemp.h"
-#include "costtemp.h"
-
 #include <time.h>
 #include <sys/time.h>
+
+#include <ddp-actuator-solver/ddpsolver.hh>
+#include "romeosimpleactuator.hh"
+#include "costfunctionromeoactuator.hh"
 
 
 using namespace std;
@@ -18,25 +15,25 @@ int main()
 {
     struct timeval tbegin,tend;
     double texec=0.0;
-    ILQRSolver<double,5,1>::stateVec_t xinit,xDes,x;
-    ILQRSolver<double,5,1>::commandVec_t u;
+    DDPSolver<double,4,1>::stateVec_t xinit,xDes,x;
+    DDPSolver<double,4,1>::commandVec_t u;
 
-    xinit << -1.0,0.0,-100.0,0.0,0.0;
-    xDes << 0.5,0.0,0.0,0.0,0.0;
+    xinit << -1.0,0.0,-100.0,0.0;
+    xDes << 0.5,0.0,0.0,0.0;
 
     int i;
     unsigned int T = 3000;
     double dt=1e-3;
     unsigned int iterMax = 100;
     double stopCrit = 1e-5;
-    ILQRSolver<double,5,1>::stateVecTab_t xList;
-    ILQRSolver<double,5,1>::commandVecTab_t uList;
-    ILQRSolver<double,5,1>::traj lastTraj;
+    DDPSolver<double,4,1>::stateVecTab_t xList;
+    DDPSolver<double,4,1>::commandVecTab_t uList;
+    DDPSolver<double,4,1>::traj lastTraj;
 
-    DCTemp model(dt);
-    DCTemp* noisyModel=NULL;
-    CostTemp cost;
-    ILQRSolver<double,5,1> testSolverRomeoActuator(model,cost,DISABLE_FULLDDP,DISABLE_QPBOX);
+    RomeoSimpleActuator romeoActuatorModel(dt);
+    RomeoSimpleActuator* romeoNoisyModel=NULL;
+    CostFunctionRomeoActuator costRomeoActuator;
+    DDPSolver<double,4,1> testSolverRomeoActuator(romeoActuatorModel,costRomeoActuator,DISABLE_FULLDDP,DISABLE_QPBOX);
     testSolverRomeoActuator.FirstInitSolver(xinit,xDes,T,dt,iterMax,stopCrit);
 
     int N = 100;

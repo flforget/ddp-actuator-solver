@@ -1,8 +1,8 @@
-#ifndef ILQRSOLVER_H
-#define ILQRSOLVER_H
+#ifndef DDPSOLVER_H
+#define DDPSOLVER_H
 
-#include "dynamicmodel.h"
-#include "costfunction.h"
+#include "dynamicmodel.hh"
+#include "costfunction.hh"
 
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
@@ -20,7 +20,7 @@ EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::MatrixXd)
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::VectorXd)
 
 template<typename precision,int stateSize,int commandSize>
-class ILQRSolver
+class DDPSolver
 {
 public:
     typedef Eigen::Matrix<precision,stateSize,1> stateVec_t;                  // 1 x stateSize
@@ -128,7 +128,7 @@ private:
 protected:
     // methods //
 public:
-    ILQRSolver(DynamicModel_t& myDynamicModel, CostFunction_t& myCostFunction,bool fullDDP=0,bool QPBox=0)
+    DDPSolver(DynamicModel_t& myDynamicModel, CostFunction_t& myCostFunction,bool fullDDP=0,bool QPBox=0)
     {
         dynamicModel = &myDynamicModel;
         costFunction = &myCostFunction;
@@ -323,7 +323,7 @@ public:
         }
     }
 
-    ILQRSolver::traj getLastSolvedTrajectory()
+    DDPSolver::traj getLastSolvedTrajectory()
     {
         lastTraj.xList = updatedxList;
         lastTraj.uList = updateduList;
@@ -345,4 +345,4 @@ protected:
 
 };
 
-#endif // ILQRSOLVER_H
+#endif // DDPSOLVER_H
