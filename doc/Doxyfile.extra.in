@@ -1,0 +1,11 @@
+INPUT                  = @CMAKE_SOURCE_DIR@/include \
+                         @CMAKE_SOURCE_DIR@/doc/additionalDoc
+IMAGE_PATH             = @PKG_CONFIG_DOXYGENDOCDIR@/pictures
+
+FILE_PATTERNS          = *.cc *.cpp *.h *.hh *.hxx
+
+TAGFILES               = \
+"@JRL_MAL_DOXYGENDOCDIR@/jrl-mal.doxytag = @JRL_MAL_DOXYGENDOCDIR@" \
+"@DYNAMIC_GRAPH_DOXYGENDOCDIR@/dynamic-graph.doxytag = @DYNAMIC_GRAPH_DOXYGENDOCDIR@"
+
+COLLABORATION_GRAPH    = NO
