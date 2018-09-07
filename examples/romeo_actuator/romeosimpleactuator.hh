@@ -3,18 +3,19 @@
 
 #include <ddp-actuator-solver/dynamicmodel.hh>
 
-class RomeoSimpleActuator : public DynamicModel<double,4,1>
+class RomeoSimpleActuator: public DynamicModel<double, 4, 1>
 {
-public:
-    RomeoSimpleActuator(double& mydt,bool noiseOnParameters=0);
-private:
-protected:
+  public:
+    RomeoSimpleActuator(double& mydt, bool noiseOnParameters = 0);
+    virtual ~RomeoSimpleActuator() {};
+  private:
+  protected:
 
     // attributes //
-public:
-private:
+  public:
+  private:
     double dt;
-private:
+  private:
     double k;
     double R;
     double Jm;
@@ -25,7 +26,7 @@ private:
     double mu;
     double Cf0;
     double a;
-private:
+  private:
     stateVec_t Xreal;
     stateMat_t Id;
     stateMat_t A;
@@ -41,18 +42,20 @@ private:
     commandMat_t QuuCont;
     commandR_stateC_t QuxCont;
 
-protected:
+  protected:
     // methods //
-public:
-    stateVec_t computeNextState(double& dt, const stateVec_t& X, const commandVec_t &U);
-    void computeAllModelDeriv(double& dt, const stateVec_t& X, const commandVec_t &U);
+  public:
+    stateVec_t computeNextState(double& dt, const stateVec_t& X,
+        const commandVec_t &U);
+    void computeAllModelDeriv(double& dt, const stateVec_t& X,
+        const commandVec_t &U);
     stateMat_t computeTensorContxx(const stateVec_t& nextVx);
     commandMat_t computeTensorContuu(const stateVec_t& nextVx);
     commandR_stateC_t computeTensorContux(const stateVec_t& nextVx);
-private:
-protected:
-        // accessors //
-public:
+  private:
+  protected:
+    // accessors //
+  public:
 
 };
 
