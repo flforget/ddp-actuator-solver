@@ -2,6 +2,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/eigen.cmake)
+INCLUDE(private_cmake/FindqpOASES.cmake)
+
+IF (NOT qpOASES_FOUND)
+  MESSAGE(ERROR " qpOASES not found. Please install it (using robotpkg for instance)")
+ENDIF()
 
 SET(CXX_DISABLE_WERROR True)
 SET(CMAKE_VERBOSE_MAKEFILE True)
@@ -13,9 +18,9 @@ SET(PROJECT_URL "https://github.com/stack-of-tasks/ddp-actuator-solver")
 SETUP_PROJECT()
 
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
-ADD_REQUIRED_DEPENDENCY("qpOASES")
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${qpOASES_INCLUDEDIR})
 
 SET(${PROJECT_NAME}_HEADERS
   include/ddp-actuator-solver/costfunction.hh
