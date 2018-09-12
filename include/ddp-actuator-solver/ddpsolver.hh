@@ -318,7 +318,7 @@ public:
             updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],updateduList[i]);
             for(unsigned int j=0;j<commandNb;j++)
             {
-                changeAmount += abs(uList[i](j,0) - updateduList[i](j,0));
+                changeAmount += fabs(uList[i](j,0) - updateduList[i](j,0));
             }
         }
     }
