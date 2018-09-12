@@ -38,6 +38,8 @@ DCTemp::DCTemp(bool noiseOnParameters)
 
   Id_.setIdentity();
 
+  fu.setZero();
+  fx.setZero();
 
   fu.setZero();
   fx.setZero();
