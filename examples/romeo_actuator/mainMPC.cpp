@@ -48,7 +48,7 @@ int main()
   fichier << "tau,tauDot,q,qDot,u" << endl;
 
   testSolverRomeoActuator.FirstInitSolver(xinit, xDes, T, dt, iterMax,
-      stopCrit);
+                                          stopCrit);
 
   gettimeofday(&tbegin, NULL);
   for (unsigned int i = 0; i < M; i++)
@@ -62,15 +62,15 @@ int main()
 
     for (unsigned int j = 0; j < T; j++)
       fichier << xList[j](0, 0) << "," << xList[j](1, 0) << ","
-      << xList[j](2, 0) << "," << xList[j](3, 0) << "," << uList[j](0, 0)
-      << endl;
+              << xList[j](2, 0) << "," << xList[j](3, 0) << "," << uList[j](0, 0)
+              << endl;
     fichier << xList[T](0, 0) << "," << xList[T](1, 0) << "," << xList[T](2, 0)
             << "," << xList[T](3, 0) << "," << 0.0 << endl;
   }
   gettimeofday(&tend, NULL);
 
   texec = ((double) (1000 * (tend.tv_sec - tbegin.tv_sec)
-      + ((tend.tv_usec - tbegin.tv_usec) / 1000))) / 1000.;
+                     + ((tend.tv_usec - tbegin.tv_usec) / 1000))) / 1000.;
   texec = (double) (tend.tv_usec - tbegin.tv_usec);
 
   cout << "temps d'execution total du solveur ";

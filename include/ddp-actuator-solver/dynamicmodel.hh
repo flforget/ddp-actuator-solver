@@ -18,8 +18,6 @@ public:
   typedef Eigen::Matrix<precision,commandSize,commandSize> commandMat_t;                 // commandSize x commandSize
   typedef Eigen::Matrix<precision,commandSize,commandSize> commandTens_t[commandSize];   // stateSize x commandSize x commandSize
 
-
-
   // typedef for mixed stateSize and commandSize types
   typedef Eigen::Matrix<precision,stateSize,commandSize> stateR_commandC_t;                          // stateSize x commandSize
   typedef Eigen::Matrix<precision,stateSize,commandSize> stateR_commandC_stateD_t[stateSize];        // stateSize x commandSize x stateSize
@@ -56,25 +54,25 @@ protected:
 
   // methods //
 public:
-  virtual stateVec_t computeNextState(double& dt, const stateVec_t& X,const commandVec_t& U)=0;
-  virtual void computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)=0;
-  virtual stateMat_t computeTensorContxx(const stateVec_t& nextVx)=0;
-  virtual commandMat_t computeTensorContuu(const stateVec_t& nextVx)=0;
-  virtual commandR_stateC_t computeTensorContux(const stateVec_t& nextVx)=0;
+  virtual stateVec_t computeNextState(double & dt, const stateVec_t& X, const commandVec_t& U) = 0;
+  virtual void computeAllModelDeriv(double & dt, const stateVec_t& X, const commandVec_t& U) = 0;
+  virtual stateMat_t computeTensorContxx(const stateVec_t& nextVx) = 0;
+  virtual commandMat_t computeTensorContuu(const stateVec_t& nextVx) = 0;
+  virtual commandR_stateC_t computeTensorContux(const stateVec_t& nextVx) = 0;
 private:
 protected:
   // accessors //
 public:
-  unsigned int getStateNb()               {return stateNb;}
-  unsigned int getCommandNb()             {return commandNb;}
-  commandVec_t& getLowerCommandBounds()   {return lowerCommandBounds;}
-  commandVec_t& getUpperCommandBounds()   {return upperCommandBounds;}
-  stateMat_t& getfx()                     {return fx;}
-  stateTens_t& getfxx()                   {return fxx;}
-  stateR_commandC_t &getfu()              {return fu;}
-  stateR_commandC_commandD_t& getfuu()    {return fuu;}
-  stateR_stateC_commandD_t& getfxu()      {return fxu;}
-  stateR_commandC_stateD_t& getfux()      {return fux;}
+  unsigned int getStateNb()               { return stateNb; }
+  unsigned int getCommandNb()             { return commandNb; }
+  commandVec_t& getLowerCommandBounds()   { return lowerCommandBounds; }
+  commandVec_t& getUpperCommandBounds()   { return upperCommandBounds; }
+  stateMat_t& getfx()                     { return fx; }
+  stateTens_t& getfxx()                   { return fxx; }
+  stateR_commandC_t &getfu()              { return fu; }
+  stateR_commandC_commandD_t& getfuu()    { return fuu; }
+  stateR_stateC_commandD_t& getfxu()      { return fxu; }
+  stateR_commandC_stateD_t& getfux()      { return fux; }
 };
 
 #endif // DYNAMICMODEL_H
