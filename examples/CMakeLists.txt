@@ -3,7 +3,8 @@ macro(_local_test_ddp)
   set(list_var "${ARGN}")
   foreach(loop_var IN LISTS list_var)
     ADD_EXECUTABLE(${loop_var} ${loop_var}.cpp)
-    TARGET_LINK_LIBRARIES(${loop_var} ${PROJECT_NAME}-examples ${qpOASES_LIBRARIES})
+    TARGET_LINK_LIBRARIES(${loop_var} ${PROJECT_NAME}-examples 
+      ${qpOASES_LIBRARIES})
     PKG_CONFIG_USE_DEPENDENCY(${loop_var} eigen3)
   endforeach()
 endmacro()
@@ -29,7 +30,7 @@ ADD_LIBRARY(${PROJECT_NAME}-examples SHARED ${source_files})
 PKG_CONFIG_USE_DEPENDENCY(${PROJECT_NAME}-examples eigen3)
 
 INSTALL(TARGETS ${PROJECT_NAME}-examples LIBRARY DESTINATION lib)
-INSTALL(FILES ${header_files} DESTINATION include)
+INSTALL(FILES ${header_files} DESTINATION include/ddp-actuator-solver/examples)
 
 ADD_SUBDIRECTORY(romeo_actuator)
 ADD_SUBDIRECTORY(temperature_control)
