@@ -43,5 +43,6 @@ ADD_SUBDIRECTORY(examples)
 
 # Generate dependency to ddp-actuator-solver-examples in pc file
 PKG_CONFIG_APPEND_LIBS(ddp-actuator-solver-examples)
+PKG_CONFIG_APPEND_LIBS(${qpOASES_LIBRARIES})
 
 SETUP_PROJECT_FINALIZE()
