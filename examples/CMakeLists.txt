@@ -30,6 +30,7 @@ SET(header_files
   )
 
 ADD_LIBRARY(${PROJECT_NAME}-examples SHARED ${source_files})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}-examples ${qpOASES_LIBRARIES})
 
 PKG_CONFIG_USE_DEPENDENCY(${PROJECT_NAME}-examples eigen3)
 
