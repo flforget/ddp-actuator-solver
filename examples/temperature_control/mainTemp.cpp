@@ -19,16 +19,25 @@ int main()
   DDPSolver<double,5,1>::stateVec_t xinit,xDes,x;
   DDPSolver<double,5,1>::commandVec_t u;
 
-  xinit << -1.0,0.0,-100.0,0.0,0.0;
-  xDes << 0.5,0.0,0.0,0.0,0.0;
+    /*
+    * x0 -> actuator position
+    * x1 -> actuator speed
+    * x2 -> motor temperature
+    * x3 -> external torque
+    * x4 -> ambiant temperature
+    */
 
-  unsigned int T = 3000;
-  double dt=1e-3;
-  unsigned int iterMax = 100;
-  double stopCrit = 1e-5;
-  DDPSolver<double,5,1>::stateVecTab_t xList;
-  DDPSolver<double,5,1>::commandVecTab_t uList;
-  DDPSolver<double,5,1>::traj lastTraj;
+    xinit << -1.0,0.0,-100.0,0.0,0.0;
+    xDes << 0.5,0.0,0.0,0.0,0.0;
+
+    unsigned int i;
+    unsigned int T = 3000;
+    double dt=1e-3;
+    unsigned int iterMax = 100;
+    double stopCrit = 0.01;
+    DDPSolver<double,5,1>::stateVecTab_t xList;
+    DDPSolver<double,5,1>::commandVecTab_t uList;
+    DDPSolver<double,5,1>::traj lastTraj;
 
   DCTemp model;
   DCTemp* noisyModel=NULL;

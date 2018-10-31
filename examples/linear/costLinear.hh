@@ -1,12 +1,12 @@
-#ifndef COSTFUNCTIONROMEOACTUATOR_H
-#define COSTFUNCTIONROMEOACTUATOR_H
+#ifndef COST_H
+#define COST_H
 
 #include <ddp-actuator-solver/costfunction.hh>
 
-class CostFunctionRomeoActuator : public CostFunction<double,4,1>
+class CostLinear : public CostFunction<double,2,1>
 {
 public:
-    CostFunctionRomeoActuator();
+    CostLinear();
 private:
     stateMat_t Q;
     commandMat_t R;
@@ -28,4 +28,4 @@ public:
 
 };
 
-#endif // COSTFUNCTIONROMEOACTUATOR_H
+#endif // COST_H

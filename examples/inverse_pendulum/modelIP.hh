@@ -1,34 +1,34 @@
-#ifndef DCTEMP_H
-#define DCTEMP_H
+#ifndef MODEL_H
+#define MODEL_H
 
 #include <ddp-actuator-solver/dynamicmodel.hh>
 
-class DCTemp : public DynamicModel<double,5,1>
+class ModelIP : public DynamicModel<double,5,1>
 {
-public:
-  DCTemp(bool noiseOnParameters=0);
-  virtual ~DCTemp(){};
-private:
-protected:
+  public:
+    ModelIP(double& mydt,bool noiseOnParameters=0);
+    virtual ~ModelIP() {};
+  private:
+  protected:
 
-  // attributes //
-public:
-private:
-  double dt_;
-private:
-  double J_;
-  double K_M_;
-  double f_VL_;
-  double R_th_;
-  double tau_th_;
-private:
-  stateVec_t Xreal_,dX_;
-  stateVec_t x_next_,k1_,k2_,k3_,k4_;
-  stateMat_t Id_;
+    // attributes //
+  public:
+  private:
+    double dt;
+  private:
+    double J;
+    double K_M;
+    double f_VL;
+    double R_th;
+    double tau_th;
+  private:
+    stateVec_t Xreal,dX;
+    stateVec_t x_next,k1,k2,k3,k4;
+    stateMat_t Id;
 
-  stateMat_t QxxCont_;
-  commandMat_t QuuCont_;
-  commandR_stateC_t QuxCont_;
+    stateMat_t QxxCont;
+    commandMat_t QuuCont;
+    commandR_stateC_t QuxCont;
 
   protected:
     // methods //
@@ -46,4 +46,4 @@ private:
 
 };
 
-#endif // DCTEMP_H
+#endif // MODEL_H

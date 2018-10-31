@@ -39,6 +39,8 @@ private:
 
 protected:
     double dt;
+    double final_cost;
+    double running_cost;
     stateVec_t lx;
     stateMat_t lxx;
     commandVec_t lu;
@@ -47,12 +49,14 @@ protected:
     stateR_commandC_t lxu;
     // methods //
 public:
-    virtual void computeAllCostDeriv(const stateVec_t& X,const stateVec_t& Xdes, const commandVec_t& U)=0;
-    virtual void computeFinalCostDeriv(const stateVec_t& X,const stateVec_t& Xdes)=0;
+    virtual void computeCostAndDeriv(const stateVec_t& X,const stateVec_t& Xdes, const commandVec_t& U)=0;
+    virtual void computeFinalCostAndDeriv(const stateVec_t& X,const stateVec_t& Xdes)=0;
 private:
 protected:
     // accessors //
 public:
+    double& getRunningCost()    { return running_cost;}
+    double& getFinalCost()      { return final_cost; }
     stateVec_t& getlx()         {return lx;}
     stateMat_t& getlxx()        {return lxx;}
     commandVec_t& getlu()       {return lu;}

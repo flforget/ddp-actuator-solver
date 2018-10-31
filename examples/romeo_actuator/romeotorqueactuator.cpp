@@ -72,7 +72,7 @@ RomeoTorqueActuator::stateVec_t RomeoTorqueActuator::computeNextState(double& dt
   return x_next;
 }
 
-void RomeoTorqueActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
+void RomeoTorqueActuator::computeModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
 {
   double dh = 1e-7;
   stateVec_t Xp,Xm;

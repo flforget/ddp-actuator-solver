@@ -15,6 +15,10 @@ SET(source_files
   romeo_actuator/romeotorqueactuator.cpp
   temperature_control/costtemp.cpp
   temperature_control/dctemp.cpp
+  linear/costLinear.cpp
+  linear/modelLinear.cpp
+  inverse_pendulum/costIP.cpp
+  inverse_pendulum/modelIP.cpp
 )
 
 SET(header_files
@@ -34,3 +38,5 @@ INSTALL(FILES ${header_files} DESTINATION include/ddp-actuator-solver/examples)
 
 ADD_SUBDIRECTORY(romeo_actuator)
 ADD_SUBDIRECTORY(temperature_control)
+ADD_SUBDIRECTORY(linear)
+ADD_SUBDIRECTORY(inverse_pendulum)

@@ -47,7 +47,7 @@ class RomeoSimpleActuator: public DynamicModel<double, 4, 1>
   public:
     stateVec_t computeNextState(double& dt, const stateVec_t& X,
         const commandVec_t &U);
-    void computeAllModelDeriv(double& dt, const stateVec_t& X,
+    void computeModelDeriv(double& dt, const stateVec_t& X,
         const commandVec_t &U);
     stateMat_t computeTensorContxx(const stateVec_t& nextVx);
     commandMat_t computeTensorContuu(const stateVec_t& nextVx);

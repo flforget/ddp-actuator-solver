@@ -25,7 +25,7 @@ int main()
   unsigned int M = 3000;
   double dt = 1e-3;
   unsigned int iterMax = 100;
-  double stopCrit = 1e-3;
+  double stopCrit = 0.01;
   DDPSolver<double, 4, 1>::stateVecTab_t xList;
   DDPSolver<double, 4, 1>::commandVecTab_t uList;
   DDPSolver<double, 4, 1>::traj lastTraj;

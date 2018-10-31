@@ -90,9 +90,8 @@ DCTemp::stateVec_t DCTemp::computeNextState(double& dt,
   return x_next_;
 }
 
-void DCTemp::computeAllModelDeriv(double& dt,
-				  const stateVec_t& X,
-				  const commandVec_t& U)
+void DCTemp::computeModelDeriv(double& dt, const stateVec_t& X,
+    const commandVec_t& U)
 {
   double dh = 1e-7;
   stateVec_t Xp,Xm;
