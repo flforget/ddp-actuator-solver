@@ -26,13 +26,11 @@ class DDPSolver
     typedef Eigen::Matrix<precision, stateSize, 1> stateVec_t;  // 1 x stateSize
     typedef Eigen::Matrix<precision, 1, stateSize> stateVecTrans_t; // 1 x stateSize
     typedef Eigen::Matrix<precision, stateSize, stateSize> stateMat_t; // stateSize x stateSize
-    typedef Eigen::Matrix<precision, stateSize, stateSize> stateTens_t[stateSize]; // stateSize x stateSize x stateSize
 
     // typedef for commandSize types
     typedef Eigen::Matrix<precision, commandSize, 1> commandVec_t; // commandSize x 1
     typedef Eigen::Matrix<precision, 1, commandSize> commandVecTrans_t; // 1 x commandSize
     typedef Eigen::Matrix<precision, commandSize, commandSize> commandMat_t; // commandSize x commandSize
-    typedef Eigen::Matrix<precision, commandSize, commandSize> commandTens_t[commandSize]; // stateSize x commandSize x commandSize
 
     // typedef for mixed stateSize and commandSize types
     typedef Eigen::Matrix<precision, stateSize, commandSize> stateR_commandC_t; // stateSize x commandSize
@@ -79,6 +77,7 @@ class DDPSolver
     unsigned int iterMax;
     double stopCrit;
     double changeAmount;
+    double cost, previous_cost;
     commandVec_t zeroCommand;
 
     stateVecTab_t xList;
@@ -134,6 +133,8 @@ class DDPSolver
       enableQPBox = QPBox;
       enableFullDDP = fullDDP;
       zeroCommand.setZero();
+      cost = 0;
+      previous_cost = 0;
       if (QPBox)
       {
         qp = new QProblemB(commandNb);
@@ -187,7 +188,7 @@ class DDPSolver
       xDes = myxDes;
     }
 
-    void solveTrajectory()
+    commandVec_t solveTrajectory()
     {
       initTrajectory();
       for (iter = 1; iter < iterMax; iter++)
@@ -205,6 +206,7 @@ class DDPSolver
         uList = updateduList;
         updateduList = tmpuPtr;
       }
+      return updateduList[0];
     }
 
     void initTrajectory()
@@ -220,7 +222,8 @@ class DDPSolver
 
     void backwardLoop()
     {
-      costFunction->computeFinalCostDeriv(xList[T], xDes);
+      costFunction->computeFinalCostAndDeriv(xList[T], xDes);
+      cost = costFunction->getFinalCost();
       nextVx = costFunction->getlx();
       nextVxx = costFunction->getlxx();
 
@@ -236,8 +239,9 @@ class DDPSolver
           x = xList[i];
           u = uList[i];
 
-          dynamicModel->computeAllModelDeriv(dt, x, u);
-          costFunction->computeAllCostDeriv(x, xDes, u);
+          dynamicModel->computeModelDeriv(dt, x, u);
+          costFunction->computeCostAndDeriv(x, xDes, u);
+          cost += costFunction->getRunningCost();
 
           Qx = costFunction->getlx()
               + dynamicModel->getfx().transpose() * nextVx;
@@ -334,16 +338,9 @@ class DDPSolver
             + KList[i] * (updatedxList[i] - xList[i]);
         updatedxList[i + 1] = dynamicModel->computeNextState(dt,
             updatedxList[i], updateduList[i]);
-        for (unsigned int j = 0; j < commandNb; j++)
-        {
-            updateduList[i] = uList[i] + alpha*kList[i] + KList[i]*(updatedxList[i]-xList[i]);
-            updatedxList[i+1] = dynamicModel->computeNextState(dt,updatedxList[i],updateduList[i]);
-            for(unsigned int j=0;j<commandNb;j++)
-            {
-                changeAmount += fabs(uList[i](j,0) - updateduList[i](j,0));
-            }
-        }
+        changeAmount = fabs(previous_cost - cost) / cost;
       }
+      previous_cost = cost;
     }
 
     DDPSolver::traj getLastSolvedTrajectory()
@@ -353,6 +350,8 @@ class DDPSolver
       lastTraj.iter = iter;
       return lastTraj;
     }
+
+    DDPSolver::commandVec_t getLastCommand()  { return updateduList[0]; }
 
     bool isQuudefinitePositive(const commandMat_t & Quu_reg)
     {

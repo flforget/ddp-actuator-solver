@@ -98,7 +98,7 @@ computeNextState(double& , const stateVec_t& X,const commandVec_t& U)
     return x_next;
 }
 
-void RomeoSimpleActuator::computeAllModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
+void RomeoSimpleActuator::computeModelDeriv(double& dt, const stateVec_t& X,const commandVec_t& U)
 {
     double dh = 1e-7;
     stateVec_t Xp,Xm;
